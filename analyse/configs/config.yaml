@@ -1,0 +1,14 @@
+server:
+  http:
+    addr: 0.0.0.0:8000
+    timeout: 1s
+  grpc:
+    addr: 0.0.0.0:9000
+    timeout: 1s
+data:
+  click_house:
+    dsn: tcp://120.26.68.38:9000/waf?username=default&dial_timeout=10s&read_timeout=20s
+  kafka:
+    group_id: group1
+    addr: 120.26.68.38:9092
+    assignor: range

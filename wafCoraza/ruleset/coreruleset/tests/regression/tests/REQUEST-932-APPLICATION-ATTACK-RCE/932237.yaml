@@ -1,0 +1,548 @@
+---
+meta:
+  author: "Franziska Bühler, Esad Cetiner, azurit"
+rule_id: 932237
+tests:
+  - test_id: 1
+    stages:
+      - input:
+          dest_addr: "127.0.0.1"
+          method: "GET"
+          port: 80
+          headers:
+            User-Agent: env
+            Host: "localhost"
+            Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
+          uri: "/get"
+          version: HTTP/1.1
+        output:
+          log:
+            no_expect_ids: [932237]
+  - test_id: 2
+    stages:
+      - input:
+          dest_addr: "127.0.0.1"
+          method: "GET"
+          port: 80
+          headers:
+            User-Agent: id
+            Host: "localhost"
+            Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
+          uri: "/get"
+          version: HTTP/1.1
+        output:
+          log:
+            expect_ids: [932237]
+  - test_id: 3
+    stages:
+      - input:
+          dest_addr: "127.0.0.1"
+          method: "GET"
+          port: 80
+          headers:
+            User-Agent: set -o history
+            Host: "localhost"
+            Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
+          uri: "/get"
+          version: HTTP/1.1
+        output:
+          log:
+            expect_ids: [932237]
+  - test_id: 4
+    stages:
+      - input:
+          dest_addr: "127.0.0.1"
+          method: "GET"
+          port: 80
+          headers:
+            User-Agent: settings
+            Host: "localhost"
+            Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
+          uri: "/get"
+          version: HTTP/1.1
+        output:
+          log:
+            no_expect_ids: [932237]
+  - test_id: 5
+    stages:
+      - input:
+          dest_addr: "127.0.0.1"
+          method: "GET"
+          port: 80
+          headers:
+            User-Agent: environment
+            Host: "localhost"
+            Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
+          uri: "/get"
+          version: HTTP/1.1
+        output:
+          log:
+            no_expect_ids: [932237]
+  - test_id: 6
+    stages:
+      - input:
+          dest_addr: "127.0.0.1"
+          method: "GET"
+          port: 80
+          headers:
+            User-Agent: "OWASP CRS test agent"
+            Referer: env
+            Host: "localhost"
+            Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
+          uri: "/get"
+          version: HTTP/1.1
+        output:
+          log:
+            no_expect_ids: [932237]
+  - test_id: 7
+    stages:
+      - input:
+          dest_addr: "127.0.0.1"
+          method: "GET"
+          port: 80
+          headers:
+            User-Agent: "OWASP CRS test agent"
+            Referer: id
+            Host: "localhost"
+            Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
+          uri: "/get"
+          version: HTTP/1.1
+        output:
+          log:
+            expect_ids: [932237]
+  - test_id: 8
+    stages:
+      - input:
+          dest_addr: "127.0.0.1"
+          method: "GET"
+          port: 80
+          headers:
+            User-Agent: "OWASP CRS test agent"
+            Referer: set -o history
+            Host: "localhost"
+            Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
+          uri: "/get"
+          version: HTTP/1.1
+        output:
+          log:
+            expect_ids: [932237]
+  - test_id: 9
+    stages:
+      - input:
+          dest_addr: "127.0.0.1"
+          method: "GET"
+          port: 80
+          headers:
+            User-Agent: "OWASP CRS test agent"
+            Referer: settings
+            Host: "localhost"
+            Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
+          uri: "/get"
+          version: HTTP/1.1
+        output:
+          log:
+            no_expect_ids: [932237]
+  - test_id: 10
+    stages:
+      - input:
+          dest_addr: "127.0.0.1"
+          method: "GET"
+          port: 80
+          headers:
+            User-Agent: "OWASP CRS test agent"
+            Referer: environment
+            Host: "localhost"
+            Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
+          uri: "/get"
+          version: HTTP/1.1
+        output:
+          log:
+            no_expect_ids: [932237]
+  - test_id: 11
+    desc: "9323HNQU - should not be detected at PL 2"
+    stages:
+      - input:
+          dest_addr: 127.0.0.1
+          headers:
+            Accept: "text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5"
+            Host: localhost
+            User-Agent: "OWASP CRS test agent"
+          method: POST
+          port: 80
+          uri: "/post"
+          data: |
+            code=;vi dddd +silent\\ \!whoami +wq
+          version: HTTP/1.0
+        output:
+          log:
+            no_expect_ids: [932237]
+  - test_id: 12
+    desc: "9323HNQU - should not be detected at PL 2"
+    stages:
+      - input:
+          dest_addr: 127.0.0.1
+          headers:
+            Accept: "text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5"
+            Host: localhost
+            User-Agent: "OWASP CRS test agent"
+          method: POST
+          port: 80
+          uri: "/post"
+          data: |
+            code=;vi -c:\!pwd
+          version: HTTP/1.0
+        output:
+          log:
+            no_expect_ids: [932237]
+  - test_id: 13
+    desc: "FP with word comment"
+    stages:
+      - input:
+          dest_addr: 127.0.0.1
+          headers:
+            User-Agent: "https://example.com/?args=comment"
+            Host: localhost
+            Accept: "text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5"
+          method: GET
+          port: 80
+          uri: "/get"
+          version: HTTP/1.0
+        output:
+          log:
+            no_expect_ids: [932237]
+  - test_id: 14
+    desc: "FP with word settings"
+    stages:
+      - input:
+          dest_addr: 127.0.0.1
+          headers:
+            User-Agent: "https://example.com/?args=settings"
+            Host: localhost
+            Accept: "text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5"
+          method: GET
+          port: 80
+          uri: "/get"
+          version: HTTP/1.0
+        output:
+          log:
+            no_expect_ids: [932237]
+  - test_id: 15
+    stages:
+      - input:
+          dest_addr: "127.0.0.1"
+          method: "GET"
+          port: 80
+          headers:
+            User-Agent: "OWASP CRS test agent"
+            Referer: set
+            Host: "localhost"
+            Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
+          uri: "/get"
+          version: HTTP/1.1
+        output:
+          log:
+            no_expect_ids: [932237]
+  - test_id: 16
+    stages:
+      - input:
+          dest_addr: "127.0.0.1"
+          method: "GET"
+          port: 80
+          headers:
+            User-Agent: set
+            Host: "localhost"
+            Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
+          uri: "/get"
+          version: HTTP/1.1
+        output:
+          log:
+            no_expect_ids: [932237]
+  - test_id: 17
+    desc: "Block env command with arguments"
+    stages:
+      - input:
+          dest_addr: "127.0.0.1"
+          method: "GET"
+          port: 80
+          headers:
+            User-Agent: env --version
+            Host: "localhost"
+            Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
+          uri: "/get"
+          version: HTTP/1.1
+        output:
+          log:
+            expect_ids: [932237]
+  - test_id: 18
+    desc: "Block env command with arguments"
+    stages:
+      - input:
+          dest_addr: "127.0.0.1"
+          method: "GET"
+          port: 80
+          headers:
+            User-Agent: "OWASP CRS test agent"
+            Referer: env --version
+            Host: "localhost"
+            Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
+          uri: "/get"
+          version: HTTP/1.1
+        output:
+          log:
+            expect_ids: [932237]
+  - test_id: 19
+    desc: "Block ad-hoc ansible commands"
+    stages:
+      - input:
+          dest_addr: 127.0.0.1
+          headers:
+            Accept: "text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5"
+            Host: localhost
+            User-Agent: "ansible all -m ping"
+          method: POST
+          port: 80
+          uri: "/post"
+          version: HTTP/1.0
+        output:
+          log:
+            expect_ids: [932237]
+  - test_id: 20
+    desc: "Block ansible config dump command"
+    stages:
+      - input:
+          dest_addr: 127.0.0.1
+          headers:
+            Accept: "text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5"
+            Host: localhost
+            User-Agent: "ansible-config dump"
+          method: POST
+          port: 80
+          uri: "/post"
+          version: HTTP/1.0
+        output:
+          log:
+            expect_ids: [932237]
+  - test_id: 21
+    desc: "Block installing collections from ansible galaxy"
+    stages:
+      - input:
+          dest_addr: 127.0.0.1
+          headers:
+            Accept: "text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5"
+            Host: localhost
+            User-Agent: "ansible-galaxy collection install community.general"
+          method: POST
+          port: 80
+          uri: "/post"
+          version: HTTP/1.0
+        output:
+          log:
+            expect_ids: [932237]
+  - test_id: 22
+    desc: "Block ad-hoc ansible commands using ansible-console"
+    stages:
+      - input:
+          dest_addr: 127.0.0.1
+          headers:
+            Accept: "text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5"
+            Host: localhost
+            User-Agent: "code=ansible-console"
+          method: POST
+          port: 80
+          uri: "/post"
+          version: HTTP/1.0
+        output:
+          log:
+            expect_ids: [932237]
+  - test_id: 23
+    desc: "Block ansible-doc command"
+    stages:
+      - input:
+          dest_addr: 127.0.0.1
+          headers:
+            Accept: "text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5"
+            Host: localhost
+            User-Agent: "ansible-doc plugin ping"
+          method: POST
+          port: 80
+          uri: "/post"
+          version: HTTP/1.0
+        output:
+          log:
+            expect_ids: [932237]
+  - test_id: 24
+    desc: "Block dumping ansible inventory file and variables"
+    stages:
+      - input:
+          dest_addr: 127.0.0.1
+          headers:
+            Accept: "text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5"
+            Host: localhost
+            User-Agent: "ansible-inventory --list"
+          method: POST
+          port: 80
+          uri: "/post"
+          version: HTTP/1.0
+        output:
+          log:
+            expect_ids: [932237]
+  - test_id: 25
+    desc: "Block ansible pull from remote repository"
+    stages:
+      - input:
+          dest_addr: 127.0.0.1
+          headers:
+            Accept: "text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5"
+            Host: localhost
+            User-Agent: "ansible-pull --url example.com"
+          method: POST
+          port: 80
+          uri: "/post"
+          version: HTTP/1.0
+        output:
+          log:
+            expect_ids: [932237]
+  - test_id: 26
+    desc: "Block decrypting ansible secrets"
+    stages:
+      - input:
+          dest_addr: 127.0.0.1
+          headers:
+            Accept: "text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5"
+            Host: localhost
+            User-Agent: "ansible-vault decrypt secret"
+          method: POST
+          port: 80
+          uri: "/post"
+          version: HTTP/1.0
+        output:
+          log:
+            expect_ids: [932237]
+  - test_id: 27
+    desc: "Block execution of ansible playbooks"
+    stages:
+      - input:
+          dest_addr: 127.0.0.1
+          headers:
+            Accept: "text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5"
+            Host: localhost
+            User-Agent: "ansible-playbook site.yml"
+          method: POST
+          port: 80
+          uri: "/post"
+          version: HTTP/1.0
+        output:
+          log:
+            expect_ids: [932237]
+  - test_id: 28
+    desc: "Block decryption of secrets with chef-vault"
+    stages:
+      - input:
+          dest_addr: 127.0.0.1
+          headers:
+            Accept: "text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5"
+            Host: localhost
+            User-Agent: "chef-vault -i secret"
+          method: POST
+          port: 80
+          uri: "/post"
+          version: HTTP/1.0
+        output:
+          log:
+            expect_ids: [932237]
+  - test_id: 29
+    desc: "Block execution of chef-shell command"
+    stages:
+      - input:
+          dest_addr: 127.0.0.1
+          headers:
+            Accept: "text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5"
+            Host: localhost
+            User-Agent: "chef-shell"
+          method: POST
+          port: 80
+          uri: "/post"
+          version: HTTP/1.0
+        output:
+          log:
+            expect_ids: [932237]
+  - test_id: 30
+    desc: "Block execution chef recipie book"
+    stages:
+      - input:
+          dest_addr: 127.0.0.1
+          headers:
+            Accept: "text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5"
+            Host: localhost
+            User-Agent: "chef-run all recipie.rb"
+          method: POST
+          port: 80
+          uri: "/post"
+          version: HTTP/1.0
+        output:
+          log:
+            expect_ids: [932237]
+  - test_id: 31
+    desc: "Block execution chef recipie book against a specific node"
+    stages:
+      - input:
+          dest_addr: 127.0.0.1
+          headers:
+            Accept: "text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5"
+            Host: localhost
+            User-Agent: "chef-client -t 1.1.1.1"
+          method: POST
+          port: 80
+          uri: "/post"
+          version: HTTP/1.0
+        output:
+          log:
+            expect_ids: [932237]
+  - test_id: 32
+    desc: "Block execution chef command"
+    stages:
+      - input:
+          dest_addr: 127.0.0.1
+          headers:
+            Accept: "text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5"
+            Host: localhost
+            User-Agent: "chef report nodes"
+          method: POST
+          port: 80
+          uri: "/post"
+          version: HTTP/1.0
+        output:
+          log:
+            expect_ids: [932237]
+  - test_id: 33
+    desc: "Block execution of visudo"
+    stages:
+      - input:
+          dest_addr: 127.0.0.1
+          headers:
+            Accept: "text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5"
+            Host: localhost
+            User-Agent: "visudo"
+          method: POST
+          port: 80
+          uri: "/post"
+          version: HTTP/1.0
+        output:
+          log:
+            expect_ids: [932237]
+  - test_id: 34
+    desc: "Block execution of CrowdSec cscli"
+    stages:
+      - input:
+          dest_addr: 127.0.0.1
+          headers:
+            Accept: "text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5"
+            Host: localhost
+            User-Agent: "cscli alerts list"
+          method: POST
+          port: 80
+          uri: "/post"
+          version: HTTP/1.0
+        output:
+          log:
+            expect_ids: [932237]
