@@ -38,7 +38,7 @@ func newKafkaProducer() sarama.SyncProducer {
 	config.Producer.Partitioner = sarama.NewHashPartitioner // 根据hasH值选择分区
 	config.Producer.Return.Successes = true                 // 成功交付的消息将在success channel 返回
 	//链接kafka
-	kafkaProducer, err := sarama.NewSyncProducer([]string{"120.26.68.38:9092"}, config)
+	kafkaProducer, err := sarama.NewSyncProducer([]string{"string"}, config)
 	if err != nil {
 		slog.Error("kafka client error: ", err)
 		return nil
