@@ -1,7 +1,6 @@
 package biz
 
 import (
-	"fmt"
 	coreruleset "github.com/corazawaf/coraza-coreruleset/v4"
 	"github.com/corazawaf/coraza/v3"
 	"github.com/jcchavezs/mergefs"
@@ -16,6 +15,7 @@ import (
 type WafConfigRepo interface {
 	GetAppForStrategyIDs(appAddr string) ([]string, error)
 	GetAllSeclangRules() ([]model.WAFStrategy, error)
+	GetRealAddr(domain string) (string, error)
 }
 
 type WafConfigUsercase struct {
@@ -68,10 +68,19 @@ func (w *WafConfigUsercase) GetAppWAF(host string) []coraza.WAF {
 	strategyIDsAll := strategyIDs[0]
 	strategyIDsArr := strings.Split(strategyIDsAll, types.CutOFF)
 	for _, strategyIDStr := range strategyIDsArr {
-		fmt.Println(strategyIDStr)
 		wafs = append(wafs, w.waf[strategyIDStr])
 	}
 	return wafs
+}
+
+// GetRealAddr 根据主机地址 , 获取真正的后端请求地址
+func (w *WafConfigUsercase) GetRealAddr(host string) (string, error) {
+	realAddr, err := w.repo.GetRealAddr(host)
+	if err != nil {
+		slog.Error("GetRealAddr is failed: ", err)
+		return realAddr, nil
+	}
+	return realAddr, nil
 }
 
 // 处理从etcd中取出的seclang 安全规则 , 使其符合规范
