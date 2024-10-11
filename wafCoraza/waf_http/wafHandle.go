@@ -1,63 +1,70 @@
 package wafHttp
 
 import (
-	"bytes"
-	"github.com/corazawaf/coraza/v3"
 	"github.com/corazawaf/coraza/v3/types"
 	"io"
 	"log"
 	"log/slog"
 	"net"
 	"net/http"
-	"net/url"
 	"strconv"
 	"strings"
 	"wafCoraza/biz"
 )
 
 type WafHandleService struct {
-	uc *biz.AttackEventUsercase
+	uc          *biz.AttackEventUsercase
+	wafConfigUc *biz.WafConfigUsercase
 }
 
-func NewWafHandleService(uc *biz.AttackEventUsercase) *WafHandleService {
-	return &WafHandleService{uc: uc}
+func NewWafHandleService(uc *biz.AttackEventUsercase, wafConfigUc *biz.WafConfigUsercase) *WafHandleService {
+	return &WafHandleService{
+		uc:          uc,
+		wafConfigUc: wafConfigUc,
+	}
 }
 
-// WAFHandle HTTP 请求处理函数
-func (w *WafHandleService) WAFHandle(waf coraza.WAF) http.HandlerFunc {
+// ProxyHandler 创建反向代理服务器
+func (w *WafHandleService) ProxyHandler() http.HandlerFunc {
 	return func(rw http.ResponseWriter, req *http.Request) {
-
-		tx := waf.NewTransaction()
-		defer func() {
-			tx.ProcessLogging()
-			if err := tx.Close(); err != nil {
-				slog.Error("Error closing transaction: ", err)
+		//根据访问的域名 获取收到保护的web程序所应用的策略 对应的WAF实列
+		wafs := w.wafConfigUc.GetAppWAF(req.Host)
+		//根据这些waf实列 , 校验请求是否可以放行
+		for _, waf := range wafs {
+			tx := waf.NewTransaction()
+			defer func() {
+				tx.ProcessLogging()
+				if err := tx.Close(); err != nil {
+					slog.Error("Error closing transaction: ", err)
+				}
+			}()
+			// 获取真实的客户端 IP 地址和端口
+			clientIP, clientPort, err := net.SplitHostPort(req.RemoteAddr)
+			if err != nil {
+				log.Printf("Error splitting RemoteAddr: %v", err)
 			}
-		}()
-		// 获取真实的客户端 IP 地址和端口
-		clientIP, clientPort, err := net.SplitHostPort(req.RemoteAddr)
-		if err != nil {
-			log.Printf("Error splitting RemoteAddr: %v", err)
-		}
-		port, _ := strconv.Atoi(clientPort)
-		// 模拟网络连接，使用请求的远程地址和端口
-		tx.ProcessConnection(clientIP, port, "152.136.50.60", 8888)
-		// Request URI was /some-url?with=args
-		tx.ProcessURI(req.RequestURI, req.Method, req.Proto)
-
-		// 阶段1 处理请求头
-		_, isAllow1 := w.WafParseHeader(tx, req, rw)
-
-		// 阶段2 处理请求体
-		_, isAllow2, requestBody := w.WafParseReqBody(tx, req, rw)
-		attackMathRules := w.WafMatchRules(tx) //处理命中的规则
-		if isAllow1 && isAllow2 {
-			w.ForwardHandler(rw, req, requestBody)
-		} else {
-			//记录攻击日志
-			w.uc.LogAttackEvent(attackMathRules, req, requestBody)
+			port, _ := strconv.Atoi(clientPort)
+			// 模拟网络连接，使用请求的远程地址和端口
+			tx.ProcessConnection(clientIP, port, "152.136.50.60", 8888)
+			// Request URI was /some-url?with=args
+			tx.ProcessURI(req.RequestURI, req.Method, req.Proto)
+			// 阶段1 处理请求头
+			_, isAllow1 := w.WafParseHeader(tx, req, rw)
+			// 阶段2 处理请求体
+			_, isAllow2, requestBody := w.WafParseReqBody(tx, req, rw)
+			attackMathRules := w.WafMatchRules(tx) //处理命中的规则
+			if isAllow1 && isAllow2 {
+			} else {
+				//记录攻击日志
+				w.uc.LogAttackEvent(attackMathRules, req, requestBody)
+			}
 		}
 	}
+}
+
+// InitWAF 内核启动之初 , 初始化WAF
+func (w *WafHandleService) InitWAF() {
+	w.wafConfigUc.CreateWaf()
 }
 
 func (w *WafHandleService) WafParseHeader(tx types.Transaction, req *http.Request, rw http.ResponseWriter) (*types.Interruption, bool) {
@@ -116,36 +123,4 @@ func (w *WafHandleService) WafMatchRules(tx types.Transaction) []types.MatchedRu
 		}
 	}
 	return attackMatchRule
-}
-
-func (w *WafHandleService) ForwardHandler(rw http.ResponseWriter, r *http.Request, reqBody []byte) {
-	// 解析请求的目标地址
-	linkURL := getLinkUrl(r.RequestURI)
-	targetURL, err := url.Parse(linkURL)
-	if err != nil {
-		// 处理错误
-		return
-	}
-	// 构建新的请求对象
-	forwardReq, err := http.NewRequest(r.Method, targetURL.String(), bytes.NewReader(reqBody))
-	forwardReq.Header = r.Header
-	// 创建 HTTP 客户端
-	client := &http.Client{}
-
-	// 发送转发请求并获取响应
-	resp, err := client.Do(forwardReq)
-	if err != nil {
-		// 处理错误
-		return
-	}
-	defer resp.Body.Close()
-
-	// 将目标服务器的响应返回给客户端
-	for key, values := range resp.Header {
-		for _, value := range values {
-			rw.Header().Add(key, value)
-		}
-	}
-	rw.WriteHeader(resp.StatusCode)
-	io.Copy(rw, resp.Body)
 }
