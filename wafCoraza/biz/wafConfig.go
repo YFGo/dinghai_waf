@@ -9,6 +9,7 @@ import (
 	"log/slog"
 	"strings"
 	"wafCoraza/data/model"
+	"wafCoraza/data/types"
 )
 
 // WafConfigRepo 加载waf配置
@@ -39,11 +40,11 @@ func (w *WafConfigUsercase) CreateWaf() {
 	for _, strategy := range wafStrategy {
 		cfg := coraza.NewWAFConfig()
 		seclang := strategy.SeclangRules
-		if strategy.ID == "1" { //如果是内置策略
-			fmt.Println(seclang)
-			cfg = cfg.WithDirectives(seclang).WithRootFS(mergefs.Merge(coreruleset.FS, io.OSFS))
+		rightSeclang := w.disposeSeclang(seclang) //获取正确格式的seclang
+		if strategy.ID == types.BUILDIN {         //如果是内置策略
+			cfg = cfg.WithDirectives(rightSeclang).WithRootFS(mergefs.Merge(coreruleset.FS, io.OSFS))
 		} else {
-			cfg = cfg.WithDirectives(seclang)
+			cfg = cfg.WithDirectives(rightSeclang)
 		}
 		//创建waf
 		waf, err := coraza.NewWAF(cfg)
@@ -65,9 +66,25 @@ func (w *WafConfigUsercase) GetAppWAF(host string) []coraza.WAF {
 	}
 	//目前只有单节点etcd , 直接获取即可
 	strategyIDsAll := strategyIDs[0]
-	strategyIDsArr := strings.Split(strategyIDsAll, " ")
+	strategyIDsArr := strings.Split(strategyIDsAll, types.CutOFF)
 	for _, strategyIDStr := range strategyIDsArr {
+		fmt.Println(strategyIDStr)
 		wafs = append(wafs, w.waf[strategyIDStr])
 	}
 	return wafs
+}
+
+// 处理从etcd中取出的seclang 安全规则 , 使其符合规范
+func (w *WafConfigUsercase) disposeSeclang(seclang string) string {
+	seclangArr := strings.Split(seclang, types.CutOFF)
+	// 使用strings.Builder来构建最终的字符串
+	var formattedSeclang strings.Builder
+	for i, rule := range seclangArr {
+		if i > 0 {
+			formattedSeclang.WriteString("\n")
+		}
+		formattedSeclang.WriteString(rule)
+	}
+
+	return formattedSeclang.String()
 }

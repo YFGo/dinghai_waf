@@ -6,9 +6,8 @@ import (
 	"strings"
 	"wafCoraza/biz"
 	"wafCoraza/data/model"
+	"wafCoraza/data/types"
 )
-
-const strategyKey = "strategy_"
 
 type loadWAFConfigRepo struct {
 	data *Data
@@ -33,13 +32,13 @@ func (l loadWAFConfigRepo) GetAppForStrategyIDs(appAddr string) ([]string, error
 
 // GetAllSeclangRules 获取所有策略对应的安全规则
 func (l loadWAFConfigRepo) GetAllSeclangRules() ([]model.WAFStrategy, error) {
-	seclangRulesResp, err := l.data.etcdClient.KV.Get(context.Background(), strategyKey, clientv3.WithPrefix())
+	seclangRulesResp, err := l.data.etcdClient.KV.Get(context.Background(), types.StrategyKey, clientv3.WithPrefix())
 	if err != nil {
 		return nil, err
 	}
 	var seclangRules []model.WAFStrategy
 	for _, kv := range seclangRulesResp.Kvs {
-		keyLoad := strings.Split(string(kv.Key), "_")
+		keyLoad := strings.Split(string(kv.Key), types.CutOFF)
 		seclangRule := model.WAFStrategy{
 			ID:           keyLoad[1],
 			SeclangRules: string(kv.Value),
