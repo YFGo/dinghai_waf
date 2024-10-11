@@ -35,14 +35,27 @@ func (w *WafHandleService) InitWAF() {
 // ProxyHandler 创建反向代理服务器
 func (w *WafHandleService) ProxyHandler() http.HandlerFunc {
 	return func(rw http.ResponseWriter, req *http.Request) {
+		// 读取请求体
+		requestBody, err := io.ReadAll(req.Body)
+		defer func() {
+			if err := req.Body.Close(); err != nil {
+				slog.Error("Error closing request body: ", err)
+			}
+		}()
+		if err != nil {
+			slog.Error("LogAttackEvent Error reading request body: ", err)
+			return
+		}
 		//根据访问的域名 获取收到保护的web程序所应用的策略 对应的WAF实列
 		wafs := w.wafConfigUc.GetAppWAF(req.Host)
 		//根据这些waf实列 , 校验请求是否可以放行 , 只要存在一个waf实列拦截了请求 , 就不再检测
 		var tx types.Transaction
 		defer func() {
-			tx.ProcessLogging()
-			if err := tx.Close(); err != nil {
-				slog.Error("Error closing transaction: ", err)
+			if tx != nil {
+				tx.ProcessLogging()
+				if err := tx.Close(); err != nil {
+					slog.Error("Error closing transaction: ", err)
+				}
 			}
 		}()
 		clientIP, clientPort, err := net.SplitHostPort(req.RemoteAddr)
@@ -50,13 +63,13 @@ func (w *WafHandleService) ProxyHandler() http.HandlerFunc {
 			log.Printf("Error splitting RemoteAddr: %v", err)
 		}
 		port, _ := strconv.Atoi(clientPort)
-		var isAllow bool
+		isAllow := true //  默认值为true , 当此程序无waf实列时 , 直接放行
 		for _, waf := range wafs {
 			tx = waf.NewTransaction()
 			tx.ProcessConnection(clientIP, port, "152.136.50.60", 8888) // 模拟网络连接，使用请求的远程地址和端口
 			tx.ProcessURI(req.RequestURI, req.Method, req.Proto)        // Request URI was /some-url?with=args
 			_, reqHeaderIsLegal := w.WafParseHeader(tx, req, rw)
-			_, reqBodyIsLegal, requestBody := w.WafParseReqBody(tx, req, rw)
+			_, reqBodyIsLegal := w.WafParseReqBody(tx, requestBody)
 			attackMathRules := w.WafMatchRules(tx)  //处理命中的规则
 			if reqHeaderIsLegal && reqBodyIsLegal { // 此waf实列检测 请求头和请求体的检测均无问题
 				isAllow = true
@@ -73,6 +86,7 @@ func (w *WafHandleService) ProxyHandler() http.HandlerFunc {
 				http.Error(rw, err.Error(), http.StatusInternalServerError)
 				return
 			}
+			req.Body = io.NopCloser(strings.NewReader(string(requestBody))) /* 重置请求体 */
 			proxy := httputil.NewSingleHostReverseProxy(targetURL)
 			proxy.ServeHTTP(rw, req)
 		} else {
@@ -98,31 +112,21 @@ func (w *WafHandleService) WafParseHeader(tx types.Transaction, req *http.Reques
 }
 
 // WafParseReqBody 处理请求体
-func (w *WafHandleService) WafParseReqBody(tx types.Transaction, req *http.Request, rw http.ResponseWriter) (*types.Interruption, bool, []byte) {
-	requestBody, err := io.ReadAll(req.Body)
-	defer func() {
-		if err := req.Body.Close(); err != nil {
-			slog.Error("Error closing request body: ", err)
-		}
-	}()
-	if err != nil {
-		slog.Error("LogAttackEvent Error reading request body: ", err)
-		return nil, false, requestBody
-	}
+func (w *WafHandleService) WafParseReqBody(tx types.Transaction, requestBody []byte) (*types.Interruption, bool) {
 	// 将读取的数据写入请求体缓冲区
 	if it, _, err := tx.WriteRequestBody(requestBody); it != nil || err != nil {
 		if it != nil {
-			return it, false, requestBody
+			return it, false
 		}
 		slog.Error("Error writing request body: ", err)
-		return nil, false, requestBody
+		return nil, false
 	}
 	// 处理请求体阶段
 	itReqBody, err := tx.ProcessRequestBody()
-	if itReqBody != nil {
-		return itReqBody, false, requestBody
+	if itReqBody != nil || err != nil {
+		return itReqBody, false
 	}
-	return itReqBody, true, requestBody
+	return itReqBody, true
 }
 
 // WafMatchRules 获取命中的规则

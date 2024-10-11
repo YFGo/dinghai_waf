@@ -59,16 +59,18 @@ func (w *WafConfigUsercase) CreateWaf() {
 // GetAppWAF 根据域名和访问的端口 , 获取此web程序应用的策略的waf实列
 func (w *WafConfigUsercase) GetAppWAF(host string) []coraza.WAF {
 	wafs := make([]coraza.WAF, 0)
-	strategyIDs, err := w.repo.GetAppForStrategyIDs(host)
-	if err != nil {
-		slog.Error("获取策略失败", err)
+	strategyIDs, err := w.repo.GetAppForStrategyIDs(host) //获取策略ID
+	if err != nil || len(strategyIDs) == 0 {
+		slog.Error("get strategy failed: ", err, "strategyIDs: ", strategyIDs)
 		return nil
 	}
 	//目前只有单节点etcd , 直接获取即可
 	strategyIDsAll := strategyIDs[0]
 	strategyIDsArr := strings.Split(strategyIDsAll, types.CutOFF)
 	for _, strategyIDStr := range strategyIDsArr {
-		wafs = append(wafs, w.waf[strategyIDStr])
+		if wafValue, ok := w.waf[strategyIDStr]; ok {
+			wafs = append(wafs, wafValue)
+		}
 	}
 	return wafs
 }
