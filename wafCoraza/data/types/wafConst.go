@@ -4,4 +4,5 @@ const (
 	CutOFF      = "_"
 	StrategyKey = "strategy" + CutOFF
 	BUILDIN     = "1"
+	RealAddr    = CutOFF + "real"
 )
