@@ -3,10 +3,6 @@ package main
 import (
 	"context"
 	"errors"
-	coreruleset "github.com/corazawaf/coraza-coreruleset/v4"
-	"github.com/corazawaf/coraza/v3"
-	"github.com/jcchavezs/mergefs"
-	"github.com/jcchavezs/mergefs/io"
 	"log/slog"
 	"net/http"
 	"os"
@@ -25,41 +21,25 @@ func initApp() (func(), *wafHttp.WafHandleService) {
 	// 初始化app
 	attackRepo := data.NewSaveAttackEventRepo(dataDB)
 	attackUsercase := biz.NewAttackEventUsercase(attackRepo)
+	// waf
+	loadWafRepo := data.NewLoadWAFConfigRepo(dataDB)
+	wafConfigUsercase := biz.NewWafConfigUsercase(loadWafRepo)
 	//开启定时任务
 	timeTask := attackUsercase.StartTimeTask()
 	timeTask()
-	attackHttp := wafHttp.NewWafHandleService(attackUsercase)
+	attackHttp := wafHttp.NewWafHandleService(attackUsercase, wafConfigUsercase)
 
 	// 在服务启动之处 , 创建存储攻击日志的csv文件
 	return cleanup, attackHttp
 }
 
-func initCoraza() coraza.WAF {
-	cfg := coraza.NewWAFConfig().
-		WithDirectives(`
-			Include wafCoraza/ruleset/coraza.conf
-			Include wafCoraza/ruleset/coreruleset/crs-setup.conf.example
-			Include wafCoraza/ruleset/coreruleset/rules/*.conf
- 		`).
-		WithRootFS(mergefs.Merge(coreruleset.FS, io.OSFS))
-	waf, err := coraza.NewWAF(cfg)
-	if err != nil {
-		panic(err)
-	}
-	return waf
-
-}
-
 func main() {
-	defer func() {
-		if err := recover(); err != nil {
-			slog.Error("panic: ", err)
-		}
-	}()
-	waf := initCoraza()
+
 	cleanup, wafService := initApp() //初始化数据层面
+	// 初始化waf 实列
+	wafService.InitWAF()
 	// 设置 HTTP 处理函数
-	http.HandleFunc("/", wafService.WAFHandle(waf))
+	http.HandleFunc("/", wafService.ProxyHandler())
 
 	// 监听并在 0.0.0.0:8888 上启动服务器
 	slog.Info("Starting HTTP server on :8887")
