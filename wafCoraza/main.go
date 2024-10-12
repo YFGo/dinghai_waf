@@ -38,6 +38,10 @@ func main() {
 	cleanup, wafService := initApp() //初始化数据层面
 	// 初始化waf 实列
 	wafService.InitWAF()
+	// 配置热更新waf实列
+	go func() {
+		wafService.WatchStrategyService()
+	}()
 	// 设置 HTTP 处理函数
 	http.HandleFunc("/", wafService.ProxyHandler())
 

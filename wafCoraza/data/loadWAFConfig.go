@@ -60,3 +60,8 @@ func (l loadWAFConfigRepo) GetRealAddr(domain string) (string, error) {
 	}
 	return realAddr, nil
 }
+
+// AirUpdateStrategy 热更新策略
+func (l loadWAFConfigRepo) AirUpdateStrategy() clientv3.WatchChan {
+	return l.data.etcdClient.Watch(context.Background(), types.StrategyKey, clientv3.WithPrefix())
+}
