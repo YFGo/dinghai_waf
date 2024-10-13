@@ -10,7 +10,7 @@ import (
 )
 
 // ProviderSet is data providers.
-var ProviderSet = wire.NewSet(NewData, NewGreeterRepo)
+var ProviderSet = wire.NewSet(NewData, NewAppWafRepo)
 
 // Data .
 type Data struct {
@@ -51,5 +51,14 @@ func newMysql(cfg *conf.Data_Mysql) (*gorm.DB, error) {
 	}
 	sqlDB.SetMaxIdleConns(int(cfg.MaxIdle))
 	sqlDB.SetMaxOpenConns(int(cfg.MaxOpen))
+	// 自动 建表
+	//db.AutoMigrate(model.AppWaf{})
+	//db.AutoMigrate(model.BuildinRule{})
+	//db.AutoMigrate(model.RuleGroup{})
+	//db.AutoMigrate(model.ServerStrategies{})
+	//db.AutoMigrate(model.ServerWaf{})
+	//db.AutoMigrate(model.Strategy{})
+	//db.AutoMigrate(model.StrategyConfig{})
+	//db.AutoMigrate(model.UserRule{})
 	return db, nil
 }

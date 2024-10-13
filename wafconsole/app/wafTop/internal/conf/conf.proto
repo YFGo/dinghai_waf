@@ -28,7 +28,7 @@ message Server {
 message Data {
   message Mysql {
     string host = 1;
-    string port = 2;
+    int32 port = 2;
     string user = 3;
     string password = 4;
     string db = 5;
