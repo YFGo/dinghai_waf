@@ -7,3 +7,7 @@ const (
 	RealAddr      = CutOFF + "real"
 	SeclangCutOFF = "<$>"
 )
+
+const (
+	WafDeny = "deny"
+)
