@@ -13,6 +13,7 @@ import (
 	"strconv"
 	"strings"
 	"wafCoraza/biz"
+	constType "wafCoraza/data/types"
 )
 
 type WafHandleService struct {
@@ -46,9 +47,8 @@ func (w *WafHandleService) ProxyHandler() http.HandlerFunc {
 			slog.Error("LogAttackEvent Error reading request body: ", err)
 			return
 		}
-		//根据访问的域名 获取收到保护的web程序所应用的策略 对应的WAF实列
-		wafs := w.wafConfigUc.GetAppWAF(req.Host)
-		//根据这些waf实列 , 校验请求是否可以放行 , 只要存在一个waf实列拦截了请求 , 就不再检测
+		wafs := w.wafConfigUc.GetAppWAF(req.Host)            //根据访问的域名 获取收到保护的web程序所应用的策略 对应的WAF实列
+		realAddr, err := w.wafConfigUc.GetRealAddr(req.Host) //  获取真实的后端地址
 		var tx types.Transaction
 		defer func() {
 			if tx != nil {
@@ -59,15 +59,18 @@ func (w *WafHandleService) ProxyHandler() http.HandlerFunc {
 			}
 		}()
 		clientIP, clientPort, err := net.SplitHostPort(req.RemoteAddr)
+		serverIP, serverPortStr, err := net.SplitHostPort(realAddr)
 		if err != nil {
 			log.Printf("Error splitting RemoteAddr: %v", err)
 		}
+		serverPort, _ := strconv.Atoi(serverPortStr)
 		port, _ := strconv.Atoi(clientPort)
 		isAllow := true //  默认值为true , 当此程序无waf实列时 , 直接放行
+		//根据这些waf实列 , 校验请求是否可以放行 , 只要存在一个waf实列拦截了请求 , 就不再检测
 		for _, waf := range wafs {
 			tx = waf.NewTransaction()
-			tx.ProcessConnection(clientIP, port, "152.136.50.60", 8888) // 模拟网络连接，使用请求的远程地址和端口
-			tx.ProcessURI(req.RequestURI, req.Method, req.Proto)        // Request URI was /some-url?with=args
+			tx.ProcessConnection(clientIP, port, serverIP, serverPort) // 模拟网络连接，使用请求的远程地址和端口
+			tx.ProcessURI(req.RequestURI, req.Method, req.Proto)       // Request URI was /some-url?with=args
 			_, reqHeaderIsLegal := w.WafParseHeader(tx, req, rw)
 			_, reqBodyIsLegal := w.WafParseReqBody(tx, requestBody)
 			attackMathRules := w.WafMatchRules(tx)  //处理命中的规则
@@ -80,8 +83,7 @@ func (w *WafHandleService) ProxyHandler() http.HandlerFunc {
 			}
 		}
 		if isAllow { //允许放行
-			readAddr, err := w.wafConfigUc.GetRealAddr(req.Host)
-			targetURL, err := url.Parse(fmt.Sprintf("http://%s", readAddr))
+			targetURL, err := url.Parse(fmt.Sprintf("http://%s", realAddr))
 			if err != nil {
 				http.Error(rw, err.Error(), http.StatusInternalServerError)
 				return
@@ -106,7 +108,12 @@ func (w *WafHandleService) WafParseHeader(tx types.Transaction, req *http.Reques
 	// 处理请求头
 	itParse1 := tx.ProcessRequestHeaders()
 	if itParse1 != nil {
-		return itParse1, false
+		switch itParse1.Action {
+		case constType.WafDeny: //访问行为被禁止
+			return itParse1, false
+		default:
+			return itParse1, false
+		}
 	}
 	return itParse1, true
 }
@@ -123,8 +130,14 @@ func (w *WafHandleService) WafParseReqBody(tx types.Transaction, requestBody []b
 	}
 	// 处理请求体阶段
 	itReqBody, err := tx.ProcessRequestBody()
-	if itReqBody != nil || err != nil {
+	if err != nil {
 		return itReqBody, false
+	}
+	if itReqBody != nil { //处理结果
+		switch itReqBody.Action {
+		case constType.WafDeny: //访问行为被禁止
+			return itReqBody, false
+		}
 	}
 	return itReqBody, true
 }
