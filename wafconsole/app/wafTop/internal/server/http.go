@@ -3,7 +3,7 @@ package server
 import (
 	v1 "wafconsole/api/wafTop/v1"
 	"wafconsole/app/wafTop/internal/conf"
-	"wafconsole/app/wafTop/internal/service"
+	"wafconsole/app/wafTop/internal/service/site"
 
 	"github.com/go-kratos/kratos/v2/log"
 	"github.com/go-kratos/kratos/v2/middleware/recovery"
@@ -11,7 +11,7 @@ import (
 )
 
 // NewHTTPServer new an HTTP server.
-func NewHTTPServer(c *conf.Server, greeter *service.GreeterService, logger log.Logger) *http.Server {
+func NewHTTPServer(c *conf.Server, appWafTop *site.WafAppService, logger log.Logger) *http.Server {
 	var opts = []http.ServerOption{
 		http.Middleware(
 			recovery.Recovery(),
@@ -27,6 +27,7 @@ func NewHTTPServer(c *conf.Server, greeter *service.GreeterService, logger log.L
 		opts = append(opts, http.Timeout(c.Http.Timeout.AsDuration()))
 	}
 	srv := http.NewServer(opts...)
-	v1.RegisterGreeterHTTPServer(srv, greeter)
+
+	v1.RegisterWafAppHTTPServer(srv, appWafTop)
 	return srv
 }

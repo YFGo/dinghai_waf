@@ -1,0 +1,25 @@
+syntax = "proto3";
+
+package api.wafTop.v1;
+
+//  kratos proto client wafTop/v1/message.proto 在api目录下生成Proto代码
+
+option go_package = "wafconsole/api/wafTop/v1;v1";
+option java_multiple_files = true;
+option java_package = "api.wafTop.v1";
+
+message CreateWafAppRequest {
+}
+message CreateWafAppReply {}
+
+message UpdateWafAppRequest {}
+message UpdateWafAppReply {}
+
+message DeleteWafAppRequest {}
+message DeleteWafAppReply {}
+
+message GetWafAppRequest {}
+message GetWafAppReply {}
+
+message ListWafAppRequest {}
+message ListWafAppReply {}

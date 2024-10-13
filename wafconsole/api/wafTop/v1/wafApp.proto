@@ -1,0 +1,21 @@
+syntax = "proto3";
+//  kratos proto add api/wafTop/v1/wafApp.proto 生成proto文件
+//  kratos proto client wafTop/v1/wafApp.proto 在api目录下生成Proto代码
+//  kratos proto server wafTop/v1/wafApp.proto -t ../app/wafTop/internal/service  在api目录下生成Service代码
+package api.wafTop.v1;
+
+import "wafTop/v1/message.proto";
+import "google/api/annotations.proto";
+
+option go_package = "wafconsole/api/wafTop/v1;v1";
+option java_multiple_files = true;
+option java_package = "api.wafTop.v1";
+
+service WafApp {
+	rpc CreateWafApp (CreateWafAppRequest) returns (CreateWafAppReply) {
+		option (google.api.http) = {
+			post: "/app/wafTop/v1/appWaf"
+			body: "*"
+		};
+	};
+}
