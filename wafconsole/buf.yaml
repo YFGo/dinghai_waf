@@ -1,0 +1,4 @@
+# buf.yaml
+version: v1
+deps:
+  - buf.build/bufbuild/protovalidate

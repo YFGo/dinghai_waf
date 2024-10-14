@@ -2,24 +2,170 @@ syntax = "proto3";
 
 package api.wafTop.v1;
 
-//  kratos proto client wafTop/v1/message.proto 在api目录下生成Proto代码
-
 option go_package = "wafconsole/api/wafTop/v1;v1";
 option java_multiple_files = true;
 option java_package = "api.wafTop.v1";
 
-message CreateWafAppRequest {
+import "buf/validate/validate.proto";
+
+message PageRequest {
+	int64 page_now = 1 [
+		(buf.validate.field).cel = {
+			id: "page_now",
+			message: "分页参数错误",
+			expression: "this > 0"
+		}
+	];
+	int64 page_size = 2 [
+		(buf.validate.field).cel = {
+			id: "page_size"
+			message: "分页参数错误",
+			expression: "this > 0"
+		}
+	];
+}
+
+
+// waf保护的应用程序
+message ChangeWafAppRequest {
+	string name = 1 [
+			(buf.validate.field).cel = {
+				id: "name",
+				message: "应用程序名称长度应为1~15",
+				expression: "size(this) >=1 && size(this) <=15"
+			}
+	];
+	string url = 2 [
+			(buf.validate.field).cel = {
+				id: "url",
+				message: "url格式错误",
+				expression: "this.isHostname()"
+			}
+	];
+	int64 server_id = 3 [
+			(buf.validate.field).cel = {
+				id: "server_id",
+				message: "服务器不存在",
+				expression: "this > 0"
+			}
+	];
 }
 message CreateWafAppReply {}
-
-message UpdateWafAppRequest {}
 message UpdateWafAppReply {}
 
-message DeleteWafAppRequest {}
-message DeleteWafAppReply {}
 
-message GetWafAppRequest {}
-message GetWafAppReply {}
+message GetWafAppRequest {
+	int64 id = 1 [
+			(buf.validate.field).cel = {
+				id: "id",
+				message: "应用程序不存在",
+				expression: "this > 0"
+			}
+	];
+}
+message GetWafAppReply {
+	string name = 1;
+	string url = 2;
+	ServerInfo server_info = 3;
+}
 
-message ListWafAppRequest {}
-message ListWafAppReply {}
+message ListWafAppRequest {
+	string name = 1;
+	PageRequest page_request = 2;
+}
+message WafAppInfo {
+	int64 id = 1;
+	string name = 2;
+	string url = 3;
+}
+message ListWafAppReply {
+	int64 total = 1;
+	repeated WafAppInfo waf_apps = 2;
+}
+
+// waf保护的服务器
+message ChangeServerRequest {
+	string name = 1 [
+		(buf.validate.field).cel = {
+			id: "name",
+			message: "名字长度在1~15字之间",
+			expression: "size(this) >= 1 && size(this) <= 15"
+		}
+	];
+	string ip = 2 [
+		(buf.validate.field).cel = {
+			id: "ip",
+			message: "IP地址格式不规范",
+			expression: "this.isIp()"
+		}
+	];
+	string host = 3 [
+		(buf.validate.field).cel = {
+			id: "host",
+			message: "域名格式不规范",
+			expression: " this.isHostname()"
+		}
+	];
+	int64 port = 4 [
+		(buf.validate.field).cel = {
+			id: "port",
+			message: "端口选择在1~65535之间",
+			expression: "this >= 1 && this <= 65535"
+		}
+	];
+}
+message CreateServerReply {}
+
+message UpdateServerReply {}
+
+// 删除服务器
+message DeleteRequest {
+	repeated int64 ids = 1[
+		(buf.validate.field).cel = {
+			id: "ids",
+			message: "服务器不能为空",
+			expression: "size(this) > 0"
+		},
+		(buf.validate.field).repeated.items.cel = {
+			id: "ids",
+			message: "服务器选择错误",
+			expression: "this > 0"
+		}
+	];
+}
+message DeleteReply {}
+
+// 根据服务器id 查询服务器详细信息
+message GetServerRequest {
+	int64 id = 1[
+		(buf.validate.field).cel = {
+			id: "id",
+			message: "服务器选择错误",
+			expression: "this > 0"
+		}
+	];
+}
+message GetServerReply {
+	string name = 1;
+	string ip = 2;
+	string host = 3;
+	int64 port = 4;
+	repeated WafAppInfo waf_apps = 5;
+}
+
+// 查询服务器列表
+message ListServerRequest {
+	string name = 1;
+	PageRequest page_request = 2;
+}
+message ServerInfo {
+	string name = 1;
+	string ip = 2;
+	string host = 3;
+	int64 port = 4;
+	int64  id = 5;
+}
+message ListServerReply {
+	int64 total = 1;
+	repeated ServerInfo list_servers = 2;
+}

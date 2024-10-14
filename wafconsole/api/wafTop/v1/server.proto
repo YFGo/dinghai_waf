@@ -1,0 +1,45 @@
+syntax = "proto3";
+
+//  kratos proto add api/wafTop/v1/server.proto 生成proto文件
+//  kratos proto client api/wafTop/v1/server.proto 在项目目录下生成Proto代码
+//  kratos proto server api/wafTop/v1/server.proto -t app/wafTop/internal/service/site  在api目录下生成Service代码
+
+package api.wafTop.v1;
+
+import "api/wafTop/v1/message.proto";
+import "google/api/annotations.proto";
+
+option go_package = "wafconsole/api/wafTop/v1;v1";
+option java_multiple_files = true;
+option java_package = "api.wafTop.v1";
+
+service Server {
+	rpc CreateServer (ChangeServerRequest) returns (CreateServerReply) {
+		option (google.api.http) = {
+			post: "/app/wafTop/v1/serverWaf"
+			body: "*"
+		};
+	};
+	rpc UpdateServer (ChangeServerRequest) returns (UpdateServerReply) {
+		option (google.api.http) = {
+			patch: "/app/wafTop/v1/serverWaf"
+			body: "*"
+		};
+	};
+	rpc DeleteServer (DeleteRequest) returns (DeleteReply) {
+		option (google.api.http) = {
+			delete: "/app/wafTop/v1/serverWaf"
+		};
+	};
+	rpc GetServer (GetServerRequest) returns (GetServerReply) {
+		option (google.api.http) = {
+			get: "/app/wafTop/v1/serverWaf/{id}"
+		};
+	};
+	rpc ListServer (ListServerRequest) returns (ListServerReply) {
+		option (google.api.http) = {
+			get: "/app/wafTop/v1/serverWafs"
+		};
+	};
+}
+

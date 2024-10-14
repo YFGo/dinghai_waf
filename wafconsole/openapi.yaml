@@ -3,19 +3,87 @@
 
 openapi: 3.0.3
 info:
-    title: Greeter API
-    description: The greeting service definition.
+    title: WafApp API
     version: 0.0.1
 paths:
-    /helloworld/{name}:
+    /app/wafTop/v1/wafApp:
+        post:
+            tags:
+                - WafApp
+            operationId: WafApp_CreateWafApp
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/ChangeServerRequest'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/CreateWafAppReply'
+                default:
+                    description: Default error response
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/Status'
+        delete:
+            tags:
+                - WafApp
+            operationId: WafApp_DeleteWafApp
+            parameters:
+                - name: ids
+                  in: query
+                  schema:
+                    type: array
+                    items:
+                        type: string
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/DeleteReply'
+                default:
+                    description: Default error response
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/Status'
+        patch:
+            tags:
+                - WafApp
+            operationId: WafApp_UpdateWafApp
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/ChangeServerRequest'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/UpdateWafAppReply'
+                default:
+                    description: Default error response
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/Status'
+    /app/wafTop/v1/wafApp/{id}:
         get:
             tags:
-                - Greeter
-                - subgroup
-            description: Sends a greeting
-            operationId: Greeter_SayHello
+                - WafApp
+            operationId: WafApp_GetWafApp
             parameters:
-                - name: name
+                - name: id
                   in: path
                   required: true
                   schema:
@@ -26,14 +94,130 @@ paths:
                     content:
                         application/json:
                             schema:
-                                $ref: '#/components/schemas/wafTop.v1.HelloReply'
+                                $ref: '#/components/schemas/GetWafAppReply'
+                default:
+                    description: Default error response
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/Status'
+    /app/wafTop/v1/wafApps:
+        get:
+            tags:
+                - WafApp
+            operationId: WafApp_ListWafApp
+            parameters:
+                - name: name
+                  in: query
+                  schema:
+                    type: string
+                - name: pageRequest.pageNow
+                  in: query
+                  schema:
+                    type: string
+                - name: pageRequest.pageSize
+                  in: query
+                  schema:
+                    type: string
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/ListWafAppReply'
+                default:
+                    description: Default error response
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/Status'
 components:
     schemas:
-        helloworld.v1.HelloReply:
+        ChangeServerRequest:
             type: object
             properties:
+                name:
+                    type: string
+                ip:
+                    type: string
+                host:
+                    type: string
+                port:
+                    type: string
+            description: waf保护的服务器
+        CreateWafAppReply:
+            type: object
+            properties: {}
+        DeleteReply:
+            type: object
+            properties: {}
+        GetWafAppReply:
+            type: object
+            properties:
+                name:
+                    type: string
+                url:
+                    type: string
+                serverInfo:
+                    $ref: '#/components/schemas/ServerInfo'
+        GoogleProtobufAny:
+            type: object
+            properties:
+                '@type':
+                    type: string
+                    description: The type of the serialized message.
+            additionalProperties: true
+            description: Contains an arbitrary serialized message along with a @type that describes the type of the serialized message.
+        ListWafAppReply:
+            type: object
+            properties:
+                total:
+                    type: string
+                wafApps:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/WafAppInfo'
+        ServerInfo:
+            type: object
+            properties:
+                name:
+                    type: string
+                ip:
+                    type: string
+                host:
+                    type: string
+                port:
+                    type: string
+                id:
+                    type: string
+        Status:
+            type: object
+            properties:
+                code:
+                    type: integer
+                    description: The status code, which should be an enum value of [google.rpc.Code][google.rpc.Code].
+                    format: int32
                 message:
                     type: string
-            description: The response message containing the greetings
+                    description: A developer-facing error message, which should be in English. Any user-facing error message should be localized and sent in the [google.rpc.Status.details][google.rpc.Status.details] field, or localized by the client.
+                details:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/GoogleProtobufAny'
+                    description: A list of messages that carry the error details.  There is a common set of message types for APIs to use.
+            description: 'The `Status` type defines a logical error model that is suitable for different programming environments, including REST APIs and RPC APIs. It is used by [gRPC](https://github.com/grpc). Each `Status` message contains three pieces of data: error code, error message, and error details. You can find out more about this error model and how to work with it in the [API Design Guide](https://cloud.google.com/apis/design/errors).'
+        UpdateWafAppReply:
+            type: object
+            properties: {}
+        WafAppInfo:
+            type: object
+            properties:
+                id:
+                    type: string
+                name:
+                    type: string
+                url:
+                    type: string
 tags:
-    - name: Greeter
+    - name: WafApp
