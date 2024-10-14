@@ -2,8 +2,8 @@ package service
 
 import (
 	"github.com/google/wire"
-	"wafconsole/app/wafTop/internal/service/site"
+	service "wafconsole/app/wafTop/internal/service/site"
 )
 
 // ProviderSet is service providers.
-var ProviderSet = wire.NewSet(site.NewWafAppService)
+var ProviderSet = wire.NewSet(service.NewWafAppService, service.NewServerService)

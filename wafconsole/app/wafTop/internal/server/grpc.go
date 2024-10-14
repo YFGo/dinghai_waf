@@ -11,7 +11,7 @@ import (
 )
 
 // NewGRPCServer new a gRPC server.
-func NewGRPCServer(c *conf.Server, wafApp *site.WafAppService, logger log.Logger) *grpc.Server {
+func NewGRPCServer(c *conf.Server, wafApp *service.WafAppService, serverWaf *service.ServerService, logger log.Logger) *grpc.Server {
 	var opts = []grpc.ServerOption{
 		grpc.Middleware(
 			recovery.Recovery(),
@@ -28,5 +28,6 @@ func NewGRPCServer(c *conf.Server, wafApp *site.WafAppService, logger log.Logger
 	}
 	srv := grpc.NewServer(opts...)
 	v1.RegisterWafAppServer(srv, wafApp)
+	v1.RegisterServerServer(srv, serverWaf)
 	return srv
 }

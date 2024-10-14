@@ -2,11 +2,12 @@
 // versions:
 // 	protoc-gen-go v1.34.2
 // 	protoc        v4.25.2
-// source: wafTop/v1/message.proto
+// source: api/wafTop/v1/message.proto
 
 package v1
 
 import (
+	_ "buf.build/gen/go/bufbuild/protovalidate/protocolbuffers/go/buf/validate"
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
 	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
 	reflect "reflect"
@@ -20,29 +21,32 @@ const (
 	_ = protoimpl.EnforceVersion(protoimpl.MaxVersion - 20)
 )
 
-type CreateWafAppRequest struct {
+type PageRequest struct {
 	state         protoimpl.MessageState
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
+
+	PageNow  int64 `protobuf:"varint,1,opt,name=page_now,json=pageNow,proto3" json:"page_now,omitempty"`
+	PageSize int64 `protobuf:"varint,2,opt,name=page_size,json=pageSize,proto3" json:"page_size,omitempty"`
 }
 
-func (x *CreateWafAppRequest) Reset() {
-	*x = CreateWafAppRequest{}
+func (x *PageRequest) Reset() {
+	*x = PageRequest{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_wafTop_v1_message_proto_msgTypes[0]
+		mi := &file_api_wafTop_v1_message_proto_msgTypes[0]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
 }
 
-func (x *CreateWafAppRequest) String() string {
+func (x *PageRequest) String() string {
 	return protoimpl.X.MessageStringOf(x)
 }
 
-func (*CreateWafAppRequest) ProtoMessage() {}
+func (*PageRequest) ProtoMessage() {}
 
-func (x *CreateWafAppRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_wafTop_v1_message_proto_msgTypes[0]
+func (x *PageRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_api_wafTop_v1_message_proto_msgTypes[0]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -53,9 +57,87 @@ func (x *CreateWafAppRequest) ProtoReflect() protoreflect.Message {
 	return mi.MessageOf(x)
 }
 
-// Deprecated: Use CreateWafAppRequest.ProtoReflect.Descriptor instead.
-func (*CreateWafAppRequest) Descriptor() ([]byte, []int) {
-	return file_wafTop_v1_message_proto_rawDescGZIP(), []int{0}
+// Deprecated: Use PageRequest.ProtoReflect.Descriptor instead.
+func (*PageRequest) Descriptor() ([]byte, []int) {
+	return file_api_wafTop_v1_message_proto_rawDescGZIP(), []int{0}
+}
+
+func (x *PageRequest) GetPageNow() int64 {
+	if x != nil {
+		return x.PageNow
+	}
+	return 0
+}
+
+func (x *PageRequest) GetPageSize() int64 {
+	if x != nil {
+		return x.PageSize
+	}
+	return 0
+}
+
+// waf保护的应用程序
+type ChangeWafAppRequest struct {
+	state         protoimpl.MessageState
+	sizeCache     protoimpl.SizeCache
+	unknownFields protoimpl.UnknownFields
+
+	Name     string `protobuf:"bytes,1,opt,name=name,proto3" json:"name,omitempty"`
+	Url      string `protobuf:"bytes,2,opt,name=url,proto3" json:"url,omitempty"`
+	ServerId int64  `protobuf:"varint,3,opt,name=server_id,json=serverId,proto3" json:"server_id,omitempty"`
+}
+
+func (x *ChangeWafAppRequest) Reset() {
+	*x = ChangeWafAppRequest{}
+	if protoimpl.UnsafeEnabled {
+		mi := &file_api_wafTop_v1_message_proto_msgTypes[1]
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		ms.StoreMessageInfo(mi)
+	}
+}
+
+func (x *ChangeWafAppRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ChangeWafAppRequest) ProtoMessage() {}
+
+func (x *ChangeWafAppRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_api_wafTop_v1_message_proto_msgTypes[1]
+	if protoimpl.UnsafeEnabled && x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ChangeWafAppRequest.ProtoReflect.Descriptor instead.
+func (*ChangeWafAppRequest) Descriptor() ([]byte, []int) {
+	return file_api_wafTop_v1_message_proto_rawDescGZIP(), []int{1}
+}
+
+func (x *ChangeWafAppRequest) GetName() string {
+	if x != nil {
+		return x.Name
+	}
+	return ""
+}
+
+func (x *ChangeWafAppRequest) GetUrl() string {
+	if x != nil {
+		return x.Url
+	}
+	return ""
+}
+
+func (x *ChangeWafAppRequest) GetServerId() int64 {
+	if x != nil {
+		return x.ServerId
+	}
+	return 0
 }
 
 type CreateWafAppReply struct {
@@ -67,7 +149,7 @@ type CreateWafAppReply struct {
 func (x *CreateWafAppReply) Reset() {
 	*x = CreateWafAppReply{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_wafTop_v1_message_proto_msgTypes[1]
+		mi := &file_api_wafTop_v1_message_proto_msgTypes[2]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -80,7 +162,7 @@ func (x *CreateWafAppReply) String() string {
 func (*CreateWafAppReply) ProtoMessage() {}
 
 func (x *CreateWafAppReply) ProtoReflect() protoreflect.Message {
-	mi := &file_wafTop_v1_message_proto_msgTypes[1]
+	mi := &file_api_wafTop_v1_message_proto_msgTypes[2]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -93,45 +175,7 @@ func (x *CreateWafAppReply) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use CreateWafAppReply.ProtoReflect.Descriptor instead.
 func (*CreateWafAppReply) Descriptor() ([]byte, []int) {
-	return file_wafTop_v1_message_proto_rawDescGZIP(), []int{1}
-}
-
-type UpdateWafAppRequest struct {
-	state         protoimpl.MessageState
-	sizeCache     protoimpl.SizeCache
-	unknownFields protoimpl.UnknownFields
-}
-
-func (x *UpdateWafAppRequest) Reset() {
-	*x = UpdateWafAppRequest{}
-	if protoimpl.UnsafeEnabled {
-		mi := &file_wafTop_v1_message_proto_msgTypes[2]
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		ms.StoreMessageInfo(mi)
-	}
-}
-
-func (x *UpdateWafAppRequest) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*UpdateWafAppRequest) ProtoMessage() {}
-
-func (x *UpdateWafAppRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_wafTop_v1_message_proto_msgTypes[2]
-	if protoimpl.UnsafeEnabled && x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
-}
-
-// Deprecated: Use UpdateWafAppRequest.ProtoReflect.Descriptor instead.
-func (*UpdateWafAppRequest) Descriptor() ([]byte, []int) {
-	return file_wafTop_v1_message_proto_rawDescGZIP(), []int{2}
+	return file_api_wafTop_v1_message_proto_rawDescGZIP(), []int{2}
 }
 
 type UpdateWafAppReply struct {
@@ -143,7 +187,7 @@ type UpdateWafAppReply struct {
 func (x *UpdateWafAppReply) Reset() {
 	*x = UpdateWafAppReply{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_wafTop_v1_message_proto_msgTypes[3]
+		mi := &file_api_wafTop_v1_message_proto_msgTypes[3]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -156,7 +200,7 @@ func (x *UpdateWafAppReply) String() string {
 func (*UpdateWafAppReply) ProtoMessage() {}
 
 func (x *UpdateWafAppReply) ProtoReflect() protoreflect.Message {
-	mi := &file_wafTop_v1_message_proto_msgTypes[3]
+	mi := &file_api_wafTop_v1_message_proto_msgTypes[3]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -169,95 +213,21 @@ func (x *UpdateWafAppReply) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use UpdateWafAppReply.ProtoReflect.Descriptor instead.
 func (*UpdateWafAppReply) Descriptor() ([]byte, []int) {
-	return file_wafTop_v1_message_proto_rawDescGZIP(), []int{3}
-}
-
-type DeleteWafAppRequest struct {
-	state         protoimpl.MessageState
-	sizeCache     protoimpl.SizeCache
-	unknownFields protoimpl.UnknownFields
-}
-
-func (x *DeleteWafAppRequest) Reset() {
-	*x = DeleteWafAppRequest{}
-	if protoimpl.UnsafeEnabled {
-		mi := &file_wafTop_v1_message_proto_msgTypes[4]
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		ms.StoreMessageInfo(mi)
-	}
-}
-
-func (x *DeleteWafAppRequest) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*DeleteWafAppRequest) ProtoMessage() {}
-
-func (x *DeleteWafAppRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_wafTop_v1_message_proto_msgTypes[4]
-	if protoimpl.UnsafeEnabled && x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
-}
-
-// Deprecated: Use DeleteWafAppRequest.ProtoReflect.Descriptor instead.
-func (*DeleteWafAppRequest) Descriptor() ([]byte, []int) {
-	return file_wafTop_v1_message_proto_rawDescGZIP(), []int{4}
-}
-
-type DeleteWafAppReply struct {
-	state         protoimpl.MessageState
-	sizeCache     protoimpl.SizeCache
-	unknownFields protoimpl.UnknownFields
-}
-
-func (x *DeleteWafAppReply) Reset() {
-	*x = DeleteWafAppReply{}
-	if protoimpl.UnsafeEnabled {
-		mi := &file_wafTop_v1_message_proto_msgTypes[5]
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		ms.StoreMessageInfo(mi)
-	}
-}
-
-func (x *DeleteWafAppReply) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*DeleteWafAppReply) ProtoMessage() {}
-
-func (x *DeleteWafAppReply) ProtoReflect() protoreflect.Message {
-	mi := &file_wafTop_v1_message_proto_msgTypes[5]
-	if protoimpl.UnsafeEnabled && x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
-}
-
-// Deprecated: Use DeleteWafAppReply.ProtoReflect.Descriptor instead.
-func (*DeleteWafAppReply) Descriptor() ([]byte, []int) {
-	return file_wafTop_v1_message_proto_rawDescGZIP(), []int{5}
+	return file_api_wafTop_v1_message_proto_rawDescGZIP(), []int{3}
 }
 
 type GetWafAppRequest struct {
 	state         protoimpl.MessageState
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
+
+	Id int64 `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty"`
 }
 
 func (x *GetWafAppRequest) Reset() {
 	*x = GetWafAppRequest{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_wafTop_v1_message_proto_msgTypes[6]
+		mi := &file_api_wafTop_v1_message_proto_msgTypes[4]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -270,7 +240,7 @@ func (x *GetWafAppRequest) String() string {
 func (*GetWafAppRequest) ProtoMessage() {}
 
 func (x *GetWafAppRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_wafTop_v1_message_proto_msgTypes[6]
+	mi := &file_api_wafTop_v1_message_proto_msgTypes[4]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -283,19 +253,30 @@ func (x *GetWafAppRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use GetWafAppRequest.ProtoReflect.Descriptor instead.
 func (*GetWafAppRequest) Descriptor() ([]byte, []int) {
-	return file_wafTop_v1_message_proto_rawDescGZIP(), []int{6}
+	return file_api_wafTop_v1_message_proto_rawDescGZIP(), []int{4}
+}
+
+func (x *GetWafAppRequest) GetId() int64 {
+	if x != nil {
+		return x.Id
+	}
+	return 0
 }
 
 type GetWafAppReply struct {
 	state         protoimpl.MessageState
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
+
+	Name       string      `protobuf:"bytes,1,opt,name=name,proto3" json:"name,omitempty"`
+	Url        string      `protobuf:"bytes,2,opt,name=url,proto3" json:"url,omitempty"`
+	ServerInfo *ServerInfo `protobuf:"bytes,3,opt,name=server_info,json=serverInfo,proto3" json:"server_info,omitempty"`
 }
 
 func (x *GetWafAppReply) Reset() {
 	*x = GetWafAppReply{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_wafTop_v1_message_proto_msgTypes[7]
+		mi := &file_api_wafTop_v1_message_proto_msgTypes[5]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -308,7 +289,7 @@ func (x *GetWafAppReply) String() string {
 func (*GetWafAppReply) ProtoMessage() {}
 
 func (x *GetWafAppReply) ProtoReflect() protoreflect.Message {
-	mi := &file_wafTop_v1_message_proto_msgTypes[7]
+	mi := &file_api_wafTop_v1_message_proto_msgTypes[5]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -321,19 +302,43 @@ func (x *GetWafAppReply) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use GetWafAppReply.ProtoReflect.Descriptor instead.
 func (*GetWafAppReply) Descriptor() ([]byte, []int) {
-	return file_wafTop_v1_message_proto_rawDescGZIP(), []int{7}
+	return file_api_wafTop_v1_message_proto_rawDescGZIP(), []int{5}
+}
+
+func (x *GetWafAppReply) GetName() string {
+	if x != nil {
+		return x.Name
+	}
+	return ""
+}
+
+func (x *GetWafAppReply) GetUrl() string {
+	if x != nil {
+		return x.Url
+	}
+	return ""
+}
+
+func (x *GetWafAppReply) GetServerInfo() *ServerInfo {
+	if x != nil {
+		return x.ServerInfo
+	}
+	return nil
 }
 
 type ListWafAppRequest struct {
 	state         protoimpl.MessageState
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
+
+	Name        string       `protobuf:"bytes,1,opt,name=name,proto3" json:"name,omitempty"`
+	PageRequest *PageRequest `protobuf:"bytes,2,opt,name=page_request,json=pageRequest,proto3" json:"page_request,omitempty"`
 }
 
 func (x *ListWafAppRequest) Reset() {
 	*x = ListWafAppRequest{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_wafTop_v1_message_proto_msgTypes[8]
+		mi := &file_api_wafTop_v1_message_proto_msgTypes[6]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -346,7 +351,7 @@ func (x *ListWafAppRequest) String() string {
 func (*ListWafAppRequest) ProtoMessage() {}
 
 func (x *ListWafAppRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_wafTop_v1_message_proto_msgTypes[8]
+	mi := &file_api_wafTop_v1_message_proto_msgTypes[6]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -359,19 +364,99 @@ func (x *ListWafAppRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ListWafAppRequest.ProtoReflect.Descriptor instead.
 func (*ListWafAppRequest) Descriptor() ([]byte, []int) {
-	return file_wafTop_v1_message_proto_rawDescGZIP(), []int{8}
+	return file_api_wafTop_v1_message_proto_rawDescGZIP(), []int{6}
+}
+
+func (x *ListWafAppRequest) GetName() string {
+	if x != nil {
+		return x.Name
+	}
+	return ""
+}
+
+func (x *ListWafAppRequest) GetPageRequest() *PageRequest {
+	if x != nil {
+		return x.PageRequest
+	}
+	return nil
+}
+
+type WafAppInfo struct {
+	state         protoimpl.MessageState
+	sizeCache     protoimpl.SizeCache
+	unknownFields protoimpl.UnknownFields
+
+	Id   int64  `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty"`
+	Name string `protobuf:"bytes,2,opt,name=name,proto3" json:"name,omitempty"`
+	Url  string `protobuf:"bytes,3,opt,name=url,proto3" json:"url,omitempty"`
+}
+
+func (x *WafAppInfo) Reset() {
+	*x = WafAppInfo{}
+	if protoimpl.UnsafeEnabled {
+		mi := &file_api_wafTop_v1_message_proto_msgTypes[7]
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		ms.StoreMessageInfo(mi)
+	}
+}
+
+func (x *WafAppInfo) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*WafAppInfo) ProtoMessage() {}
+
+func (x *WafAppInfo) ProtoReflect() protoreflect.Message {
+	mi := &file_api_wafTop_v1_message_proto_msgTypes[7]
+	if protoimpl.UnsafeEnabled && x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use WafAppInfo.ProtoReflect.Descriptor instead.
+func (*WafAppInfo) Descriptor() ([]byte, []int) {
+	return file_api_wafTop_v1_message_proto_rawDescGZIP(), []int{7}
+}
+
+func (x *WafAppInfo) GetId() int64 {
+	if x != nil {
+		return x.Id
+	}
+	return 0
+}
+
+func (x *WafAppInfo) GetName() string {
+	if x != nil {
+		return x.Name
+	}
+	return ""
+}
+
+func (x *WafAppInfo) GetUrl() string {
+	if x != nil {
+		return x.Url
+	}
+	return ""
 }
 
 type ListWafAppReply struct {
 	state         protoimpl.MessageState
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
+
+	Total   int64         `protobuf:"varint,1,opt,name=total,proto3" json:"total,omitempty"`
+	WafApps []*WafAppInfo `protobuf:"bytes,2,rep,name=waf_apps,json=wafApps,proto3" json:"waf_apps,omitempty"`
 }
 
 func (x *ListWafAppReply) Reset() {
 	*x = ListWafAppReply{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_wafTop_v1_message_proto_msgTypes[9]
+		mi := &file_api_wafTop_v1_message_proto_msgTypes[8]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -384,7 +469,7 @@ func (x *ListWafAppReply) String() string {
 func (*ListWafAppReply) ProtoMessage() {}
 
 func (x *ListWafAppReply) ProtoReflect() protoreflect.Message {
-	mi := &file_wafTop_v1_message_proto_msgTypes[9]
+	mi := &file_api_wafTop_v1_message_proto_msgTypes[8]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -397,75 +482,771 @@ func (x *ListWafAppReply) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ListWafAppReply.ProtoReflect.Descriptor instead.
 func (*ListWafAppReply) Descriptor() ([]byte, []int) {
-	return file_wafTop_v1_message_proto_rawDescGZIP(), []int{9}
+	return file_api_wafTop_v1_message_proto_rawDescGZIP(), []int{8}
 }
 
-var File_wafTop_v1_message_proto protoreflect.FileDescriptor
+func (x *ListWafAppReply) GetTotal() int64 {
+	if x != nil {
+		return x.Total
+	}
+	return 0
+}
 
-var file_wafTop_v1_message_proto_rawDesc = []byte{
-	0x0a, 0x17, 0x77, 0x61, 0x66, 0x54, 0x6f, 0x70, 0x2f, 0x76, 0x31, 0x2f, 0x6d, 0x65, 0x73, 0x73,
-	0x61, 0x67, 0x65, 0x2e, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x12, 0x0d, 0x61, 0x70, 0x69, 0x2e, 0x77,
-	0x61, 0x66, 0x54, 0x6f, 0x70, 0x2e, 0x76, 0x31, 0x22, 0x15, 0x0a, 0x13, 0x43, 0x72, 0x65, 0x61,
-	0x74, 0x65, 0x57, 0x61, 0x66, 0x41, 0x70, 0x70, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x22,
-	0x13, 0x0a, 0x11, 0x43, 0x72, 0x65, 0x61, 0x74, 0x65, 0x57, 0x61, 0x66, 0x41, 0x70, 0x70, 0x52,
-	0x65, 0x70, 0x6c, 0x79, 0x22, 0x15, 0x0a, 0x13, 0x55, 0x70, 0x64, 0x61, 0x74, 0x65, 0x57, 0x61,
-	0x66, 0x41, 0x70, 0x70, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x22, 0x13, 0x0a, 0x11, 0x55,
-	0x70, 0x64, 0x61, 0x74, 0x65, 0x57, 0x61, 0x66, 0x41, 0x70, 0x70, 0x52, 0x65, 0x70, 0x6c, 0x79,
-	0x22, 0x15, 0x0a, 0x13, 0x44, 0x65, 0x6c, 0x65, 0x74, 0x65, 0x57, 0x61, 0x66, 0x41, 0x70, 0x70,
-	0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x22, 0x13, 0x0a, 0x11, 0x44, 0x65, 0x6c, 0x65, 0x74,
-	0x65, 0x57, 0x61, 0x66, 0x41, 0x70, 0x70, 0x52, 0x65, 0x70, 0x6c, 0x79, 0x22, 0x12, 0x0a, 0x10,
-	0x47, 0x65, 0x74, 0x57, 0x61, 0x66, 0x41, 0x70, 0x70, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74,
-	0x22, 0x10, 0x0a, 0x0e, 0x47, 0x65, 0x74, 0x57, 0x61, 0x66, 0x41, 0x70, 0x70, 0x52, 0x65, 0x70,
-	0x6c, 0x79, 0x22, 0x13, 0x0a, 0x11, 0x4c, 0x69, 0x73, 0x74, 0x57, 0x61, 0x66, 0x41, 0x70, 0x70,
-	0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x22, 0x11, 0x0a, 0x0f, 0x4c, 0x69, 0x73, 0x74, 0x57,
-	0x61, 0x66, 0x41, 0x70, 0x70, 0x52, 0x65, 0x70, 0x6c, 0x79, 0x42, 0x2e, 0x0a, 0x0d, 0x61, 0x70,
-	0x69, 0x2e, 0x77, 0x61, 0x66, 0x54, 0x6f, 0x70, 0x2e, 0x76, 0x31, 0x50, 0x01, 0x5a, 0x1b, 0x77,
-	0x61, 0x66, 0x63, 0x6f, 0x6e, 0x73, 0x6f, 0x6c, 0x65, 0x2f, 0x61, 0x70, 0x69, 0x2f, 0x77, 0x61,
-	0x66, 0x54, 0x6f, 0x70, 0x2f, 0x76, 0x31, 0x3b, 0x76, 0x31, 0x62, 0x06, 0x70, 0x72, 0x6f, 0x74,
-	0x6f, 0x33,
+func (x *ListWafAppReply) GetWafApps() []*WafAppInfo {
+	if x != nil {
+		return x.WafApps
+	}
+	return nil
+}
+
+// waf保护的服务器
+type ChangeServerRequest struct {
+	state         protoimpl.MessageState
+	sizeCache     protoimpl.SizeCache
+	unknownFields protoimpl.UnknownFields
+
+	Name string `protobuf:"bytes,1,opt,name=name,proto3" json:"name,omitempty"`
+	Ip   string `protobuf:"bytes,2,opt,name=ip,proto3" json:"ip,omitempty"`
+	Host string `protobuf:"bytes,3,opt,name=host,proto3" json:"host,omitempty"`
+	Port int64  `protobuf:"varint,4,opt,name=port,proto3" json:"port,omitempty"`
+}
+
+func (x *ChangeServerRequest) Reset() {
+	*x = ChangeServerRequest{}
+	if protoimpl.UnsafeEnabled {
+		mi := &file_api_wafTop_v1_message_proto_msgTypes[9]
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		ms.StoreMessageInfo(mi)
+	}
+}
+
+func (x *ChangeServerRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ChangeServerRequest) ProtoMessage() {}
+
+func (x *ChangeServerRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_api_wafTop_v1_message_proto_msgTypes[9]
+	if protoimpl.UnsafeEnabled && x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ChangeServerRequest.ProtoReflect.Descriptor instead.
+func (*ChangeServerRequest) Descriptor() ([]byte, []int) {
+	return file_api_wafTop_v1_message_proto_rawDescGZIP(), []int{9}
+}
+
+func (x *ChangeServerRequest) GetName() string {
+	if x != nil {
+		return x.Name
+	}
+	return ""
+}
+
+func (x *ChangeServerRequest) GetIp() string {
+	if x != nil {
+		return x.Ip
+	}
+	return ""
+}
+
+func (x *ChangeServerRequest) GetHost() string {
+	if x != nil {
+		return x.Host
+	}
+	return ""
+}
+
+func (x *ChangeServerRequest) GetPort() int64 {
+	if x != nil {
+		return x.Port
+	}
+	return 0
+}
+
+type CreateServerReply struct {
+	state         protoimpl.MessageState
+	sizeCache     protoimpl.SizeCache
+	unknownFields protoimpl.UnknownFields
+}
+
+func (x *CreateServerReply) Reset() {
+	*x = CreateServerReply{}
+	if protoimpl.UnsafeEnabled {
+		mi := &file_api_wafTop_v1_message_proto_msgTypes[10]
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		ms.StoreMessageInfo(mi)
+	}
+}
+
+func (x *CreateServerReply) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*CreateServerReply) ProtoMessage() {}
+
+func (x *CreateServerReply) ProtoReflect() protoreflect.Message {
+	mi := &file_api_wafTop_v1_message_proto_msgTypes[10]
+	if protoimpl.UnsafeEnabled && x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use CreateServerReply.ProtoReflect.Descriptor instead.
+func (*CreateServerReply) Descriptor() ([]byte, []int) {
+	return file_api_wafTop_v1_message_proto_rawDescGZIP(), []int{10}
+}
+
+type UpdateServerReply struct {
+	state         protoimpl.MessageState
+	sizeCache     protoimpl.SizeCache
+	unknownFields protoimpl.UnknownFields
+}
+
+func (x *UpdateServerReply) Reset() {
+	*x = UpdateServerReply{}
+	if protoimpl.UnsafeEnabled {
+		mi := &file_api_wafTop_v1_message_proto_msgTypes[11]
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		ms.StoreMessageInfo(mi)
+	}
+}
+
+func (x *UpdateServerReply) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*UpdateServerReply) ProtoMessage() {}
+
+func (x *UpdateServerReply) ProtoReflect() protoreflect.Message {
+	mi := &file_api_wafTop_v1_message_proto_msgTypes[11]
+	if protoimpl.UnsafeEnabled && x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use UpdateServerReply.ProtoReflect.Descriptor instead.
+func (*UpdateServerReply) Descriptor() ([]byte, []int) {
+	return file_api_wafTop_v1_message_proto_rawDescGZIP(), []int{11}
+}
+
+// 删除服务器
+type DeleteRequest struct {
+	state         protoimpl.MessageState
+	sizeCache     protoimpl.SizeCache
+	unknownFields protoimpl.UnknownFields
+
+	Ids []int64 `protobuf:"varint,1,rep,packed,name=ids,proto3" json:"ids,omitempty"`
+}
+
+func (x *DeleteRequest) Reset() {
+	*x = DeleteRequest{}
+	if protoimpl.UnsafeEnabled {
+		mi := &file_api_wafTop_v1_message_proto_msgTypes[12]
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		ms.StoreMessageInfo(mi)
+	}
+}
+
+func (x *DeleteRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*DeleteRequest) ProtoMessage() {}
+
+func (x *DeleteRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_api_wafTop_v1_message_proto_msgTypes[12]
+	if protoimpl.UnsafeEnabled && x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use DeleteRequest.ProtoReflect.Descriptor instead.
+func (*DeleteRequest) Descriptor() ([]byte, []int) {
+	return file_api_wafTop_v1_message_proto_rawDescGZIP(), []int{12}
+}
+
+func (x *DeleteRequest) GetIds() []int64 {
+	if x != nil {
+		return x.Ids
+	}
+	return nil
+}
+
+type DeleteReply struct {
+	state         protoimpl.MessageState
+	sizeCache     protoimpl.SizeCache
+	unknownFields protoimpl.UnknownFields
+}
+
+func (x *DeleteReply) Reset() {
+	*x = DeleteReply{}
+	if protoimpl.UnsafeEnabled {
+		mi := &file_api_wafTop_v1_message_proto_msgTypes[13]
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		ms.StoreMessageInfo(mi)
+	}
+}
+
+func (x *DeleteReply) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*DeleteReply) ProtoMessage() {}
+
+func (x *DeleteReply) ProtoReflect() protoreflect.Message {
+	mi := &file_api_wafTop_v1_message_proto_msgTypes[13]
+	if protoimpl.UnsafeEnabled && x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use DeleteReply.ProtoReflect.Descriptor instead.
+func (*DeleteReply) Descriptor() ([]byte, []int) {
+	return file_api_wafTop_v1_message_proto_rawDescGZIP(), []int{13}
+}
+
+// 根据服务器id 查询服务器详细信息
+type GetServerRequest struct {
+	state         protoimpl.MessageState
+	sizeCache     protoimpl.SizeCache
+	unknownFields protoimpl.UnknownFields
+
+	Id int64 `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty"`
+}
+
+func (x *GetServerRequest) Reset() {
+	*x = GetServerRequest{}
+	if protoimpl.UnsafeEnabled {
+		mi := &file_api_wafTop_v1_message_proto_msgTypes[14]
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		ms.StoreMessageInfo(mi)
+	}
+}
+
+func (x *GetServerRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*GetServerRequest) ProtoMessage() {}
+
+func (x *GetServerRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_api_wafTop_v1_message_proto_msgTypes[14]
+	if protoimpl.UnsafeEnabled && x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use GetServerRequest.ProtoReflect.Descriptor instead.
+func (*GetServerRequest) Descriptor() ([]byte, []int) {
+	return file_api_wafTop_v1_message_proto_rawDescGZIP(), []int{14}
+}
+
+func (x *GetServerRequest) GetId() int64 {
+	if x != nil {
+		return x.Id
+	}
+	return 0
+}
+
+type GetServerReply struct {
+	state         protoimpl.MessageState
+	sizeCache     protoimpl.SizeCache
+	unknownFields protoimpl.UnknownFields
+
+	Name    string        `protobuf:"bytes,1,opt,name=name,proto3" json:"name,omitempty"`
+	Ip      string        `protobuf:"bytes,2,opt,name=ip,proto3" json:"ip,omitempty"`
+	Host    string        `protobuf:"bytes,3,opt,name=host,proto3" json:"host,omitempty"`
+	Port    int64         `protobuf:"varint,4,opt,name=port,proto3" json:"port,omitempty"`
+	WafApps []*WafAppInfo `protobuf:"bytes,5,rep,name=waf_apps,json=wafApps,proto3" json:"waf_apps,omitempty"`
+}
+
+func (x *GetServerReply) Reset() {
+	*x = GetServerReply{}
+	if protoimpl.UnsafeEnabled {
+		mi := &file_api_wafTop_v1_message_proto_msgTypes[15]
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		ms.StoreMessageInfo(mi)
+	}
+}
+
+func (x *GetServerReply) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*GetServerReply) ProtoMessage() {}
+
+func (x *GetServerReply) ProtoReflect() protoreflect.Message {
+	mi := &file_api_wafTop_v1_message_proto_msgTypes[15]
+	if protoimpl.UnsafeEnabled && x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use GetServerReply.ProtoReflect.Descriptor instead.
+func (*GetServerReply) Descriptor() ([]byte, []int) {
+	return file_api_wafTop_v1_message_proto_rawDescGZIP(), []int{15}
+}
+
+func (x *GetServerReply) GetName() string {
+	if x != nil {
+		return x.Name
+	}
+	return ""
+}
+
+func (x *GetServerReply) GetIp() string {
+	if x != nil {
+		return x.Ip
+	}
+	return ""
+}
+
+func (x *GetServerReply) GetHost() string {
+	if x != nil {
+		return x.Host
+	}
+	return ""
+}
+
+func (x *GetServerReply) GetPort() int64 {
+	if x != nil {
+		return x.Port
+	}
+	return 0
+}
+
+func (x *GetServerReply) GetWafApps() []*WafAppInfo {
+	if x != nil {
+		return x.WafApps
+	}
+	return nil
+}
+
+// 查询服务器列表
+type ListServerRequest struct {
+	state         protoimpl.MessageState
+	sizeCache     protoimpl.SizeCache
+	unknownFields protoimpl.UnknownFields
+
+	Name        string       `protobuf:"bytes,1,opt,name=name,proto3" json:"name,omitempty"`
+	PageRequest *PageRequest `protobuf:"bytes,2,opt,name=page_request,json=pageRequest,proto3" json:"page_request,omitempty"`
+}
+
+func (x *ListServerRequest) Reset() {
+	*x = ListServerRequest{}
+	if protoimpl.UnsafeEnabled {
+		mi := &file_api_wafTop_v1_message_proto_msgTypes[16]
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		ms.StoreMessageInfo(mi)
+	}
+}
+
+func (x *ListServerRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ListServerRequest) ProtoMessage() {}
+
+func (x *ListServerRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_api_wafTop_v1_message_proto_msgTypes[16]
+	if protoimpl.UnsafeEnabled && x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ListServerRequest.ProtoReflect.Descriptor instead.
+func (*ListServerRequest) Descriptor() ([]byte, []int) {
+	return file_api_wafTop_v1_message_proto_rawDescGZIP(), []int{16}
+}
+
+func (x *ListServerRequest) GetName() string {
+	if x != nil {
+		return x.Name
+	}
+	return ""
+}
+
+func (x *ListServerRequest) GetPageRequest() *PageRequest {
+	if x != nil {
+		return x.PageRequest
+	}
+	return nil
+}
+
+type ServerInfo struct {
+	state         protoimpl.MessageState
+	sizeCache     protoimpl.SizeCache
+	unknownFields protoimpl.UnknownFields
+
+	Name string `protobuf:"bytes,1,opt,name=name,proto3" json:"name,omitempty"`
+	Ip   string `protobuf:"bytes,2,opt,name=ip,proto3" json:"ip,omitempty"`
+	Host string `protobuf:"bytes,3,opt,name=host,proto3" json:"host,omitempty"`
+	Port int64  `protobuf:"varint,4,opt,name=port,proto3" json:"port,omitempty"`
+	Id   int64  `protobuf:"varint,5,opt,name=id,proto3" json:"id,omitempty"`
+}
+
+func (x *ServerInfo) Reset() {
+	*x = ServerInfo{}
+	if protoimpl.UnsafeEnabled {
+		mi := &file_api_wafTop_v1_message_proto_msgTypes[17]
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		ms.StoreMessageInfo(mi)
+	}
+}
+
+func (x *ServerInfo) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ServerInfo) ProtoMessage() {}
+
+func (x *ServerInfo) ProtoReflect() protoreflect.Message {
+	mi := &file_api_wafTop_v1_message_proto_msgTypes[17]
+	if protoimpl.UnsafeEnabled && x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ServerInfo.ProtoReflect.Descriptor instead.
+func (*ServerInfo) Descriptor() ([]byte, []int) {
+	return file_api_wafTop_v1_message_proto_rawDescGZIP(), []int{17}
+}
+
+func (x *ServerInfo) GetName() string {
+	if x != nil {
+		return x.Name
+	}
+	return ""
+}
+
+func (x *ServerInfo) GetIp() string {
+	if x != nil {
+		return x.Ip
+	}
+	return ""
+}
+
+func (x *ServerInfo) GetHost() string {
+	if x != nil {
+		return x.Host
+	}
+	return ""
+}
+
+func (x *ServerInfo) GetPort() int64 {
+	if x != nil {
+		return x.Port
+	}
+	return 0
+}
+
+func (x *ServerInfo) GetId() int64 {
+	if x != nil {
+		return x.Id
+	}
+	return 0
+}
+
+type ListServerReply struct {
+	state         protoimpl.MessageState
+	sizeCache     protoimpl.SizeCache
+	unknownFields protoimpl.UnknownFields
+
+	Total       int64         `protobuf:"varint,1,opt,name=total,proto3" json:"total,omitempty"`
+	ListServers []*ServerInfo `protobuf:"bytes,2,rep,name=list_servers,json=listServers,proto3" json:"list_servers,omitempty"`
+}
+
+func (x *ListServerReply) Reset() {
+	*x = ListServerReply{}
+	if protoimpl.UnsafeEnabled {
+		mi := &file_api_wafTop_v1_message_proto_msgTypes[18]
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		ms.StoreMessageInfo(mi)
+	}
+}
+
+func (x *ListServerReply) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ListServerReply) ProtoMessage() {}
+
+func (x *ListServerReply) ProtoReflect() protoreflect.Message {
+	mi := &file_api_wafTop_v1_message_proto_msgTypes[18]
+	if protoimpl.UnsafeEnabled && x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ListServerReply.ProtoReflect.Descriptor instead.
+func (*ListServerReply) Descriptor() ([]byte, []int) {
+	return file_api_wafTop_v1_message_proto_rawDescGZIP(), []int{18}
+}
+
+func (x *ListServerReply) GetTotal() int64 {
+	if x != nil {
+		return x.Total
+	}
+	return 0
+}
+
+func (x *ListServerReply) GetListServers() []*ServerInfo {
+	if x != nil {
+		return x.ListServers
+	}
+	return nil
+}
+
+var File_api_wafTop_v1_message_proto protoreflect.FileDescriptor
+
+var file_api_wafTop_v1_message_proto_rawDesc = []byte{
+	0x0a, 0x1b, 0x61, 0x70, 0x69, 0x2f, 0x77, 0x61, 0x66, 0x54, 0x6f, 0x70, 0x2f, 0x76, 0x31, 0x2f,
+	0x6d, 0x65, 0x73, 0x73, 0x61, 0x67, 0x65, 0x2e, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x12, 0x0d, 0x61,
+	0x70, 0x69, 0x2e, 0x77, 0x61, 0x66, 0x54, 0x6f, 0x70, 0x2e, 0x76, 0x31, 0x1a, 0x1b, 0x62, 0x75,
+	0x66, 0x2f, 0x76, 0x61, 0x6c, 0x69, 0x64, 0x61, 0x74, 0x65, 0x2f, 0x76, 0x61, 0x6c, 0x69, 0x64,
+	0x61, 0x74, 0x65, 0x2e, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x22, 0xa6, 0x01, 0x0a, 0x0b, 0x50, 0x61,
+	0x67, 0x65, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x12, 0x49, 0x0a, 0x08, 0x70, 0x61, 0x67,
+	0x65, 0x5f, 0x6e, 0x6f, 0x77, 0x18, 0x01, 0x20, 0x01, 0x28, 0x03, 0x42, 0x2e, 0xba, 0x48, 0x2b,
+	0xba, 0x01, 0x28, 0x0a, 0x08, 0x70, 0x61, 0x67, 0x65, 0x5f, 0x6e, 0x6f, 0x77, 0x12, 0x12, 0xe5,
+	0x88, 0x86, 0xe9, 0xa1, 0xb5, 0xe5, 0x8f, 0x82, 0xe6, 0x95, 0xb0, 0xe9, 0x94, 0x99, 0xe8, 0xaf,
+	0xaf, 0x1a, 0x08, 0x74, 0x68, 0x69, 0x73, 0x20, 0x3e, 0x20, 0x30, 0x52, 0x07, 0x70, 0x61, 0x67,
+	0x65, 0x4e, 0x6f, 0x77, 0x12, 0x4c, 0x0a, 0x09, 0x70, 0x61, 0x67, 0x65, 0x5f, 0x73, 0x69, 0x7a,
+	0x65, 0x18, 0x02, 0x20, 0x01, 0x28, 0x03, 0x42, 0x2f, 0xba, 0x48, 0x2c, 0xba, 0x01, 0x29, 0x0a,
+	0x09, 0x70, 0x61, 0x67, 0x65, 0x5f, 0x73, 0x69, 0x7a, 0x65, 0x12, 0x12, 0xe5, 0x88, 0x86, 0xe9,
+	0xa1, 0xb5, 0xe5, 0x8f, 0x82, 0xe6, 0x95, 0xb0, 0xe9, 0x94, 0x99, 0xe8, 0xaf, 0xaf, 0x1a, 0x08,
+	0x74, 0x68, 0x69, 0x73, 0x20, 0x3e, 0x20, 0x30, 0x52, 0x08, 0x70, 0x61, 0x67, 0x65, 0x53, 0x69,
+	0x7a, 0x65, 0x22, 0x8f, 0x02, 0x0a, 0x13, 0x43, 0x68, 0x61, 0x6e, 0x67, 0x65, 0x57, 0x61, 0x66,
+	0x41, 0x70, 0x70, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x12, 0x67, 0x0a, 0x04, 0x6e, 0x61,
+	0x6d, 0x65, 0x18, 0x01, 0x20, 0x01, 0x28, 0x09, 0x42, 0x53, 0xba, 0x48, 0x50, 0xba, 0x01, 0x4d,
+	0x0a, 0x04, 0x6e, 0x61, 0x6d, 0x65, 0x12, 0x22, 0xe5, 0xba, 0x94, 0xe7, 0x94, 0xa8, 0xe7, 0xa8,
+	0x8b, 0xe5, 0xba, 0x8f, 0xe5, 0x90, 0x8d, 0xe7, 0xa7, 0xb0, 0xe9, 0x95, 0xbf, 0xe5, 0xba, 0xa6,
+	0xe5, 0xba, 0x94, 0xe4, 0xb8, 0xba, 0x31, 0x7e, 0x31, 0x35, 0x1a, 0x21, 0x73, 0x69, 0x7a, 0x65,
+	0x28, 0x74, 0x68, 0x69, 0x73, 0x29, 0x20, 0x3e, 0x3d, 0x31, 0x20, 0x26, 0x26, 0x20, 0x73, 0x69,
+	0x7a, 0x65, 0x28, 0x74, 0x68, 0x69, 0x73, 0x29, 0x20, 0x3c, 0x3d, 0x31, 0x35, 0x52, 0x04, 0x6e,
+	0x61, 0x6d, 0x65, 0x12, 0x41, 0x0a, 0x03, 0x75, 0x72, 0x6c, 0x18, 0x02, 0x20, 0x01, 0x28, 0x09,
+	0x42, 0x2f, 0xba, 0x48, 0x2c, 0xba, 0x01, 0x29, 0x0a, 0x03, 0x75, 0x72, 0x6c, 0x12, 0x0f, 0x75,
+	0x72, 0x6c, 0xe6, 0xa0, 0xbc, 0xe5, 0xbc, 0x8f, 0xe9, 0x94, 0x99, 0xe8, 0xaf, 0xaf, 0x1a, 0x11,
+	0x74, 0x68, 0x69, 0x73, 0x2e, 0x69, 0x73, 0x48, 0x6f, 0x73, 0x74, 0x6e, 0x61, 0x6d, 0x65, 0x28,
+	0x29, 0x52, 0x03, 0x75, 0x72, 0x6c, 0x12, 0x4c, 0x0a, 0x09, 0x73, 0x65, 0x72, 0x76, 0x65, 0x72,
+	0x5f, 0x69, 0x64, 0x18, 0x03, 0x20, 0x01, 0x28, 0x03, 0x42, 0x2f, 0xba, 0x48, 0x2c, 0xba, 0x01,
+	0x29, 0x0a, 0x09, 0x73, 0x65, 0x72, 0x76, 0x65, 0x72, 0x5f, 0x69, 0x64, 0x12, 0x12, 0xe6, 0x9c,
+	0x8d, 0xe5, 0x8a, 0xa1, 0xe5, 0x99, 0xa8, 0xe4, 0xb8, 0x8d, 0xe5, 0xad, 0x98, 0xe5, 0x9c, 0xa8,
+	0x1a, 0x08, 0x74, 0x68, 0x69, 0x73, 0x20, 0x3e, 0x20, 0x30, 0x52, 0x08, 0x73, 0x65, 0x72, 0x76,
+	0x65, 0x72, 0x49, 0x64, 0x22, 0x13, 0x0a, 0x11, 0x43, 0x72, 0x65, 0x61, 0x74, 0x65, 0x57, 0x61,
+	0x66, 0x41, 0x70, 0x70, 0x52, 0x65, 0x70, 0x6c, 0x79, 0x22, 0x13, 0x0a, 0x11, 0x55, 0x70, 0x64,
+	0x61, 0x74, 0x65, 0x57, 0x61, 0x66, 0x41, 0x70, 0x70, 0x52, 0x65, 0x70, 0x6c, 0x79, 0x22, 0x4f,
+	0x0a, 0x10, 0x47, 0x65, 0x74, 0x57, 0x61, 0x66, 0x41, 0x70, 0x70, 0x52, 0x65, 0x71, 0x75, 0x65,
+	0x73, 0x74, 0x12, 0x3b, 0x0a, 0x02, 0x69, 0x64, 0x18, 0x01, 0x20, 0x01, 0x28, 0x03, 0x42, 0x2b,
+	0xba, 0x48, 0x28, 0xba, 0x01, 0x25, 0x0a, 0x02, 0x69, 0x64, 0x12, 0x15, 0xe5, 0xba, 0x94, 0xe7,
+	0x94, 0xa8, 0xe7, 0xa8, 0x8b, 0xe5, 0xba, 0x8f, 0xe4, 0xb8, 0x8d, 0xe5, 0xad, 0x98, 0xe5, 0x9c,
+	0xa8, 0x1a, 0x08, 0x74, 0x68, 0x69, 0x73, 0x20, 0x3e, 0x20, 0x30, 0x52, 0x02, 0x69, 0x64, 0x22,
+	0x72, 0x0a, 0x0e, 0x47, 0x65, 0x74, 0x57, 0x61, 0x66, 0x41, 0x70, 0x70, 0x52, 0x65, 0x70, 0x6c,
+	0x79, 0x12, 0x12, 0x0a, 0x04, 0x6e, 0x61, 0x6d, 0x65, 0x18, 0x01, 0x20, 0x01, 0x28, 0x09, 0x52,
+	0x04, 0x6e, 0x61, 0x6d, 0x65, 0x12, 0x10, 0x0a, 0x03, 0x75, 0x72, 0x6c, 0x18, 0x02, 0x20, 0x01,
+	0x28, 0x09, 0x52, 0x03, 0x75, 0x72, 0x6c, 0x12, 0x3a, 0x0a, 0x0b, 0x73, 0x65, 0x72, 0x76, 0x65,
+	0x72, 0x5f, 0x69, 0x6e, 0x66, 0x6f, 0x18, 0x03, 0x20, 0x01, 0x28, 0x0b, 0x32, 0x19, 0x2e, 0x61,
+	0x70, 0x69, 0x2e, 0x77, 0x61, 0x66, 0x54, 0x6f, 0x70, 0x2e, 0x76, 0x31, 0x2e, 0x53, 0x65, 0x72,
+	0x76, 0x65, 0x72, 0x49, 0x6e, 0x66, 0x6f, 0x52, 0x0a, 0x73, 0x65, 0x72, 0x76, 0x65, 0x72, 0x49,
+	0x6e, 0x66, 0x6f, 0x22, 0x66, 0x0a, 0x11, 0x4c, 0x69, 0x73, 0x74, 0x57, 0x61, 0x66, 0x41, 0x70,
+	0x70, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x12, 0x12, 0x0a, 0x04, 0x6e, 0x61, 0x6d, 0x65,
+	0x18, 0x01, 0x20, 0x01, 0x28, 0x09, 0x52, 0x04, 0x6e, 0x61, 0x6d, 0x65, 0x12, 0x3d, 0x0a, 0x0c,
+	0x70, 0x61, 0x67, 0x65, 0x5f, 0x72, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x18, 0x02, 0x20, 0x01,
+	0x28, 0x0b, 0x32, 0x1a, 0x2e, 0x61, 0x70, 0x69, 0x2e, 0x77, 0x61, 0x66, 0x54, 0x6f, 0x70, 0x2e,
+	0x76, 0x31, 0x2e, 0x50, 0x61, 0x67, 0x65, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x52, 0x0b,
+	0x70, 0x61, 0x67, 0x65, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x22, 0x42, 0x0a, 0x0a, 0x57,
+	0x61, 0x66, 0x41, 0x70, 0x70, 0x49, 0x6e, 0x66, 0x6f, 0x12, 0x0e, 0x0a, 0x02, 0x69, 0x64, 0x18,
+	0x01, 0x20, 0x01, 0x28, 0x03, 0x52, 0x02, 0x69, 0x64, 0x12, 0x12, 0x0a, 0x04, 0x6e, 0x61, 0x6d,
+	0x65, 0x18, 0x02, 0x20, 0x01, 0x28, 0x09, 0x52, 0x04, 0x6e, 0x61, 0x6d, 0x65, 0x12, 0x10, 0x0a,
+	0x03, 0x75, 0x72, 0x6c, 0x18, 0x03, 0x20, 0x01, 0x28, 0x09, 0x52, 0x03, 0x75, 0x72, 0x6c, 0x22,
+	0x5d, 0x0a, 0x0f, 0x4c, 0x69, 0x73, 0x74, 0x57, 0x61, 0x66, 0x41, 0x70, 0x70, 0x52, 0x65, 0x70,
+	0x6c, 0x79, 0x12, 0x14, 0x0a, 0x05, 0x74, 0x6f, 0x74, 0x61, 0x6c, 0x18, 0x01, 0x20, 0x01, 0x28,
+	0x03, 0x52, 0x05, 0x74, 0x6f, 0x74, 0x61, 0x6c, 0x12, 0x34, 0x0a, 0x08, 0x77, 0x61, 0x66, 0x5f,
+	0x61, 0x70, 0x70, 0x73, 0x18, 0x02, 0x20, 0x03, 0x28, 0x0b, 0x32, 0x19, 0x2e, 0x61, 0x70, 0x69,
+	0x2e, 0x77, 0x61, 0x66, 0x54, 0x6f, 0x70, 0x2e, 0x76, 0x31, 0x2e, 0x57, 0x61, 0x66, 0x41, 0x70,
+	0x70, 0x49, 0x6e, 0x66, 0x6f, 0x52, 0x07, 0x77, 0x61, 0x66, 0x41, 0x70, 0x70, 0x73, 0x22, 0xe5,
+	0x02, 0x0a, 0x13, 0x43, 0x68, 0x61, 0x6e, 0x67, 0x65, 0x53, 0x65, 0x72, 0x76, 0x65, 0x72, 0x52,
+	0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x12, 0x63, 0x0a, 0x04, 0x6e, 0x61, 0x6d, 0x65, 0x18, 0x01,
+	0x20, 0x01, 0x28, 0x09, 0x42, 0x4f, 0xba, 0x48, 0x4c, 0xba, 0x01, 0x49, 0x0a, 0x04, 0x6e, 0x61,
+	0x6d, 0x65, 0x12, 0x1c, 0xe5, 0x90, 0x8d, 0xe5, 0xad, 0x97, 0xe9, 0x95, 0xbf, 0xe5, 0xba, 0xa6,
+	0xe5, 0x9c, 0xa8, 0x31, 0x7e, 0x31, 0x35, 0xe5, 0xad, 0x97, 0xe4, 0xb9, 0x8b, 0xe9, 0x97, 0xb4,
+	0x1a, 0x23, 0x73, 0x69, 0x7a, 0x65, 0x28, 0x74, 0x68, 0x69, 0x73, 0x29, 0x20, 0x3e, 0x3d, 0x20,
+	0x31, 0x20, 0x26, 0x26, 0x20, 0x73, 0x69, 0x7a, 0x65, 0x28, 0x74, 0x68, 0x69, 0x73, 0x29, 0x20,
+	0x3c, 0x3d, 0x20, 0x31, 0x35, 0x52, 0x04, 0x6e, 0x61, 0x6d, 0x65, 0x12, 0x40, 0x0a, 0x02, 0x69,
+	0x70, 0x18, 0x02, 0x20, 0x01, 0x28, 0x09, 0x42, 0x30, 0xba, 0x48, 0x2d, 0xba, 0x01, 0x2a, 0x0a,
+	0x02, 0x69, 0x70, 0x12, 0x17, 0x49, 0x50, 0xe5, 0x9c, 0xb0, 0xe5, 0x9d, 0x80, 0xe6, 0xa0, 0xbc,
+	0xe5, 0xbc, 0x8f, 0xe4, 0xb8, 0x8d, 0xe8, 0xa7, 0x84, 0xe8, 0x8c, 0x83, 0x1a, 0x0b, 0x74, 0x68,
+	0x69, 0x73, 0x2e, 0x69, 0x73, 0x49, 0x70, 0x28, 0x29, 0x52, 0x02, 0x69, 0x70, 0x12, 0x4b, 0x0a,
+	0x04, 0x68, 0x6f, 0x73, 0x74, 0x18, 0x03, 0x20, 0x01, 0x28, 0x09, 0x42, 0x37, 0xba, 0x48, 0x34,
+	0xba, 0x01, 0x31, 0x0a, 0x04, 0x68, 0x6f, 0x73, 0x74, 0x12, 0x15, 0xe5, 0x9f, 0x9f, 0xe5, 0x90,
+	0x8d, 0xe6, 0xa0, 0xbc, 0xe5, 0xbc, 0x8f, 0xe4, 0xb8, 0x8d, 0xe8, 0xa7, 0x84, 0xe8, 0x8c, 0x83,
+	0x1a, 0x12, 0x20, 0x74, 0x68, 0x69, 0x73, 0x2e, 0x69, 0x73, 0x48, 0x6f, 0x73, 0x74, 0x6e, 0x61,
+	0x6d, 0x65, 0x28, 0x29, 0x52, 0x04, 0x68, 0x6f, 0x73, 0x74, 0x12, 0x5a, 0x0a, 0x04, 0x70, 0x6f,
+	0x72, 0x74, 0x18, 0x04, 0x20, 0x01, 0x28, 0x03, 0x42, 0x46, 0xba, 0x48, 0x43, 0xba, 0x01, 0x40,
+	0x0a, 0x04, 0x70, 0x6f, 0x72, 0x74, 0x12, 0x1c, 0xe7, 0xab, 0xaf, 0xe5, 0x8f, 0xa3, 0xe9, 0x80,
+	0x89, 0xe6, 0x8b, 0xa9, 0xe5, 0x9c, 0xa8, 0x31, 0x7e, 0x36, 0x35, 0x35, 0x33, 0x35, 0xe4, 0xb9,
+	0x8b, 0xe9, 0x97, 0xb4, 0x1a, 0x1a, 0x74, 0x68, 0x69, 0x73, 0x20, 0x3e, 0x3d, 0x20, 0x31, 0x20,
+	0x26, 0x26, 0x20, 0x74, 0x68, 0x69, 0x73, 0x20, 0x3c, 0x3d, 0x20, 0x36, 0x35, 0x35, 0x33, 0x35,
+	0x52, 0x04, 0x70, 0x6f, 0x72, 0x74, 0x22, 0x13, 0x0a, 0x11, 0x43, 0x72, 0x65, 0x61, 0x74, 0x65,
+	0x53, 0x65, 0x72, 0x76, 0x65, 0x72, 0x52, 0x65, 0x70, 0x6c, 0x79, 0x22, 0x13, 0x0a, 0x11, 0x55,
+	0x70, 0x64, 0x61, 0x74, 0x65, 0x53, 0x65, 0x72, 0x76, 0x65, 0x72, 0x52, 0x65, 0x70, 0x6c, 0x79,
+	0x22, 0x83, 0x01, 0x0a, 0x0d, 0x44, 0x65, 0x6c, 0x65, 0x74, 0x65, 0x52, 0x65, 0x71, 0x75, 0x65,
+	0x73, 0x74, 0x12, 0x72, 0x0a, 0x03, 0x69, 0x64, 0x73, 0x18, 0x01, 0x20, 0x03, 0x28, 0x03, 0x42,
+	0x60, 0xba, 0x48, 0x5d, 0xba, 0x01, 0x2c, 0x0a, 0x03, 0x69, 0x64, 0x73, 0x12, 0x15, 0xe6, 0x9c,
+	0x8d, 0xe5, 0x8a, 0xa1, 0xe5, 0x99, 0xa8, 0xe4, 0xb8, 0x8d, 0xe8, 0x83, 0xbd, 0xe4, 0xb8, 0xba,
+	0xe7, 0xa9, 0xba, 0x1a, 0x0e, 0x73, 0x69, 0x7a, 0x65, 0x28, 0x74, 0x68, 0x69, 0x73, 0x29, 0x20,
+	0x3e, 0x20, 0x30, 0x92, 0x01, 0x2b, 0x22, 0x29, 0xba, 0x01, 0x26, 0x0a, 0x03, 0x69, 0x64, 0x73,
+	0x12, 0x15, 0xe6, 0x9c, 0x8d, 0xe5, 0x8a, 0xa1, 0xe5, 0x99, 0xa8, 0xe9, 0x80, 0x89, 0xe6, 0x8b,
+	0xa9, 0xe9, 0x94, 0x99, 0xe8, 0xaf, 0xaf, 0x1a, 0x08, 0x74, 0x68, 0x69, 0x73, 0x20, 0x3e, 0x20,
+	0x30, 0x52, 0x03, 0x69, 0x64, 0x73, 0x22, 0x0d, 0x0a, 0x0b, 0x44, 0x65, 0x6c, 0x65, 0x74, 0x65,
+	0x52, 0x65, 0x70, 0x6c, 0x79, 0x22, 0x4f, 0x0a, 0x10, 0x47, 0x65, 0x74, 0x53, 0x65, 0x72, 0x76,
+	0x65, 0x72, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x12, 0x3b, 0x0a, 0x02, 0x69, 0x64, 0x18,
+	0x01, 0x20, 0x01, 0x28, 0x03, 0x42, 0x2b, 0xba, 0x48, 0x28, 0xba, 0x01, 0x25, 0x0a, 0x02, 0x69,
+	0x64, 0x12, 0x15, 0xe6, 0x9c, 0x8d, 0xe5, 0x8a, 0xa1, 0xe5, 0x99, 0xa8, 0xe9, 0x80, 0x89, 0xe6,
+	0x8b, 0xa9, 0xe9, 0x94, 0x99, 0xe8, 0xaf, 0xaf, 0x1a, 0x08, 0x74, 0x68, 0x69, 0x73, 0x20, 0x3e,
+	0x20, 0x30, 0x52, 0x02, 0x69, 0x64, 0x22, 0x92, 0x01, 0x0a, 0x0e, 0x47, 0x65, 0x74, 0x53, 0x65,
+	0x72, 0x76, 0x65, 0x72, 0x52, 0x65, 0x70, 0x6c, 0x79, 0x12, 0x12, 0x0a, 0x04, 0x6e, 0x61, 0x6d,
+	0x65, 0x18, 0x01, 0x20, 0x01, 0x28, 0x09, 0x52, 0x04, 0x6e, 0x61, 0x6d, 0x65, 0x12, 0x0e, 0x0a,
+	0x02, 0x69, 0x70, 0x18, 0x02, 0x20, 0x01, 0x28, 0x09, 0x52, 0x02, 0x69, 0x70, 0x12, 0x12, 0x0a,
+	0x04, 0x68, 0x6f, 0x73, 0x74, 0x18, 0x03, 0x20, 0x01, 0x28, 0x09, 0x52, 0x04, 0x68, 0x6f, 0x73,
+	0x74, 0x12, 0x12, 0x0a, 0x04, 0x70, 0x6f, 0x72, 0x74, 0x18, 0x04, 0x20, 0x01, 0x28, 0x03, 0x52,
+	0x04, 0x70, 0x6f, 0x72, 0x74, 0x12, 0x34, 0x0a, 0x08, 0x77, 0x61, 0x66, 0x5f, 0x61, 0x70, 0x70,
+	0x73, 0x18, 0x05, 0x20, 0x03, 0x28, 0x0b, 0x32, 0x19, 0x2e, 0x61, 0x70, 0x69, 0x2e, 0x77, 0x61,
+	0x66, 0x54, 0x6f, 0x70, 0x2e, 0x76, 0x31, 0x2e, 0x57, 0x61, 0x66, 0x41, 0x70, 0x70, 0x49, 0x6e,
+	0x66, 0x6f, 0x52, 0x07, 0x77, 0x61, 0x66, 0x41, 0x70, 0x70, 0x73, 0x22, 0x66, 0x0a, 0x11, 0x4c,
+	0x69, 0x73, 0x74, 0x53, 0x65, 0x72, 0x76, 0x65, 0x72, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74,
+	0x12, 0x12, 0x0a, 0x04, 0x6e, 0x61, 0x6d, 0x65, 0x18, 0x01, 0x20, 0x01, 0x28, 0x09, 0x52, 0x04,
+	0x6e, 0x61, 0x6d, 0x65, 0x12, 0x3d, 0x0a, 0x0c, 0x70, 0x61, 0x67, 0x65, 0x5f, 0x72, 0x65, 0x71,
+	0x75, 0x65, 0x73, 0x74, 0x18, 0x02, 0x20, 0x01, 0x28, 0x0b, 0x32, 0x1a, 0x2e, 0x61, 0x70, 0x69,
+	0x2e, 0x77, 0x61, 0x66, 0x54, 0x6f, 0x70, 0x2e, 0x76, 0x31, 0x2e, 0x50, 0x61, 0x67, 0x65, 0x52,
+	0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x52, 0x0b, 0x70, 0x61, 0x67, 0x65, 0x52, 0x65, 0x71, 0x75,
+	0x65, 0x73, 0x74, 0x22, 0x68, 0x0a, 0x0a, 0x53, 0x65, 0x72, 0x76, 0x65, 0x72, 0x49, 0x6e, 0x66,
+	0x6f, 0x12, 0x12, 0x0a, 0x04, 0x6e, 0x61, 0x6d, 0x65, 0x18, 0x01, 0x20, 0x01, 0x28, 0x09, 0x52,
+	0x04, 0x6e, 0x61, 0x6d, 0x65, 0x12, 0x0e, 0x0a, 0x02, 0x69, 0x70, 0x18, 0x02, 0x20, 0x01, 0x28,
+	0x09, 0x52, 0x02, 0x69, 0x70, 0x12, 0x12, 0x0a, 0x04, 0x68, 0x6f, 0x73, 0x74, 0x18, 0x03, 0x20,
+	0x01, 0x28, 0x09, 0x52, 0x04, 0x68, 0x6f, 0x73, 0x74, 0x12, 0x12, 0x0a, 0x04, 0x70, 0x6f, 0x72,
+	0x74, 0x18, 0x04, 0x20, 0x01, 0x28, 0x03, 0x52, 0x04, 0x70, 0x6f, 0x72, 0x74, 0x12, 0x0e, 0x0a,
+	0x02, 0x69, 0x64, 0x18, 0x05, 0x20, 0x01, 0x28, 0x03, 0x52, 0x02, 0x69, 0x64, 0x22, 0x65, 0x0a,
+	0x0f, 0x4c, 0x69, 0x73, 0x74, 0x53, 0x65, 0x72, 0x76, 0x65, 0x72, 0x52, 0x65, 0x70, 0x6c, 0x79,
+	0x12, 0x14, 0x0a, 0x05, 0x74, 0x6f, 0x74, 0x61, 0x6c, 0x18, 0x01, 0x20, 0x01, 0x28, 0x03, 0x52,
+	0x05, 0x74, 0x6f, 0x74, 0x61, 0x6c, 0x12, 0x3c, 0x0a, 0x0c, 0x6c, 0x69, 0x73, 0x74, 0x5f, 0x73,
+	0x65, 0x72, 0x76, 0x65, 0x72, 0x73, 0x18, 0x02, 0x20, 0x03, 0x28, 0x0b, 0x32, 0x19, 0x2e, 0x61,
+	0x70, 0x69, 0x2e, 0x77, 0x61, 0x66, 0x54, 0x6f, 0x70, 0x2e, 0x76, 0x31, 0x2e, 0x53, 0x65, 0x72,
+	0x76, 0x65, 0x72, 0x49, 0x6e, 0x66, 0x6f, 0x52, 0x0b, 0x6c, 0x69, 0x73, 0x74, 0x53, 0x65, 0x72,
+	0x76, 0x65, 0x72, 0x73, 0x42, 0x2e, 0x0a, 0x0d, 0x61, 0x70, 0x69, 0x2e, 0x77, 0x61, 0x66, 0x54,
+	0x6f, 0x70, 0x2e, 0x76, 0x31, 0x50, 0x01, 0x5a, 0x1b, 0x77, 0x61, 0x66, 0x63, 0x6f, 0x6e, 0x73,
+	0x6f, 0x6c, 0x65, 0x2f, 0x61, 0x70, 0x69, 0x2f, 0x77, 0x61, 0x66, 0x54, 0x6f, 0x70, 0x2f, 0x76,
+	0x31, 0x3b, 0x76, 0x31, 0x62, 0x06, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x33,
 }
 
 var (
-	file_wafTop_v1_message_proto_rawDescOnce sync.Once
-	file_wafTop_v1_message_proto_rawDescData = file_wafTop_v1_message_proto_rawDesc
+	file_api_wafTop_v1_message_proto_rawDescOnce sync.Once
+	file_api_wafTop_v1_message_proto_rawDescData = file_api_wafTop_v1_message_proto_rawDesc
 )
 
-func file_wafTop_v1_message_proto_rawDescGZIP() []byte {
-	file_wafTop_v1_message_proto_rawDescOnce.Do(func() {
-		file_wafTop_v1_message_proto_rawDescData = protoimpl.X.CompressGZIP(file_wafTop_v1_message_proto_rawDescData)
+func file_api_wafTop_v1_message_proto_rawDescGZIP() []byte {
+	file_api_wafTop_v1_message_proto_rawDescOnce.Do(func() {
+		file_api_wafTop_v1_message_proto_rawDescData = protoimpl.X.CompressGZIP(file_api_wafTop_v1_message_proto_rawDescData)
 	})
-	return file_wafTop_v1_message_proto_rawDescData
+	return file_api_wafTop_v1_message_proto_rawDescData
 }
 
-var file_wafTop_v1_message_proto_msgTypes = make([]protoimpl.MessageInfo, 10)
-var file_wafTop_v1_message_proto_goTypes = []any{
-	(*CreateWafAppRequest)(nil), // 0: api.wafTop.v1.CreateWafAppRequest
-	(*CreateWafAppReply)(nil),   // 1: api.wafTop.v1.CreateWafAppReply
-	(*UpdateWafAppRequest)(nil), // 2: api.wafTop.v1.UpdateWafAppRequest
+var file_api_wafTop_v1_message_proto_msgTypes = make([]protoimpl.MessageInfo, 19)
+var file_api_wafTop_v1_message_proto_goTypes = []any{
+	(*PageRequest)(nil),         // 0: api.wafTop.v1.PageRequest
+	(*ChangeWafAppRequest)(nil), // 1: api.wafTop.v1.ChangeWafAppRequest
+	(*CreateWafAppReply)(nil),   // 2: api.wafTop.v1.CreateWafAppReply
 	(*UpdateWafAppReply)(nil),   // 3: api.wafTop.v1.UpdateWafAppReply
-	(*DeleteWafAppRequest)(nil), // 4: api.wafTop.v1.DeleteWafAppRequest
-	(*DeleteWafAppReply)(nil),   // 5: api.wafTop.v1.DeleteWafAppReply
-	(*GetWafAppRequest)(nil),    // 6: api.wafTop.v1.GetWafAppRequest
-	(*GetWafAppReply)(nil),      // 7: api.wafTop.v1.GetWafAppReply
-	(*ListWafAppRequest)(nil),   // 8: api.wafTop.v1.ListWafAppRequest
-	(*ListWafAppReply)(nil),     // 9: api.wafTop.v1.ListWafAppReply
+	(*GetWafAppRequest)(nil),    // 4: api.wafTop.v1.GetWafAppRequest
+	(*GetWafAppReply)(nil),      // 5: api.wafTop.v1.GetWafAppReply
+	(*ListWafAppRequest)(nil),   // 6: api.wafTop.v1.ListWafAppRequest
+	(*WafAppInfo)(nil),          // 7: api.wafTop.v1.WafAppInfo
+	(*ListWafAppReply)(nil),     // 8: api.wafTop.v1.ListWafAppReply
+	(*ChangeServerRequest)(nil), // 9: api.wafTop.v1.ChangeServerRequest
+	(*CreateServerReply)(nil),   // 10: api.wafTop.v1.CreateServerReply
+	(*UpdateServerReply)(nil),   // 11: api.wafTop.v1.UpdateServerReply
+	(*DeleteRequest)(nil),       // 12: api.wafTop.v1.DeleteRequest
+	(*DeleteReply)(nil),         // 13: api.wafTop.v1.DeleteReply
+	(*GetServerRequest)(nil),    // 14: api.wafTop.v1.GetServerRequest
+	(*GetServerReply)(nil),      // 15: api.wafTop.v1.GetServerReply
+	(*ListServerRequest)(nil),   // 16: api.wafTop.v1.ListServerRequest
+	(*ServerInfo)(nil),          // 17: api.wafTop.v1.ServerInfo
+	(*ListServerReply)(nil),     // 18: api.wafTop.v1.ListServerReply
 }
-var file_wafTop_v1_message_proto_depIdxs = []int32{
-	0, // [0:0] is the sub-list for method output_type
-	0, // [0:0] is the sub-list for method input_type
-	0, // [0:0] is the sub-list for extension type_name
-	0, // [0:0] is the sub-list for extension extendee
-	0, // [0:0] is the sub-list for field type_name
+var file_api_wafTop_v1_message_proto_depIdxs = []int32{
+	17, // 0: api.wafTop.v1.GetWafAppReply.server_info:type_name -> api.wafTop.v1.ServerInfo
+	0,  // 1: api.wafTop.v1.ListWafAppRequest.page_request:type_name -> api.wafTop.v1.PageRequest
+	7,  // 2: api.wafTop.v1.ListWafAppReply.waf_apps:type_name -> api.wafTop.v1.WafAppInfo
+	7,  // 3: api.wafTop.v1.GetServerReply.waf_apps:type_name -> api.wafTop.v1.WafAppInfo
+	0,  // 4: api.wafTop.v1.ListServerRequest.page_request:type_name -> api.wafTop.v1.PageRequest
+	17, // 5: api.wafTop.v1.ListServerReply.list_servers:type_name -> api.wafTop.v1.ServerInfo
+	6,  // [6:6] is the sub-list for method output_type
+	6,  // [6:6] is the sub-list for method input_type
+	6,  // [6:6] is the sub-list for extension type_name
+	6,  // [6:6] is the sub-list for extension extendee
+	0,  // [0:6] is the sub-list for field type_name
 }
 
-func init() { file_wafTop_v1_message_proto_init() }
-func file_wafTop_v1_message_proto_init() {
-	if File_wafTop_v1_message_proto != nil {
+func init() { file_api_wafTop_v1_message_proto_init() }
+func file_api_wafTop_v1_message_proto_init() {
+	if File_api_wafTop_v1_message_proto != nil {
 		return
 	}
 	if !protoimpl.UnsafeEnabled {
-		file_wafTop_v1_message_proto_msgTypes[0].Exporter = func(v any, i int) any {
-			switch v := v.(*CreateWafAppRequest); i {
+		file_api_wafTop_v1_message_proto_msgTypes[0].Exporter = func(v any, i int) any {
+			switch v := v.(*PageRequest); i {
 			case 0:
 				return &v.state
 			case 1:
@@ -476,7 +1257,19 @@ func file_wafTop_v1_message_proto_init() {
 				return nil
 			}
 		}
-		file_wafTop_v1_message_proto_msgTypes[1].Exporter = func(v any, i int) any {
+		file_api_wafTop_v1_message_proto_msgTypes[1].Exporter = func(v any, i int) any {
+			switch v := v.(*ChangeWafAppRequest); i {
+			case 0:
+				return &v.state
+			case 1:
+				return &v.sizeCache
+			case 2:
+				return &v.unknownFields
+			default:
+				return nil
+			}
+		}
+		file_api_wafTop_v1_message_proto_msgTypes[2].Exporter = func(v any, i int) any {
 			switch v := v.(*CreateWafAppReply); i {
 			case 0:
 				return &v.state
@@ -488,19 +1281,7 @@ func file_wafTop_v1_message_proto_init() {
 				return nil
 			}
 		}
-		file_wafTop_v1_message_proto_msgTypes[2].Exporter = func(v any, i int) any {
-			switch v := v.(*UpdateWafAppRequest); i {
-			case 0:
-				return &v.state
-			case 1:
-				return &v.sizeCache
-			case 2:
-				return &v.unknownFields
-			default:
-				return nil
-			}
-		}
-		file_wafTop_v1_message_proto_msgTypes[3].Exporter = func(v any, i int) any {
+		file_api_wafTop_v1_message_proto_msgTypes[3].Exporter = func(v any, i int) any {
 			switch v := v.(*UpdateWafAppReply); i {
 			case 0:
 				return &v.state
@@ -512,31 +1293,7 @@ func file_wafTop_v1_message_proto_init() {
 				return nil
 			}
 		}
-		file_wafTop_v1_message_proto_msgTypes[4].Exporter = func(v any, i int) any {
-			switch v := v.(*DeleteWafAppRequest); i {
-			case 0:
-				return &v.state
-			case 1:
-				return &v.sizeCache
-			case 2:
-				return &v.unknownFields
-			default:
-				return nil
-			}
-		}
-		file_wafTop_v1_message_proto_msgTypes[5].Exporter = func(v any, i int) any {
-			switch v := v.(*DeleteWafAppReply); i {
-			case 0:
-				return &v.state
-			case 1:
-				return &v.sizeCache
-			case 2:
-				return &v.unknownFields
-			default:
-				return nil
-			}
-		}
-		file_wafTop_v1_message_proto_msgTypes[6].Exporter = func(v any, i int) any {
+		file_api_wafTop_v1_message_proto_msgTypes[4].Exporter = func(v any, i int) any {
 			switch v := v.(*GetWafAppRequest); i {
 			case 0:
 				return &v.state
@@ -548,7 +1305,7 @@ func file_wafTop_v1_message_proto_init() {
 				return nil
 			}
 		}
-		file_wafTop_v1_message_proto_msgTypes[7].Exporter = func(v any, i int) any {
+		file_api_wafTop_v1_message_proto_msgTypes[5].Exporter = func(v any, i int) any {
 			switch v := v.(*GetWafAppReply); i {
 			case 0:
 				return &v.state
@@ -560,7 +1317,7 @@ func file_wafTop_v1_message_proto_init() {
 				return nil
 			}
 		}
-		file_wafTop_v1_message_proto_msgTypes[8].Exporter = func(v any, i int) any {
+		file_api_wafTop_v1_message_proto_msgTypes[6].Exporter = func(v any, i int) any {
 			switch v := v.(*ListWafAppRequest); i {
 			case 0:
 				return &v.state
@@ -572,8 +1329,140 @@ func file_wafTop_v1_message_proto_init() {
 				return nil
 			}
 		}
-		file_wafTop_v1_message_proto_msgTypes[9].Exporter = func(v any, i int) any {
+		file_api_wafTop_v1_message_proto_msgTypes[7].Exporter = func(v any, i int) any {
+			switch v := v.(*WafAppInfo); i {
+			case 0:
+				return &v.state
+			case 1:
+				return &v.sizeCache
+			case 2:
+				return &v.unknownFields
+			default:
+				return nil
+			}
+		}
+		file_api_wafTop_v1_message_proto_msgTypes[8].Exporter = func(v any, i int) any {
 			switch v := v.(*ListWafAppReply); i {
+			case 0:
+				return &v.state
+			case 1:
+				return &v.sizeCache
+			case 2:
+				return &v.unknownFields
+			default:
+				return nil
+			}
+		}
+		file_api_wafTop_v1_message_proto_msgTypes[9].Exporter = func(v any, i int) any {
+			switch v := v.(*ChangeServerRequest); i {
+			case 0:
+				return &v.state
+			case 1:
+				return &v.sizeCache
+			case 2:
+				return &v.unknownFields
+			default:
+				return nil
+			}
+		}
+		file_api_wafTop_v1_message_proto_msgTypes[10].Exporter = func(v any, i int) any {
+			switch v := v.(*CreateServerReply); i {
+			case 0:
+				return &v.state
+			case 1:
+				return &v.sizeCache
+			case 2:
+				return &v.unknownFields
+			default:
+				return nil
+			}
+		}
+		file_api_wafTop_v1_message_proto_msgTypes[11].Exporter = func(v any, i int) any {
+			switch v := v.(*UpdateServerReply); i {
+			case 0:
+				return &v.state
+			case 1:
+				return &v.sizeCache
+			case 2:
+				return &v.unknownFields
+			default:
+				return nil
+			}
+		}
+		file_api_wafTop_v1_message_proto_msgTypes[12].Exporter = func(v any, i int) any {
+			switch v := v.(*DeleteRequest); i {
+			case 0:
+				return &v.state
+			case 1:
+				return &v.sizeCache
+			case 2:
+				return &v.unknownFields
+			default:
+				return nil
+			}
+		}
+		file_api_wafTop_v1_message_proto_msgTypes[13].Exporter = func(v any, i int) any {
+			switch v := v.(*DeleteReply); i {
+			case 0:
+				return &v.state
+			case 1:
+				return &v.sizeCache
+			case 2:
+				return &v.unknownFields
+			default:
+				return nil
+			}
+		}
+		file_api_wafTop_v1_message_proto_msgTypes[14].Exporter = func(v any, i int) any {
+			switch v := v.(*GetServerRequest); i {
+			case 0:
+				return &v.state
+			case 1:
+				return &v.sizeCache
+			case 2:
+				return &v.unknownFields
+			default:
+				return nil
+			}
+		}
+		file_api_wafTop_v1_message_proto_msgTypes[15].Exporter = func(v any, i int) any {
+			switch v := v.(*GetServerReply); i {
+			case 0:
+				return &v.state
+			case 1:
+				return &v.sizeCache
+			case 2:
+				return &v.unknownFields
+			default:
+				return nil
+			}
+		}
+		file_api_wafTop_v1_message_proto_msgTypes[16].Exporter = func(v any, i int) any {
+			switch v := v.(*ListServerRequest); i {
+			case 0:
+				return &v.state
+			case 1:
+				return &v.sizeCache
+			case 2:
+				return &v.unknownFields
+			default:
+				return nil
+			}
+		}
+		file_api_wafTop_v1_message_proto_msgTypes[17].Exporter = func(v any, i int) any {
+			switch v := v.(*ServerInfo); i {
+			case 0:
+				return &v.state
+			case 1:
+				return &v.sizeCache
+			case 2:
+				return &v.unknownFields
+			default:
+				return nil
+			}
+		}
+		file_api_wafTop_v1_message_proto_msgTypes[18].Exporter = func(v any, i int) any {
+			switch v := v.(*ListServerReply); i {
 			case 0:
 				return &v.state
 			case 1:
@@ -589,18 +1478,18 @@ func file_wafTop_v1_message_proto_init() {
 	out := protoimpl.TypeBuilder{
 		File: protoimpl.DescBuilder{
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
-			RawDescriptor: file_wafTop_v1_message_proto_rawDesc,
+			RawDescriptor: file_api_wafTop_v1_message_proto_rawDesc,
 			NumEnums:      0,
-			NumMessages:   10,
+			NumMessages:   19,
 			NumExtensions: 0,
 			NumServices:   0,
 		},
-		GoTypes:           file_wafTop_v1_message_proto_goTypes,
-		DependencyIndexes: file_wafTop_v1_message_proto_depIdxs,
-		MessageInfos:      file_wafTop_v1_message_proto_msgTypes,
+		GoTypes:           file_api_wafTop_v1_message_proto_goTypes,
+		DependencyIndexes: file_api_wafTop_v1_message_proto_depIdxs,
+		MessageInfos:      file_api_wafTop_v1_message_proto_msgTypes,
 	}.Build()
-	File_wafTop_v1_message_proto = out.File
-	file_wafTop_v1_message_proto_rawDesc = nil
-	file_wafTop_v1_message_proto_goTypes = nil
-	file_wafTop_v1_message_proto_depIdxs = nil
+	File_api_wafTop_v1_message_proto = out.File
+	file_api_wafTop_v1_message_proto_rawDesc = nil
+	file_api_wafTop_v1_message_proto_goTypes = nil
+	file_api_wafTop_v1_message_proto_depIdxs = nil
 }

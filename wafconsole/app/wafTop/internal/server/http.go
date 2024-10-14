@@ -11,7 +11,7 @@ import (
 )
 
 // NewHTTPServer new an HTTP server.
-func NewHTTPServer(c *conf.Server, appWafTop *site.WafAppService, logger log.Logger) *http.Server {
+func NewHTTPServer(c *conf.Server, appWafTop *service.WafAppService, serverWaf *service.ServerService, logger log.Logger) *http.Server {
 	var opts = []http.ServerOption{
 		http.Middleware(
 			recovery.Recovery(),
@@ -29,5 +29,6 @@ func NewHTTPServer(c *conf.Server, appWafTop *site.WafAppService, logger log.Log
 	srv := http.NewServer(opts...)
 
 	v1.RegisterWafAppHTTPServer(srv, appWafTop)
+	v1.RegisterServerHTTPServer(srv, serverWaf)
 	return srv
 }

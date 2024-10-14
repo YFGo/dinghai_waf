@@ -1,10 +1,8 @@
 syntax = "proto3";
-//  kratos proto add api/wafTop/v1/wafApp.proto 生成proto文件
-//  kratos proto client wafTop/v1/wafApp.proto 在api目录下生成Proto代码
-//  kratos proto server wafTop/v1/wafApp.proto -t ../app/wafTop/internal/service  在api目录下生成Service代码
+
 package api.wafTop.v1;
 
-import "wafTop/v1/message.proto";
+import "api/wafTop/v1/message.proto";
 import "google/api/annotations.proto";
 
 option go_package = "wafconsole/api/wafTop/v1;v1";
@@ -12,10 +10,31 @@ option java_multiple_files = true;
 option java_package = "api.wafTop.v1";
 
 service WafApp {
-	rpc CreateWafApp (CreateWafAppRequest) returns (CreateWafAppReply) {
-		option (google.api.http) = {
-			post: "/app/wafTop/v1/appWaf"
+	rpc CreateWafApp (ChangeServerRequest) returns (CreateWafAppReply) {
+		option (google.api.http)  = {
+			post: "/app/wafTop/v1/wafApp"
 			body: "*"
+		};
+	};
+	rpc UpdateWafApp (ChangeServerRequest) returns (UpdateWafAppReply) {
+		option (google.api.http) = {
+			patch: "/app/wafTop/v1/wafApp"
+			body: "*"
+		};
+	};
+	rpc DeleteWafApp (DeleteRequest) returns (DeleteReply) {
+		option (google.api.http) = {
+			delete: "/app/wafTop/v1/wafApp"
+		};
+	};
+	rpc GetWafApp (GetWafAppRequest) returns (GetWafAppReply) {
+		option (google.api.http) = {
+			get: "/app/wafTop/v1/wafApp/{id}"
+		};
+	};
+	rpc ListWafApp (ListWafAppRequest) returns (ListWafAppReply) {
+		option (google.api.http) = {
+			get: "/app/wafTop/v1/wafApps"
 		};
 	};
 }
