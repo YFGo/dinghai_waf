@@ -30,8 +30,8 @@ const (
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type WafAppClient interface {
-	CreateWafApp(ctx context.Context, in *ChangeServerRequest, opts ...grpc.CallOption) (*CreateWafAppReply, error)
-	UpdateWafApp(ctx context.Context, in *ChangeServerRequest, opts ...grpc.CallOption) (*UpdateWafAppReply, error)
+	CreateWafApp(ctx context.Context, in *CreateWafAppRequest, opts ...grpc.CallOption) (*CreateWafAppReply, error)
+	UpdateWafApp(ctx context.Context, in *UpdateWafAppRequest, opts ...grpc.CallOption) (*UpdateWafAppReply, error)
 	DeleteWafApp(ctx context.Context, in *DeleteRequest, opts ...grpc.CallOption) (*DeleteReply, error)
 	GetWafApp(ctx context.Context, in *GetWafAppRequest, opts ...grpc.CallOption) (*GetWafAppReply, error)
 	ListWafApp(ctx context.Context, in *ListWafAppRequest, opts ...grpc.CallOption) (*ListWafAppReply, error)
@@ -45,7 +45,7 @@ func NewWafAppClient(cc grpc.ClientConnInterface) WafAppClient {
 	return &wafAppClient{cc}
 }
 
-func (c *wafAppClient) CreateWafApp(ctx context.Context, in *ChangeServerRequest, opts ...grpc.CallOption) (*CreateWafAppReply, error) {
+func (c *wafAppClient) CreateWafApp(ctx context.Context, in *CreateWafAppRequest, opts ...grpc.CallOption) (*CreateWafAppReply, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
 	out := new(CreateWafAppReply)
 	err := c.cc.Invoke(ctx, WafApp_CreateWafApp_FullMethodName, in, out, cOpts...)
@@ -55,7 +55,7 @@ func (c *wafAppClient) CreateWafApp(ctx context.Context, in *ChangeServerRequest
 	return out, nil
 }
 
-func (c *wafAppClient) UpdateWafApp(ctx context.Context, in *ChangeServerRequest, opts ...grpc.CallOption) (*UpdateWafAppReply, error) {
+func (c *wafAppClient) UpdateWafApp(ctx context.Context, in *UpdateWafAppRequest, opts ...grpc.CallOption) (*UpdateWafAppReply, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
 	out := new(UpdateWafAppReply)
 	err := c.cc.Invoke(ctx, WafApp_UpdateWafApp_FullMethodName, in, out, cOpts...)
@@ -99,8 +99,8 @@ func (c *wafAppClient) ListWafApp(ctx context.Context, in *ListWafAppRequest, op
 // All implementations must embed UnimplementedWafAppServer
 // for forward compatibility.
 type WafAppServer interface {
-	CreateWafApp(context.Context, *ChangeServerRequest) (*CreateWafAppReply, error)
-	UpdateWafApp(context.Context, *ChangeServerRequest) (*UpdateWafAppReply, error)
+	CreateWafApp(context.Context, *CreateWafAppRequest) (*CreateWafAppReply, error)
+	UpdateWafApp(context.Context, *UpdateWafAppRequest) (*UpdateWafAppReply, error)
 	DeleteWafApp(context.Context, *DeleteRequest) (*DeleteReply, error)
 	GetWafApp(context.Context, *GetWafAppRequest) (*GetWafAppReply, error)
 	ListWafApp(context.Context, *ListWafAppRequest) (*ListWafAppReply, error)
@@ -114,10 +114,10 @@ type WafAppServer interface {
 // pointer dereference when methods are called.
 type UnimplementedWafAppServer struct{}
 
-func (UnimplementedWafAppServer) CreateWafApp(context.Context, *ChangeServerRequest) (*CreateWafAppReply, error) {
+func (UnimplementedWafAppServer) CreateWafApp(context.Context, *CreateWafAppRequest) (*CreateWafAppReply, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method CreateWafApp not implemented")
 }
-func (UnimplementedWafAppServer) UpdateWafApp(context.Context, *ChangeServerRequest) (*UpdateWafAppReply, error) {
+func (UnimplementedWafAppServer) UpdateWafApp(context.Context, *UpdateWafAppRequest) (*UpdateWafAppReply, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method UpdateWafApp not implemented")
 }
 func (UnimplementedWafAppServer) DeleteWafApp(context.Context, *DeleteRequest) (*DeleteReply, error) {
@@ -151,7 +151,7 @@ func RegisterWafAppServer(s grpc.ServiceRegistrar, srv WafAppServer) {
 }
 
 func _WafApp_CreateWafApp_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(ChangeServerRequest)
+	in := new(CreateWafAppRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
@@ -163,13 +163,13 @@ func _WafApp_CreateWafApp_Handler(srv interface{}, ctx context.Context, dec func
 		FullMethod: WafApp_CreateWafApp_FullMethodName,
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(WafAppServer).CreateWafApp(ctx, req.(*ChangeServerRequest))
+		return srv.(WafAppServer).CreateWafApp(ctx, req.(*CreateWafAppRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
 func _WafApp_UpdateWafApp_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(ChangeServerRequest)
+	in := new(UpdateWafAppRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
@@ -181,7 +181,7 @@ func _WafApp_UpdateWafApp_Handler(srv interface{}, ctx context.Context, dec func
 		FullMethod: WafApp_UpdateWafApp_FullMethodName,
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(WafAppServer).UpdateWafApp(ctx, req.(*ChangeServerRequest))
+		return srv.(WafAppServer).UpdateWafApp(ctx, req.(*UpdateWafAppRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }

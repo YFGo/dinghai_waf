@@ -1,0 +1,40 @@
+syntax = "proto3";
+
+package api.wafTop.v1;
+
+import "api/wafTop/v1/message.proto";
+import "google/api/annotations.proto";
+
+option go_package = "wafconsole/api/wafTop/v1;v1";
+option java_multiple_files = true;
+option java_package = "api.wafTop.v1";
+
+service UserRule {
+	rpc CreateUserRule (CreateUserRuleRequest) returns (CreateUserRuleReply) {
+		option (google.api.http) = {
+			post: "/app/wafTop/v1/userRule"
+			body: "*"
+		};
+	};
+	rpc UpdateUserRule (UpdateUserRuleRequest) returns (UpdateUserRuleReply) {
+		option (google.api.http) = {
+			patch: "/app/wafTop/v1/userRule"
+			body: "*"
+		};
+	};
+	rpc DeleteUserRule (DeleteUserRuleRequest) returns (DeleteUserRuleReply) {
+		option (google.api.http) = {
+			delete: "/app/wafTop/v1/userRule"
+		};
+	};
+	rpc GetUserRule (GetUserRuleRequest) returns (GetUserRuleReply) {
+		option (google.api.http) = {
+			get: "/app/wafTop/v1/userRule"
+		};
+	};
+	rpc ListUserRule (ListUserRuleRequest) returns (ListUserRuleReply) {
+		option (google.api.http) = {
+			get: "/app/wafTop/v1/userRules"
+		};
+	};
+}

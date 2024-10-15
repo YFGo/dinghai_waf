@@ -26,11 +26,11 @@ const OperationWafAppListWafApp = "/api.wafTop.v1.WafApp/ListWafApp"
 const OperationWafAppUpdateWafApp = "/api.wafTop.v1.WafApp/UpdateWafApp"
 
 type WafAppHTTPServer interface {
-	CreateWafApp(context.Context, *ChangeServerRequest) (*CreateWafAppReply, error)
+	CreateWafApp(context.Context, *CreateWafAppRequest) (*CreateWafAppReply, error)
 	DeleteWafApp(context.Context, *DeleteRequest) (*DeleteReply, error)
 	GetWafApp(context.Context, *GetWafAppRequest) (*GetWafAppReply, error)
 	ListWafApp(context.Context, *ListWafAppRequest) (*ListWafAppReply, error)
-	UpdateWafApp(context.Context, *ChangeServerRequest) (*UpdateWafAppReply, error)
+	UpdateWafApp(context.Context, *UpdateWafAppRequest) (*UpdateWafAppReply, error)
 }
 
 func RegisterWafAppHTTPServer(s *http.Server, srv WafAppHTTPServer) {
@@ -44,7 +44,7 @@ func RegisterWafAppHTTPServer(s *http.Server, srv WafAppHTTPServer) {
 
 func _WafApp_CreateWafApp0_HTTP_Handler(srv WafAppHTTPServer) func(ctx http.Context) error {
 	return func(ctx http.Context) error {
-		var in ChangeServerRequest
+		var in CreateWafAppRequest
 		if err := ctx.Bind(&in); err != nil {
 			return err
 		}
@@ -53,7 +53,7 @@ func _WafApp_CreateWafApp0_HTTP_Handler(srv WafAppHTTPServer) func(ctx http.Cont
 		}
 		http.SetOperation(ctx, OperationWafAppCreateWafApp)
 		h := ctx.Middleware(func(ctx context.Context, req interface{}) (interface{}, error) {
-			return srv.CreateWafApp(ctx, req.(*ChangeServerRequest))
+			return srv.CreateWafApp(ctx, req.(*CreateWafAppRequest))
 		})
 		out, err := h(ctx, &in)
 		if err != nil {
@@ -66,7 +66,7 @@ func _WafApp_CreateWafApp0_HTTP_Handler(srv WafAppHTTPServer) func(ctx http.Cont
 
 func _WafApp_UpdateWafApp0_HTTP_Handler(srv WafAppHTTPServer) func(ctx http.Context) error {
 	return func(ctx http.Context) error {
-		var in ChangeServerRequest
+		var in UpdateWafAppRequest
 		if err := ctx.Bind(&in); err != nil {
 			return err
 		}
@@ -75,7 +75,7 @@ func _WafApp_UpdateWafApp0_HTTP_Handler(srv WafAppHTTPServer) func(ctx http.Cont
 		}
 		http.SetOperation(ctx, OperationWafAppUpdateWafApp)
 		h := ctx.Middleware(func(ctx context.Context, req interface{}) (interface{}, error) {
-			return srv.UpdateWafApp(ctx, req.(*ChangeServerRequest))
+			return srv.UpdateWafApp(ctx, req.(*UpdateWafAppRequest))
 		})
 		out, err := h(ctx, &in)
 		if err != nil {
@@ -147,11 +147,11 @@ func _WafApp_ListWafApp0_HTTP_Handler(srv WafAppHTTPServer) func(ctx http.Contex
 }
 
 type WafAppHTTPClient interface {
-	CreateWafApp(ctx context.Context, req *ChangeServerRequest, opts ...http.CallOption) (rsp *CreateWafAppReply, err error)
+	CreateWafApp(ctx context.Context, req *CreateWafAppRequest, opts ...http.CallOption) (rsp *CreateWafAppReply, err error)
 	DeleteWafApp(ctx context.Context, req *DeleteRequest, opts ...http.CallOption) (rsp *DeleteReply, err error)
 	GetWafApp(ctx context.Context, req *GetWafAppRequest, opts ...http.CallOption) (rsp *GetWafAppReply, err error)
 	ListWafApp(ctx context.Context, req *ListWafAppRequest, opts ...http.CallOption) (rsp *ListWafAppReply, err error)
-	UpdateWafApp(ctx context.Context, req *ChangeServerRequest, opts ...http.CallOption) (rsp *UpdateWafAppReply, err error)
+	UpdateWafApp(ctx context.Context, req *UpdateWafAppRequest, opts ...http.CallOption) (rsp *UpdateWafAppReply, err error)
 }
 
 type WafAppHTTPClientImpl struct {
@@ -162,7 +162,7 @@ func NewWafAppHTTPClient(client *http.Client) WafAppHTTPClient {
 	return &WafAppHTTPClientImpl{client}
 }
 
-func (c *WafAppHTTPClientImpl) CreateWafApp(ctx context.Context, in *ChangeServerRequest, opts ...http.CallOption) (*CreateWafAppReply, error) {
+func (c *WafAppHTTPClientImpl) CreateWafApp(ctx context.Context, in *CreateWafAppRequest, opts ...http.CallOption) (*CreateWafAppReply, error) {
 	var out CreateWafAppReply
 	pattern := "/app/wafTop/v1/wafApp"
 	path := binding.EncodeURL(pattern, in, false)
@@ -214,7 +214,7 @@ func (c *WafAppHTTPClientImpl) ListWafApp(ctx context.Context, in *ListWafAppReq
 	return &out, nil
 }
 
-func (c *WafAppHTTPClientImpl) UpdateWafApp(ctx context.Context, in *ChangeServerRequest, opts ...http.CallOption) (*UpdateWafAppReply, error) {
+func (c *WafAppHTTPClientImpl) UpdateWafApp(ctx context.Context, in *UpdateWafAppRequest, opts ...http.CallOption) (*UpdateWafAppReply, error) {
 	var out UpdateWafAppReply
 	pattern := "/app/wafTop/v1/wafApp"
 	path := binding.EncodeURL(pattern, in, false)

@@ -1,0 +1,41 @@
+syntax = "proto3";
+
+package api.wafTop.v1;
+
+import "google/api/annotations.proto";
+import "api/wafTop/v1/message.proto";
+
+option go_package = "wafconsole/api/wafTop/v1;v1";
+option java_multiple_files = true;
+option java_package = "api.wafTop.v1";
+
+service RuleGroup {
+	rpc CreateRuleGroup (CreateRuleGroupRequest) returns (CreateRuleGroupReply) {
+		option (google.api.http) = {
+			post: "/app/wafTop/v1/ruleGroup"
+			body: "*"
+		};
+	};
+	rpc UpdateRuleGroup (UpdateRuleGroupRequest) returns (UpdateRuleGroupReply) {
+		option (google.api.http) = {
+			patch: "/app/wafTop/v1/ruleGroup"
+			body: "*"
+		};
+	};
+	rpc DeleteRuleGroup (DeleteRuleGroupRequest) returns (DeleteRuleGroupReply) {
+		option (google.api.http) = {
+			delete: "/app/wafTop/v1/ruleGroup"
+		};
+	};
+	rpc GetRuleGroup (GetRuleGroupRequest) returns (GetRuleGroupReply) {
+		option (google.api.http) = {
+			get: "/app/wafTop/v1/ruleGroup/{id}"
+		};
+	};
+	rpc ListRuleGroup (ListRuleGroupRequest) returns (ListRuleGroupReply) {
+		option (google.api.http) = {
+			get: "/app/wafTop/v1/ruleGroups"
+		};
+	};
+}
+

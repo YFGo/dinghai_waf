@@ -1,0 +1,25 @@
+syntax = "proto3";
+
+package api.wafTop.v1;
+
+import "api/wafTop/v1/message.proto";
+import "google/api/annotations.proto";
+
+option go_package = "wafconsole/api/wafTop/v1;v1";
+option java_multiple_files = true;
+option java_package = "api.wafTop.v1";
+
+service BuildRule {
+	rpc GetBuildRule (GetBuildRuleRequest) returns (GetBuildRuleReply) {
+		option (google.api.http)  = {
+			get: "/app/wafTop/v1/buildinRule/{id}"
+		};
+	};
+	rpc ListBuildRule (ListBuildRuleRequest) returns (ListBuildRuleReply) {
+		option (google.api.http) = {
+			get: "/app/wafTop/v1/buildinRules"
+		};
+	};
+}
+
+

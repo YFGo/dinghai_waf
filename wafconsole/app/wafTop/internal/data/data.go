@@ -7,11 +7,10 @@ import (
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
 	"wafconsole/app/wafTop/internal/conf"
-	"wafconsole/app/wafTop/internal/data/model"
 )
 
 // ProviderSet is data providers.
-var ProviderSet = wire.NewSet(NewData, NewAppWafRepo, NewServerRepo)
+var ProviderSet = wire.NewSet(NewData, NewAppWafRepo, NewServerRepo, NewBuildRuleRepo)
 
 // Data .
 type Data struct {
@@ -32,7 +31,9 @@ func NewData(s *conf.Server, bootstrap *conf.Bootstrap) (*Data, func(), error) {
 			}
 		}
 	}
-	return &Data{}, cleanup, nil
+	return &Data{
+		db: mysql,
+	}, cleanup, nil
 }
 
 func newMysql(cfg *conf.Data_Mysql) (*gorm.DB, error) {
@@ -53,13 +54,13 @@ func newMysql(cfg *conf.Data_Mysql) (*gorm.DB, error) {
 	sqlDB.SetMaxIdleConns(int(cfg.MaxIdle))
 	sqlDB.SetMaxOpenConns(int(cfg.MaxOpen))
 	// 自动 建表
-	db.AutoMigrate(model.AppWaf{})
-	db.AutoMigrate(model.BuildinRule{})
-	db.AutoMigrate(model.RuleGroup{})
-	db.AutoMigrate(model.ServerStrategies{})
-	db.AutoMigrate(model.ServerWaf{})
-	db.AutoMigrate(model.Strategy{})
-	db.AutoMigrate(model.StrategyConfig{})
-	db.AutoMigrate(model.UserRule{})
+	//db.AutoMigrate(model.AppWaf{})
+	//db.AutoMigrate(model.BuildinRule{})
+	//db.AutoMigrate(model.RuleGroup{})
+	//db.AutoMigrate(model.ServerStrategies{})
+	//db.AutoMigrate(model.ServerWaf{})
+	//db.AutoMigrate(model.Strategy{})
+	//db.AutoMigrate(model.StrategyConfig{})
+	//db.AutoMigrate(model.UserRule{})
 	return db, nil
 }

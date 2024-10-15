@@ -9,10 +9,12 @@ package main
 import (
 	"github.com/go-kratos/kratos/v2"
 	"github.com/go-kratos/kratos/v2/log"
+	"wafconsole/app/wafTop/internal/biz/rule"
 	"wafconsole/app/wafTop/internal/biz/site"
 	"wafconsole/app/wafTop/internal/conf"
 	"wafconsole/app/wafTop/internal/data"
 	"wafconsole/app/wafTop/internal/server"
+	service2 "wafconsole/app/wafTop/internal/service/rule"
 	"wafconsole/app/wafTop/internal/service/site"
 )
 
@@ -36,8 +38,11 @@ func wireApp(confServer *conf.Server, bootstrap *conf.Bootstrap, logger log.Logg
 	serverRepo := data.NewServerRepo(dataData)
 	serverUsecase := siteBiz.NewServerUsecase(serverRepo)
 	serverService := service.NewServerService(serverUsecase)
-	grpcServer := server.NewGRPCServer(confServer, wafAppService, serverService, logger)
-	httpServer := server.NewHTTPServer(confServer, wafAppService, serverService, logger)
+	buildRuleRepo := data.NewBuildRuleRepo(dataData)
+	buildRuleUsecase := ruleBiz.NewBuildRuleUsecase(buildRuleRepo)
+	buildRuleService := service2.NewBuildRuleService(buildRuleUsecase)
+	grpcServer := server.NewGRPCServer(confServer, wafAppService, serverService, buildRuleService, logger)
+	httpServer := server.NewHTTPServer(confServer, wafAppService, serverService, buildRuleService, logger)
 	app := newApp(logger, grpcServer, httpServer)
 	return app, func() {
 		cleanup()

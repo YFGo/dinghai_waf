@@ -26,11 +26,11 @@ const OperationServerListServer = "/api.wafTop.v1.Server/ListServer"
 const OperationServerUpdateServer = "/api.wafTop.v1.Server/UpdateServer"
 
 type ServerHTTPServer interface {
-	CreateServer(context.Context, *ChangeServerRequest) (*CreateServerReply, error)
+	CreateServer(context.Context, *CreateServerRequest) (*CreateServerReply, error)
 	DeleteServer(context.Context, *DeleteRequest) (*DeleteReply, error)
 	GetServer(context.Context, *GetServerRequest) (*GetServerReply, error)
 	ListServer(context.Context, *ListServerRequest) (*ListServerReply, error)
-	UpdateServer(context.Context, *ChangeServerRequest) (*UpdateServerReply, error)
+	UpdateServer(context.Context, *UpdateServerRequest) (*UpdateServerReply, error)
 }
 
 func RegisterServerHTTPServer(s *http.Server, srv ServerHTTPServer) {
@@ -44,7 +44,7 @@ func RegisterServerHTTPServer(s *http.Server, srv ServerHTTPServer) {
 
 func _Server_CreateServer0_HTTP_Handler(srv ServerHTTPServer) func(ctx http.Context) error {
 	return func(ctx http.Context) error {
-		var in ChangeServerRequest
+		var in CreateServerRequest
 		if err := ctx.Bind(&in); err != nil {
 			return err
 		}
@@ -53,7 +53,7 @@ func _Server_CreateServer0_HTTP_Handler(srv ServerHTTPServer) func(ctx http.Cont
 		}
 		http.SetOperation(ctx, OperationServerCreateServer)
 		h := ctx.Middleware(func(ctx context.Context, req interface{}) (interface{}, error) {
-			return srv.CreateServer(ctx, req.(*ChangeServerRequest))
+			return srv.CreateServer(ctx, req.(*CreateServerRequest))
 		})
 		out, err := h(ctx, &in)
 		if err != nil {
@@ -66,7 +66,7 @@ func _Server_CreateServer0_HTTP_Handler(srv ServerHTTPServer) func(ctx http.Cont
 
 func _Server_UpdateServer0_HTTP_Handler(srv ServerHTTPServer) func(ctx http.Context) error {
 	return func(ctx http.Context) error {
-		var in ChangeServerRequest
+		var in UpdateServerRequest
 		if err := ctx.Bind(&in); err != nil {
 			return err
 		}
@@ -75,7 +75,7 @@ func _Server_UpdateServer0_HTTP_Handler(srv ServerHTTPServer) func(ctx http.Cont
 		}
 		http.SetOperation(ctx, OperationServerUpdateServer)
 		h := ctx.Middleware(func(ctx context.Context, req interface{}) (interface{}, error) {
-			return srv.UpdateServer(ctx, req.(*ChangeServerRequest))
+			return srv.UpdateServer(ctx, req.(*UpdateServerRequest))
 		})
 		out, err := h(ctx, &in)
 		if err != nil {
@@ -147,11 +147,11 @@ func _Server_ListServer0_HTTP_Handler(srv ServerHTTPServer) func(ctx http.Contex
 }
 
 type ServerHTTPClient interface {
-	CreateServer(ctx context.Context, req *ChangeServerRequest, opts ...http.CallOption) (rsp *CreateServerReply, err error)
+	CreateServer(ctx context.Context, req *CreateServerRequest, opts ...http.CallOption) (rsp *CreateServerReply, err error)
 	DeleteServer(ctx context.Context, req *DeleteRequest, opts ...http.CallOption) (rsp *DeleteReply, err error)
 	GetServer(ctx context.Context, req *GetServerRequest, opts ...http.CallOption) (rsp *GetServerReply, err error)
 	ListServer(ctx context.Context, req *ListServerRequest, opts ...http.CallOption) (rsp *ListServerReply, err error)
-	UpdateServer(ctx context.Context, req *ChangeServerRequest, opts ...http.CallOption) (rsp *UpdateServerReply, err error)
+	UpdateServer(ctx context.Context, req *UpdateServerRequest, opts ...http.CallOption) (rsp *UpdateServerReply, err error)
 }
 
 type ServerHTTPClientImpl struct {
@@ -162,7 +162,7 @@ func NewServerHTTPClient(client *http.Client) ServerHTTPClient {
 	return &ServerHTTPClientImpl{client}
 }
 
-func (c *ServerHTTPClientImpl) CreateServer(ctx context.Context, in *ChangeServerRequest, opts ...http.CallOption) (*CreateServerReply, error) {
+func (c *ServerHTTPClientImpl) CreateServer(ctx context.Context, in *CreateServerRequest, opts ...http.CallOption) (*CreateServerReply, error) {
 	var out CreateServerReply
 	pattern := "/app/wafTop/v1/serverWaf"
 	path := binding.EncodeURL(pattern, in, false)
@@ -214,7 +214,7 @@ func (c *ServerHTTPClientImpl) ListServer(ctx context.Context, in *ListServerReq
 	return &out, nil
 }
 
-func (c *ServerHTTPClientImpl) UpdateServer(ctx context.Context, in *ChangeServerRequest, opts ...http.CallOption) (*UpdateServerReply, error) {
+func (c *ServerHTTPClientImpl) UpdateServer(ctx context.Context, in *UpdateServerRequest, opts ...http.CallOption) (*UpdateServerReply, error) {
 	var out UpdateServerReply
 	pattern := "/app/wafTop/v1/serverWaf"
 	path := binding.EncodeURL(pattern, in, false)

@@ -1,17 +1,17 @@
 package server
 
 import (
-	v1 "wafconsole/api/wafTop/v1"
-	"wafconsole/app/wafTop/internal/conf"
-	"wafconsole/app/wafTop/internal/service/site"
-
 	"github.com/go-kratos/kratos/v2/log"
 	"github.com/go-kratos/kratos/v2/middleware/recovery"
 	"github.com/go-kratos/kratos/v2/transport/http"
+	v1 "wafconsole/api/wafTop/v1"
+	"wafconsole/app/wafTop/internal/conf"
+	rule "wafconsole/app/wafTop/internal/service/rule"
+	site "wafconsole/app/wafTop/internal/service/site"
 )
 
 // NewHTTPServer new an HTTP server.
-func NewHTTPServer(c *conf.Server, appWafTop *service.WafAppService, serverWaf *service.ServerService, logger log.Logger) *http.Server {
+func NewHTTPServer(c *conf.Server, appWafTop *site.WafAppService, serverWaf *site.ServerService, buildRule *rule.BuildRuleService, logger log.Logger) *http.Server {
 	var opts = []http.ServerOption{
 		http.Middleware(
 			recovery.Recovery(),
@@ -30,5 +30,6 @@ func NewHTTPServer(c *conf.Server, appWafTop *service.WafAppService, serverWaf *
 
 	v1.RegisterWafAppHTTPServer(srv, appWafTop)
 	v1.RegisterServerHTTPServer(srv, serverWaf)
+	v1.RegisterBuildRuleHTTPServer(srv, buildRule)
 	return srv
 }

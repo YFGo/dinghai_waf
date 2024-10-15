@@ -17,6 +17,7 @@ type UserRule struct {
 	GroupId     int64      `json:"group_id"  gorm:"type:bigint;not null;comment:'分组id'"`
 	Seclang     string     `json:"seclang"  gorm:"type:varchar(255);not null;comment:'安全规则'"`
 	SeclangMod  SeclangMod `json:"seclang_mod" gorm:"-"`
+	ModSecurity string     `json:"mod_security" gorm:"type:varchar(255);not null;comment:'安全规则语言'"`
 }
 
 type SeclangMod struct {

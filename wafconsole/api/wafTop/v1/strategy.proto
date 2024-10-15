@@ -1,0 +1,40 @@
+syntax = "proto3";
+
+package api.wafTop.v1;
+
+import "api/wafTop/v1/message.proto";
+import "google/api/annotations.proto";
+
+option go_package = "wafconsole/api/wafTop/v1;v1";
+option java_multiple_files = true;
+option java_package = "api.wafTop.v1";
+
+service Strategy {
+	rpc CreateStrategy (CreateStrategyRequest) returns (CreateStrategyReply) {
+		option (google.api.http) = {
+			post: "/app/wafTop/v1/strategy"
+			body: "*"
+		};
+	};
+	rpc UpdateStrategy (UpdateStrategyRequest) returns (UpdateStrategyReply) {
+		option (google.api.http) = {
+			patch: "/app/wafTop/v1/strategy"
+			body: "*"
+		};
+	};
+	rpc DeleteStrategy (DeleteStrategyRequest) returns (DeleteStrategyReply) {
+		option (google.api.http) = {
+			delete: "/app/wafTop/v1/strategy"
+		};
+	};
+	rpc GetStrategy (GetStrategyRequest) returns (GetStrategyReply) {
+		option (google.api.http) = {
+			get: "/app/wafTop/v1/strategy/{id}"
+		};
+	};
+	rpc ListStrategy (ListStrategyRequest) returns (ListStrategyReply) {
+		option (google.api.http) = {
+			get: "/app/wafTop/v1/strategies"
+		};
+	};
+}

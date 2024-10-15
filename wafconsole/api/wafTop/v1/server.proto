@@ -14,13 +14,13 @@ option java_multiple_files = true;
 option java_package = "api.wafTop.v1";
 
 service Server {
-	rpc CreateServer (ChangeServerRequest) returns (CreateServerReply) {
+	rpc CreateServer (CreateServerRequest) returns (CreateServerReply) {
 		option (google.api.http) = {
 			post: "/app/wafTop/v1/serverWaf"
 			body: "*"
 		};
 	};
-	rpc UpdateServer (ChangeServerRequest) returns (UpdateServerReply) {
+	rpc UpdateServer (UpdateServerRequest) returns (UpdateServerReply) {
 		option (google.api.http) = {
 			patch: "/app/wafTop/v1/serverWaf"
 			body: "*"
