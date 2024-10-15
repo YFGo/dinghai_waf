@@ -34,8 +34,8 @@ const (
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type ServerClient interface {
-	CreateServer(ctx context.Context, in *ChangeServerRequest, opts ...grpc.CallOption) (*CreateServerReply, error)
-	UpdateServer(ctx context.Context, in *ChangeServerRequest, opts ...grpc.CallOption) (*UpdateServerReply, error)
+	CreateServer(ctx context.Context, in *CreateServerRequest, opts ...grpc.CallOption) (*CreateServerReply, error)
+	UpdateServer(ctx context.Context, in *UpdateServerRequest, opts ...grpc.CallOption) (*UpdateServerReply, error)
 	DeleteServer(ctx context.Context, in *DeleteRequest, opts ...grpc.CallOption) (*DeleteReply, error)
 	GetServer(ctx context.Context, in *GetServerRequest, opts ...grpc.CallOption) (*GetServerReply, error)
 	ListServer(ctx context.Context, in *ListServerRequest, opts ...grpc.CallOption) (*ListServerReply, error)
@@ -49,7 +49,7 @@ func NewServerClient(cc grpc.ClientConnInterface) ServerClient {
 	return &serverClient{cc}
 }
 
-func (c *serverClient) CreateServer(ctx context.Context, in *ChangeServerRequest, opts ...grpc.CallOption) (*CreateServerReply, error) {
+func (c *serverClient) CreateServer(ctx context.Context, in *CreateServerRequest, opts ...grpc.CallOption) (*CreateServerReply, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
 	out := new(CreateServerReply)
 	err := c.cc.Invoke(ctx, Server_CreateServer_FullMethodName, in, out, cOpts...)
@@ -59,7 +59,7 @@ func (c *serverClient) CreateServer(ctx context.Context, in *ChangeServerRequest
 	return out, nil
 }
 
-func (c *serverClient) UpdateServer(ctx context.Context, in *ChangeServerRequest, opts ...grpc.CallOption) (*UpdateServerReply, error) {
+func (c *serverClient) UpdateServer(ctx context.Context, in *UpdateServerRequest, opts ...grpc.CallOption) (*UpdateServerReply, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
 	out := new(UpdateServerReply)
 	err := c.cc.Invoke(ctx, Server_UpdateServer_FullMethodName, in, out, cOpts...)
@@ -103,8 +103,8 @@ func (c *serverClient) ListServer(ctx context.Context, in *ListServerRequest, op
 // All implementations must embed UnimplementedServerServer
 // for forward compatibility.
 type ServerServer interface {
-	CreateServer(context.Context, *ChangeServerRequest) (*CreateServerReply, error)
-	UpdateServer(context.Context, *ChangeServerRequest) (*UpdateServerReply, error)
+	CreateServer(context.Context, *CreateServerRequest) (*CreateServerReply, error)
+	UpdateServer(context.Context, *UpdateServerRequest) (*UpdateServerReply, error)
 	DeleteServer(context.Context, *DeleteRequest) (*DeleteReply, error)
 	GetServer(context.Context, *GetServerRequest) (*GetServerReply, error)
 	ListServer(context.Context, *ListServerRequest) (*ListServerReply, error)
@@ -118,10 +118,10 @@ type ServerServer interface {
 // pointer dereference when methods are called.
 type UnimplementedServerServer struct{}
 
-func (UnimplementedServerServer) CreateServer(context.Context, *ChangeServerRequest) (*CreateServerReply, error) {
+func (UnimplementedServerServer) CreateServer(context.Context, *CreateServerRequest) (*CreateServerReply, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method CreateServer not implemented")
 }
-func (UnimplementedServerServer) UpdateServer(context.Context, *ChangeServerRequest) (*UpdateServerReply, error) {
+func (UnimplementedServerServer) UpdateServer(context.Context, *UpdateServerRequest) (*UpdateServerReply, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method UpdateServer not implemented")
 }
 func (UnimplementedServerServer) DeleteServer(context.Context, *DeleteRequest) (*DeleteReply, error) {
@@ -155,7 +155,7 @@ func RegisterServerServer(s grpc.ServiceRegistrar, srv ServerServer) {
 }
 
 func _Server_CreateServer_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(ChangeServerRequest)
+	in := new(CreateServerRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
@@ -167,13 +167,13 @@ func _Server_CreateServer_Handler(srv interface{}, ctx context.Context, dec func
 		FullMethod: Server_CreateServer_FullMethodName,
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(ServerServer).CreateServer(ctx, req.(*ChangeServerRequest))
+		return srv.(ServerServer).CreateServer(ctx, req.(*CreateServerRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
 func _Server_UpdateServer_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(ChangeServerRequest)
+	in := new(UpdateServerRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
@@ -185,7 +185,7 @@ func _Server_UpdateServer_Handler(srv interface{}, ctx context.Context, dec func
 		FullMethod: Server_UpdateServer_FullMethodName,
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(ServerServer).UpdateServer(ctx, req.(*ChangeServerRequest))
+		return srv.(ServerServer).UpdateServer(ctx, req.(*UpdateServerRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }

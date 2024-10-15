@@ -18,10 +18,10 @@ func NewWafAppService(uc *siteBiz.WafAppUsecase) *WafAppService {
 	}
 }
 
-func (s *WafAppService) CreateWafApp(ctx context.Context, req *pb.ChangeServerRequest) (*pb.CreateWafAppReply, error) {
+func (s *WafAppService) CreateWafApp(ctx context.Context, req *pb.CreateWafAppRequest) (*pb.CreateWafAppReply, error) {
 	return &pb.CreateWafAppReply{}, nil
 }
-func (s *WafAppService) UpdateWafApp(ctx context.Context, req *pb.ChangeServerRequest) (*pb.UpdateWafAppReply, error) {
+func (s *WafAppService) UpdateWafApp(ctx context.Context, req *pb.UpdateWafAppRequest) (*pb.UpdateWafAppReply, error) {
 	return &pb.UpdateWafAppReply{}, nil
 }
 func (s *WafAppService) DeleteWafApp(ctx context.Context, req *pb.DeleteRequest) (*pb.DeleteReply, error) {

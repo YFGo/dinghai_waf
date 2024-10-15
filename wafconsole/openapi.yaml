@@ -3,85 +3,14 @@
 
 openapi: 3.0.3
 info:
-    title: WafApp API
+    title: BuildRule API
     version: 0.0.1
 paths:
-    /app/wafTop/v1/wafApp:
-        post:
-            tags:
-                - WafApp
-            operationId: WafApp_CreateWafApp
-            requestBody:
-                content:
-                    application/json:
-                        schema:
-                            $ref: '#/components/schemas/ChangeServerRequest'
-                required: true
-            responses:
-                "200":
-                    description: OK
-                    content:
-                        application/json:
-                            schema:
-                                $ref: '#/components/schemas/CreateWafAppReply'
-                default:
-                    description: Default error response
-                    content:
-                        application/json:
-                            schema:
-                                $ref: '#/components/schemas/Status'
-        delete:
-            tags:
-                - WafApp
-            operationId: WafApp_DeleteWafApp
-            parameters:
-                - name: ids
-                  in: query
-                  schema:
-                    type: array
-                    items:
-                        type: string
-            responses:
-                "200":
-                    description: OK
-                    content:
-                        application/json:
-                            schema:
-                                $ref: '#/components/schemas/DeleteReply'
-                default:
-                    description: Default error response
-                    content:
-                        application/json:
-                            schema:
-                                $ref: '#/components/schemas/Status'
-        patch:
-            tags:
-                - WafApp
-            operationId: WafApp_UpdateWafApp
-            requestBody:
-                content:
-                    application/json:
-                        schema:
-                            $ref: '#/components/schemas/ChangeServerRequest'
-                required: true
-            responses:
-                "200":
-                    description: OK
-                    content:
-                        application/json:
-                            schema:
-                                $ref: '#/components/schemas/UpdateWafAppReply'
-                default:
-                    description: Default error response
-                    content:
-                        application/json:
-                            schema:
-                                $ref: '#/components/schemas/Status'
-    /app/wafTop/v1/wafApp/{id}:
+    /app/wafTop/v1/buildinRule/{id}:
         get:
             tags:
-                - WafApp
-            operationId: WafApp_GetWafApp
+                - BuildRule
+            operationId: BuildRule_GetBuildRule
             parameters:
                 - name: id
                   in: path
@@ -94,28 +23,28 @@ paths:
                     content:
                         application/json:
                             schema:
-                                $ref: '#/components/schemas/GetWafAppReply'
+                                $ref: '#/components/schemas/GetBuildRuleReply'
                 default:
                     description: Default error response
                     content:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/Status'
-    /app/wafTop/v1/wafApps:
+    /app/wafTop/v1/buildinRules:
         get:
             tags:
-                - WafApp
-            operationId: WafApp_ListWafApp
+                - BuildRule
+            operationId: BuildRule_ListBuildRule
             parameters:
                 - name: name
                   in: query
                   schema:
                     type: string
-                - name: pageRequest.pageNow
+                - name: pageNow
                   in: query
                   schema:
                     type: string
-                - name: pageRequest.pageSize
+                - name: pageSize
                   in: query
                   schema:
                     type: string
@@ -125,7 +54,7 @@ paths:
                     content:
                         application/json:
                             schema:
-                                $ref: '#/components/schemas/ListWafAppReply'
+                                $ref: '#/components/schemas/ListBuildRuleReply'
                 default:
                     description: Default error response
                     content:
@@ -134,33 +63,34 @@ paths:
                                 $ref: '#/components/schemas/Status'
 components:
     schemas:
-        ChangeServerRequest:
+        BuildinRule:
+            type: object
+            properties:
+                id:
+                    type: string
+                riskLevel:
+                    type: integer
+                    format: uint32
+                status:
+                    type: integer
+                    format: uint32
+                name:
+                    type: string
+                description:
+                    type: string
+        GetBuildRuleReply:
             type: object
             properties:
                 name:
                     type: string
-                ip:
+                description:
                     type: string
-                host:
-                    type: string
-                port:
-                    type: string
-            description: waf保护的服务器
-        CreateWafAppReply:
-            type: object
-            properties: {}
-        DeleteReply:
-            type: object
-            properties: {}
-        GetWafAppReply:
-            type: object
-            properties:
-                name:
-                    type: string
-                url:
-                    type: string
-                serverInfo:
-                    $ref: '#/components/schemas/ServerInfo'
+                riskLevel:
+                    type: integer
+                    format: uint32
+                status:
+                    type: integer
+                    format: uint32
         GoogleProtobufAny:
             type: object
             properties:
@@ -169,28 +99,15 @@ components:
                     description: The type of the serialized message.
             additionalProperties: true
             description: Contains an arbitrary serialized message along with a @type that describes the type of the serialized message.
-        ListWafAppReply:
+        ListBuildRuleReply:
             type: object
             properties:
                 total:
                     type: string
-                wafApps:
+                buildinRules:
                     type: array
                     items:
-                        $ref: '#/components/schemas/WafAppInfo'
-        ServerInfo:
-            type: object
-            properties:
-                name:
-                    type: string
-                ip:
-                    type: string
-                host:
-                    type: string
-                port:
-                    type: string
-                id:
-                    type: string
+                        $ref: '#/components/schemas/BuildinRule'
         Status:
             type: object
             properties:
@@ -207,17 +124,5 @@ components:
                         $ref: '#/components/schemas/GoogleProtobufAny'
                     description: A list of messages that carry the error details.  There is a common set of message types for APIs to use.
             description: 'The `Status` type defines a logical error model that is suitable for different programming environments, including REST APIs and RPC APIs. It is used by [gRPC](https://github.com/grpc). Each `Status` message contains three pieces of data: error code, error message, and error details. You can find out more about this error model and how to work with it in the [API Design Guide](https://cloud.google.com/apis/design/errors).'
-        UpdateWafAppReply:
-            type: object
-            properties: {}
-        WafAppInfo:
-            type: object
-            properties:
-                id:
-                    type: string
-                name:
-                    type: string
-                url:
-                    type: string
 tags:
-    - name: WafApp
+    - name: BuildRule
