@@ -13,7 +13,7 @@ import (
 )
 
 // NewHTTPServer new an HTTP server.
-func NewHTTPServer(c *conf.Server, appWafTop *site.WafAppService, serverWaf *site.ServerService, buildRule *rule.BuildRuleService, logger log.Logger) *http.Server {
+func NewHTTPServer(c *conf.Server, appWafTop *site.WafAppService, serverWaf *site.ServerService, buildRule *rule.BuildRuleService, ruleGroup *rule.RuleGroupService, logger log.Logger) *http.Server {
 	protoValidate, err := plugin.NewValidate()
 	if err != nil {
 		slog.Error("protoValidate", err)
@@ -39,5 +39,6 @@ func NewHTTPServer(c *conf.Server, appWafTop *site.WafAppService, serverWaf *sit
 	v1.RegisterWafAppHTTPServer(srv, appWafTop)
 	v1.RegisterServerHTTPServer(srv, serverWaf)
 	v1.RegisterBuildRuleHTTPServer(srv, buildRule)
+	v1.RegisterRuleGroupHTTPServer(srv, ruleGroup)
 	return srv
 }

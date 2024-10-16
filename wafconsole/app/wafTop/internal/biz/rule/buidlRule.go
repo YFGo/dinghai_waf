@@ -10,6 +10,7 @@ import (
 
 type BuildRuleRepo interface {
 	iface.BaseRepo[model.BuildinRule]
+	ListBuildinRulesByGroupId(ctx context.Context, groupId int64) ([]model.BuildinRule, error)
 }
 
 type BuildRuleUsecase struct {

@@ -27,7 +27,7 @@ func (g appWafRepo) Get(ctx context.Context, i int64) (model.AppWaf, error) {
 	panic("implement me")
 }
 
-func (g appWafRepo) GetByName(ctx context.Context, s string) (model.AppWaf, error) {
+func (g appWafRepo) GetByNameAndID(ctx context.Context, name string, id int64) (model.AppWaf, error) {
 	//TODO implement me
 	panic("implement me")
 }
@@ -42,7 +42,7 @@ func (g appWafRepo) Update(ctx context.Context, i int64, t model.AppWaf) error {
 	panic("implement me")
 }
 
-func (g appWafRepo) Delete(ctx context.Context, i int64) (int64, error) {
+func (g appWafRepo) Delete(ctx context.Context, i []int64) (int64, error) {
 	//TODO implement me
 	panic("implement me")
 }

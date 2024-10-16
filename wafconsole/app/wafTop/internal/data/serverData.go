@@ -24,8 +24,8 @@ func (s serverRepo) Get(ctx context.Context, id int64) (model.ServerWaf, error) 
 	return server, err
 }
 
-// GetByName 根据名称获取服务器信息
-func (s serverRepo) GetByName(ctx context.Context, serverName string) (model.ServerWaf, error) {
+// GetByNameAndID 根据名称获取服务器信息
+func (s serverRepo) GetByNameAndID(ctx context.Context, serverName string, id int64) (model.ServerWaf, error) {
 	var server model.ServerWaf
 	err := s.data.db.Where("server_name = ?", serverName).First(&server).Error
 	return server, err
@@ -42,7 +42,7 @@ func (s serverRepo) Update(ctx context.Context, i int64, t model.ServerWaf) erro
 	panic("implement me")
 }
 
-func (s serverRepo) Delete(ctx context.Context, i int64) (int64, error) {
+func (s serverRepo) Delete(ctx context.Context, i []int64) (int64, error) {
 	//TODO implement me
 	panic("implement me")
 }
