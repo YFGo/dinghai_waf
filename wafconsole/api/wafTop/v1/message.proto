@@ -8,6 +8,12 @@ option java_package = "api.wafTop.v1";
 
 import "buf/validate/validate.proto";
 
+message SeclangMod {
+	string match_goal = 1;
+	string match_action = 2;
+	string match_content = 3;
+}
+
 // waf保护的应用程序
 message CreateWafAppRequest {
 	string name = 1 [
@@ -286,8 +292,9 @@ message GetBuildRuleRequest {
 message GetBuildRuleReply {
 	string name = 1;
 	string description = 2;
-	uint32 risk_level = 3;
-	uint32 status = 4;
+	int64 risk_level = 3;
+	int64 status = 4;
+	int64 group_id = 5;
 }
 
 message ListBuildRuleRequest {
@@ -310,10 +317,13 @@ message ListBuildRuleRequest {
 
 message BuildinRule {
 	int64 id = 1;
-	uint32 risk_level = 2;
-	uint32 status = 3;
+	int64 risk_level = 2;
+	int64 status = 3;
 	string name = 4;
 	string description = 5;
+	int64 group_id = 6;
+	string created_at = 7;
+	string updated_at = 8;
 }
 
 message ListBuildRuleReply {
@@ -341,18 +351,134 @@ message ListUserRuleReply {}
 // ########## 用户自定义规则 #########
 
 // ####### 规则组 #########
-message CreateRuleGroupRequest {}
+message CreateRuleGroupRequest {
+	string name = 1 [
+			(buf.validate.field).cel = {
+				id: "name",
+				message: "规则组昵称在1~15字符之间",
+				expression: "size(this) >= 1 && size(this) <= 15"
+			}
+	];
+	string description = 2 [
+			(buf.validate.field).cel = {
+				id: "description",
+				message: "规则组描述禁止为空",
+				expression: "size(this) > 0"
+			}
+	];
+	int64 is_buildin = 3 [
+			(buf.validate.field).cel = {
+				id: "is_buildin",
+				message: "请选择是否是默认规则",
+				expression: "this in [1 , 2]"
+			}
+	];
+}
 message CreateRuleGroupReply {}
 
-message UpdateRuleGroupRequest {}
+message UpdateRuleGroupRequest {
+	int64 id = 1 [
+			(buf.validate.field).cel = {
+				id: "id",
+				message: "规则组不存在",
+				expression: "this > 0"
+			}
+	];
+	string name = 2 [
+		(buf.validate.field).cel = {
+			id: "name",
+			message: "规则组昵称在1~15字符之间",
+			expression: "size(this) >= 1 && size(this) <= 15"
+		}
+	];
+	string description = 3 [
+		(buf.validate.field).cel = {
+			id: "description",
+			message: "规则组描述禁止为空",
+			expression: "size(this) > 0"
+		}
+	];
+	int64 is_buildin = 4 [
+		(buf.validate.field).cel = {
+			id: "is_buildin",
+			message: "请选择是否是默认规则",
+			expression: "this in [1 , 2]"
+		}
+	];
+}
 message UpdateRuleGroupReply {}
 
-message DeleteRuleGroupRequest {}
+message DeleteRuleGroupRequest {
+	repeated int64 ids = 1[
+			(buf.validate.field).cel = {
+				id: "ids",
+				message: "请选择规则组",
+				expression: "size(this) > 0"
+			},
+			(buf.validate.field).repeated.items.cel = {
+				id: "ids",
+				message: "规则组选择错误",
+				expression: "this > 0"
+			}
+	];
+}
 message DeleteRuleGroupReply {}
 
-message GetRuleGroupRequest {}
-message GetRuleGroupReply {}
+message GetRuleGroupRequest {
+	int64 id = 1[
+			(buf.validate.field).cel = {
+				id: "id",
+				message: "规则组不存在",
+				expression: "this > 0"
+			}
+	];
+}
+message GetRuleGroupReply {
+	string name = 1;
+	string description = 2;
+	int64 is_buildin = 3;
+	repeated ListRuleInfoByGroup list_rules = 4;
+}
 
-message ListRuleGroupRequest {}
-message ListRuleGroupReply {}
+message ListRuleGroupRequest {
+	string name = 1;
+	int64 is_buildin = 2 ;
+	int64 page_now = 3 [
+			(buf.validate.field).cel = {
+				id: "page_now",
+				message: "分页参数错误",
+				expression: "this > 0"
+			}
+	];
+	int64 page_size = 4 [
+			(buf.validate.field).cel = {
+				id: "page_size",
+				message: "分页参数错误",
+				expression: "this > 0"
+			}
+	];
+}
+message ListRuleGroupReply {
+	int64 total = 1;
+	repeated RuleGroupInfo rule_group_infos = 2;
+}
+
+message RuleGroupInfo {
+	int64 id = 1;
+	string name = 2;
+	string description = 3;
+	int64 is_buildin = 4;
+	string created_at = 5;
+	string updated_at = 6;
+}
+
+
+message ListRuleInfoByGroup {
+	int64 id = 1;
+	string name = 2;
+	string description = 3;
+	int64 status = 4;
+	int64 risk_level = 5;
+	SeclangMod seclang_mod = 6;
+}
 // ######## 规则组 ##########

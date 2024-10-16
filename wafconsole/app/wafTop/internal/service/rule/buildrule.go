@@ -3,6 +3,7 @@ package service
 import (
 	"context"
 	"log/slog"
+	"time"
 	"wafconsole/app/wafTop/internal/biz/rule"
 
 	pb "wafconsole/api/wafTop/v1"
@@ -32,8 +33,9 @@ func (s *BuildRuleService) GetBuildRule(ctx context.Context, req *pb.GetBuildRul
 	return &pb.GetBuildRuleReply{
 		Name:        buildinRule.Name,
 		Description: buildinRule.Description,
-		RiskLevel:   uint32(buildinRule.RiskLevel),
-		Status:      uint32(buildinRule.Status),
+		RiskLevel:   int64(buildinRule.RiskLevel),
+		Status:      int64(buildinRule.Status),
+		GroupId:     buildinRule.GroupId,
 	}, nil
 }
 func (s *BuildRuleService) ListBuildRule(ctx context.Context, req *pb.ListBuildRuleRequest) (*pb.ListBuildRuleReply, error) {
@@ -52,10 +54,13 @@ func (s *BuildRuleService) ListBuildRule(ctx context.Context, req *pb.ListBuildR
 	for _, buildinRule := range buildinRules {
 		buildinRes := &pb.BuildinRule{
 			Id:          int64(buildinRule.ID),
-			RiskLevel:   uint32(buildinRule.RiskLevel),
-			Status:      uint32(buildinRule.Status),
+			RiskLevel:   int64(buildinRule.RiskLevel),
+			Status:      int64(buildinRule.Status),
 			Name:        buildinRule.Name,
 			Description: buildinRule.Description,
+			GroupId:     buildinRule.GroupId,
+			CreatedAt:   time.Unix(buildinRule.CreatedAt.Unix(), 0).Format("2006-01-02 15:04:05"),
+			UpdatedAt:   time.Unix(buildinRule.UpdatedAt.Unix(), 0).Format("2006-01-02 15:04:05"),
 		}
 		buildinRuleRes = append(buildinRuleRes, buildinRes)
 	}

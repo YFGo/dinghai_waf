@@ -22,14 +22,14 @@ func NewServerUsecase(repo ServerRepo) *ServerUsecase {
 	return &ServerUsecase{repo: repo}
 }
 
-func (s *ServerUsecase) GetServerInfoByName(ctx context.Context, name string) (model.ServerWaf, error) {
-	return s.repo.GetByName(ctx, name)
+func (s *ServerUsecase) GetServerInfoByName(ctx context.Context, name string, id int64) (model.ServerWaf, error) {
+	return s.repo.GetByNameAndID(ctx, name, id)
 }
 
 // CreateServerSite 新增服务器站点
 func (s *ServerUsecase) CreateServerSite(ctx context.Context, serverInfo model.ServerWaf) error {
 	// 1. 检测服务器名称是否重复
-	_, err := s.GetServerInfoByName(ctx, serverInfo.Name)
+	_, err := s.GetServerInfoByName(ctx, serverInfo.Name, int64(serverInfo.ID))
 	if err != nil && !errors.Is(err, gorm.ErrRecordNotFound) {
 		slog.ErrorContext(ctx, "get server failed: ", err, "server_info", serverInfo)
 		return err
