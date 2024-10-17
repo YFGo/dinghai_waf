@@ -11,11 +11,13 @@ import (
 	"github.com/go-kratos/kratos/v2/log"
 	"wafconsole/app/wafTop/internal/biz/rule"
 	"wafconsole/app/wafTop/internal/biz/site"
+	"wafconsole/app/wafTop/internal/biz/strategy"
 	"wafconsole/app/wafTop/internal/conf"
 	"wafconsole/app/wafTop/internal/data"
 	"wafconsole/app/wafTop/internal/server"
 	service2 "wafconsole/app/wafTop/internal/service/rule"
 	"wafconsole/app/wafTop/internal/service/site"
+	service3 "wafconsole/app/wafTop/internal/service/strategy"
 )
 
 import (
@@ -47,8 +49,11 @@ func wireApp(confServer *conf.Server, bootstrap *conf.Bootstrap, logger log.Logg
 	ruleGroupService := service2.NewRuleGroupService(ruleGroupUsecase)
 	userRuleUsecase := ruleBiz.NewUserRuleUsecase(userRuleRepo, ruleGroupRepo)
 	userRuleService := service2.NewUserRuleService(userRuleUsecase)
-	grpcServer := server.NewGRPCServer(confServer, wafAppService, serverService, buildRuleService, ruleGroupService, userRuleService, logger)
-	httpServer := server.NewHTTPServer(confServer, wafAppService, serverService, buildRuleService, ruleGroupService, userRuleService, logger)
+	wafStrategyRepo := data.NewWafStrategyRepo(dataData)
+	wafStrategyUsecase := strategyBiz.NewWafStrategyUsecase(wafStrategyRepo)
+	strategyService := service3.NewStrategyService(wafStrategyUsecase)
+	grpcServer := server.NewGRPCServer(confServer, wafAppService, serverService, buildRuleService, ruleGroupService, userRuleService, strategyService, logger)
+	httpServer := server.NewHTTPServer(confServer, wafAppService, serverService, buildRuleService, ruleGroupService, userRuleService, strategyService, logger)
 	app := newApp(logger, grpcServer, httpServer)
 	return app, func() {
 		cleanup()
