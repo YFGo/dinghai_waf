@@ -11,7 +11,7 @@ import (
 )
 
 // NewGRPCServer new a gRPC server.
-func NewGRPCServer(c *conf.Server, wafApp *site.WafAppService, serverWaf *site.ServerService, buildRule *rule.BuildRuleService, ruleGroup *rule.RuleGroupService, logger log.Logger) *grpc.Server {
+func NewGRPCServer(c *conf.Server, wafApp *site.WafAppService, serverWaf *site.ServerService, buildRule *rule.BuildRuleService, ruleGroup *rule.RuleGroupService, userRule *rule.UserRuleService, logger log.Logger) *grpc.Server {
 	var opts = []grpc.ServerOption{
 		grpc.Middleware(
 			recovery.Recovery(),
@@ -31,5 +31,6 @@ func NewGRPCServer(c *conf.Server, wafApp *site.WafAppService, serverWaf *site.S
 	v1.RegisterServerServer(srv, serverWaf)
 	v1.RegisterBuildRuleServer(srv, buildRule)
 	v1.RegisterRuleGroupServer(srv, ruleGroup)
+	v1.RegisterUserRuleServer(srv, userRule)
 	return srv
 }

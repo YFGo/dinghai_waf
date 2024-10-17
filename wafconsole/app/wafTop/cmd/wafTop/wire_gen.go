@@ -45,8 +45,10 @@ func wireApp(confServer *conf.Server, bootstrap *conf.Bootstrap, logger log.Logg
 	userRuleRepo := data.NewUserRuleRepo(dataData)
 	ruleGroupUsecase := ruleBiz.NewRuleGroupUsecase(ruleGroupRepo, userRuleRepo, buildRuleRepo)
 	ruleGroupService := service2.NewRuleGroupService(ruleGroupUsecase)
-	grpcServer := server.NewGRPCServer(confServer, wafAppService, serverService, buildRuleService, ruleGroupService, logger)
-	httpServer := server.NewHTTPServer(confServer, wafAppService, serverService, buildRuleService, ruleGroupService, logger)
+	userRuleUsecase := ruleBiz.NewUserRuleUsecase(userRuleRepo, ruleGroupRepo)
+	userRuleService := service2.NewUserRuleService(userRuleUsecase)
+	grpcServer := server.NewGRPCServer(confServer, wafAppService, serverService, buildRuleService, ruleGroupService, userRuleService, logger)
+	httpServer := server.NewHTTPServer(confServer, wafAppService, serverService, buildRuleService, ruleGroupService, userRuleService, logger)
 	app := newApp(logger, grpcServer, httpServer)
 	return app, func() {
 		cleanup()

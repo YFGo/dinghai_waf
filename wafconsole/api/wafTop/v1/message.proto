@@ -9,9 +9,27 @@ option java_package = "api.wafTop.v1";
 import "buf/validate/validate.proto";
 
 message SeclangMod {
-	string match_goal = 1;
-	string match_action = 2;
-	string match_content = 3;
+	string match_goal = 1 [
+			(buf.validate.field).cel = {
+				id: "match_goal",
+				message: "请选择正确的匹配目标",
+				expression: "this in ['IP' , 'COOKIE' , 'HEADER']"
+			}
+	];
+	string match_action = 2 [
+			(buf.validate.field).cel = {
+				id: "match_action",
+				message: "请选择正确的匹配方式",
+				expression: "this in ['等于' , '模糊匹配' , '不等于']"
+			}
+	];
+	string match_content = 3 [
+			(buf.validate.field).cel = {
+				id: "match_content",
+				message: "请输入匹配内容",
+				expression: "size(this) > 0"
+			}
+	];
 }
 
 // waf保护的应用程序
@@ -334,20 +352,117 @@ message ListBuildRuleReply {
 
 
 // ########## 用户自定义规则 #########
-message CreateUserRuleRequest {}
+message CreateUserRuleRequest {
+	string name = 1[
+			(buf.validate.field).cel = {
+				id: "name",
+				message: "规则昵称在1~15字符之间",
+				expression: "size(this) >= 1 && size(this) <= 15"
+			}
+	];
+	string description =2 [
+			(buf.validate.field).cel = {
+				id: "description",
+				message: "规则描述不能为空",
+				expression: "size(this) >= 1"
+			}
+	];
+	int64 status = 3[
+			(buf.validate.field).cel = {
+				id: "status",
+				message: "请选择规则是否启用",
+				expression: "this in [1 , 2]"
+			}
+	];
+	int64 risk_level = 4 [
+			(buf.validate.field).cel = {
+				id: "risk_level",
+				message: "请选择此规则的风险等级",
+				expression: "this in [1 , 2 , 3 , 4]"
+			}
+	];
+	int64 group_id = 5 [
+			(buf.validate.field).cel = {
+				id: "group_id",
+				message: "请选择此规则所属的规则组",
+				expression: "this > 0"
+			}
+	];
+	SeclangMod seclang_mod = 6 [
+		(buf.validate.field).required = true,
+		(buf.validate.field).cel = {
+			id: "seclang_mod",
+			message: "请完善规则行为",
+			expression: "this != null"
+		}
+	];
+}
 message CreateUserRuleReply {}
 
-message UpdateUserRuleRequest {}
+message UpdateUserRuleRequest {
+	int64 id = 1[
+			(buf.validate.field).cel = {
+				id: "id",
+				message: "请选择需要修改的规则",
+				expression: "this > 0"
+			}
+	];
+	string name = 2[
+		(buf.validate.field).cel = {
+			id: "name",
+			message: "规则昵称在1~15字符之间",
+			expression: "size(this) >= 1 && size(this) <= 15"
+		}
+	];
+	string description =3 [
+		(buf.validate.field).cel = {
+			id: "description",
+			message: "规则描述不能为空",
+			expression: "size(this) >= 1"
+		}
+	];
+	int64 status = 4[
+		(buf.validate.field).cel = {
+			id: "status",
+			message: "请选择规则是否启用",
+			expression: "this in [1 , 2]"
+		}
+	];
+	int64 risk_level = 5[
+		(buf.validate.field).cel = {
+			id: "risk_level",
+			message: "请选择此规则的风险等级",
+			expression: "this in [1 , 2 , 3 , 4]"
+		}
+	];
+	int64 group_id = 6 [
+		(buf.validate.field).cel = {
+			id: "group_id",
+			message: "请选择此规则所属的规则组",
+			expression: "this > 0"
+		}
+	];
+	SeclangMod seclang_mod = 7 [
+		(buf.validate.field).required = true,
+		(buf.validate.field).cel = {
+			id: "seclang_mod",
+			message: "请完善规则行为",
+			expression: "this != null"
+		}
+	];
+}
 message UpdateUserRuleReply {}
 
-message DeleteUserRuleRequest {}
+message DeleteUserRuleRequest {
+	repeated int64 ids = 1[
+			(buf.validate.field).cel = {
+				id: "ids",
+				message: "请选择需要删除的规则",
+				expression: "size(this) > 0"
+			}
+	];
+}
 message DeleteUserRuleReply {}
-
-message GetUserRuleRequest {}
-message GetUserRuleReply {}
-
-message ListUserRuleRequest {}
-message ListUserRuleReply {}
 // ########## 用户自定义规则 #########
 
 // ####### 规则组 #########

@@ -27,14 +27,4 @@ service UserRule {
 			delete: "/app/wafTop/v1/userRule"
 		};
 	};
-	rpc GetUserRule (GetUserRuleRequest) returns (GetUserRuleReply) {
-		option (google.api.http) = {
-			get: "/app/wafTop/v1/userRule"
-		};
-	};
-	rpc ListUserRule (ListUserRuleRequest) returns (ListUserRuleReply) {
-		option (google.api.http) = {
-			get: "/app/wafTop/v1/userRules"
-		};
-	};
 }
