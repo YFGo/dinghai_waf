@@ -275,26 +275,182 @@ message ListServerReply {
 // 服务器##########
 
 // 策略 ###########
-message StrategyInfo {
-	string name = 1;
-	string description = 2;
-	bool is_buildin = 3;
-}
 
-message CreateStrategyRequest {}
+message CreateStrategyRequest {
+	string name = 1 [
+			(buf.validate.field).cel = {
+				id: "name",
+				message: "策略昵称长度必须在1~15之间",
+				expression: "size(this) >= 1 && size(this) <= 15"
+			}
+	];
+	string description = 2 [
+			(buf.validate.field).cel = {
+				id: "description",
+				message: "策略描述不能为空",
+				expression: "size(this) > 0"
+			}
+	];
+	int64 status = 3 [
+			(buf.validate.field).cel = {
+				id: "status",
+				message: "策略状态",
+				expression: "this in [1 , 2]"
+			}
+	];
+	int64 action = 4 [
+			(buf.validate.field).cel = {
+				id: "action",
+				message: "命中此策略时的行为",
+				expression: "this in [1 , 2]"
+			}
+	];
+	int64 next_action = 5 [
+			(buf.validate.field).cel = {
+				id: "next_action",
+				message: "命中此策略后的行为",
+				expression: "this in [1 , 2]"
+			}
+	];
+	repeated int64 group_id = 6 [
+			(buf.validate.field).cel = {
+				id: "group_id",
+				message: "请选择规则组",
+				expression: "size(this) > 0"
+			},
+			(buf.validate.field).repeated.items.cel = {
+				id: "group_id",
+				message: "规则组不存在",
+				expression: "this > 0"
+			}
+	];
+}
 message CreateStrategyReply {}
 
-message UpdateStrategyRequest {}
+message UpdateStrategyRequest {
+	string name = 1 [
+		(buf.validate.field).cel = {
+			id: "name",
+			message: "策略昵称长度必须在1~15之间",
+			expression: "size(this) >= 1 && size(this) <= 15"
+		}
+	];
+	string description = 2 [
+		(buf.validate.field).cel = {
+			id: "description",
+			message: "策略描述不能为空",
+			expression: "size(this) > 0"
+		}
+	];
+	int64 status = 3 [
+		(buf.validate.field).cel = {
+			id: "status",
+			message: "策略状态",
+			expression: "this in [1 , 2]"
+		}
+	];
+	int64 action = 4 [
+		(buf.validate.field).cel = {
+			id: "action",
+			message: "命中此策略时的行为",
+			expression: "this in [1 , 2]"
+		}
+	];
+	int64 next_action = 5 [
+		(buf.validate.field).cel = {
+			id: "next_action",
+			message: "命中此策略后的行为",
+			expression: "this in [1 , 2]"
+		}
+	];
+	repeated int64 group_id = 6 [
+		(buf.validate.field).cel = {
+			id: "group_id",
+			message: "请选择规则组",
+			expression: "size(this) > 0"
+		},
+		(buf.validate.field).repeated.items.cel = {
+			id: "group_id",
+			message: "规则组不存在",
+			expression: "this > 0"
+		}
+	];
+	int64 id = 7 [
+			(buf.validate.field).cel = {
+				id: "id" ,
+				message: "策略不存在",
+				expression: "this > 0"
+			}
+	];
+}
 message UpdateStrategyReply {}
 
-message DeleteStrategyRequest {}
+message DeleteStrategyRequest {
+	repeated int64 ids = 1[
+			(buf.validate.field).cel = {
+				id: "ids",
+				message: "请选择需要删除的策略",
+				expression: "size(this) > 0"
+			},
+			(buf.validate.field).repeated.items.cel = {
+				id: "ids",
+				message: "策略不存在",
+				expression: "this > 0"
+			}
+	] ;
+}
 message DeleteStrategyReply {}
 
-message GetStrategyRequest {}
-message GetStrategyReply {}
+message GetStrategyRequest {
+	int64 id = 1[
+			(buf.validate.field).cel = {
+				id: "id",
+				message: "策略不存在",
+				expression: "this > 0"
+			}
+	];
+}
+message GetStrategyReply {
+	string name = 1 ;
+	string description = 2 ;
+	int64 status = 3 ;
+	int64 action = 4 ;
+	int64 next_action = 5 ;
+	repeated RuleGroupInfo rule_group_infos = 6;
+}
 
-message ListStrategyRequest {}
-message ListStrategyReply {}
+message ListStrategyRequest {
+	string name = 1;
+	int64 status = 2;
+	int64 page_now = 3[
+			(buf.validate.field).cel = {
+				id: "page_now",
+				message: "分页参数错误",
+				expression: "this > 0"
+			}
+	];
+	int64 page_size = 4 [
+			(buf.validate.field).cel = {
+				id: "page_size",
+				message: "分页参数错误",
+				expression: "this > 0"
+			}
+	];
+}
+
+message StrategyInfo {
+	int64 id = 1;
+	int64 status = 2;
+	int64 action = 3;
+	int64 next_action = 4;
+	string name = 5;
+	string description = 6;
+}
+
+message ListStrategyReply {
+	int64 total = 1;
+	repeated StrategyInfo strategies = 2;
+}
 // 策略 ###########
 
 // ########## 内置规则 ###########
