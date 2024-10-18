@@ -445,6 +445,8 @@ message StrategyInfo {
 	int64 next_action = 4;
 	string name = 5;
 	string description = 6;
+	string created_at = 7;
+	string updated_at = 8;
 }
 
 message ListStrategyReply {
@@ -467,8 +469,7 @@ message GetBuildRuleReply {
 	string name = 1;
 	string description = 2;
 	int64 risk_level = 3;
-	int64 status = 4;
-	int64 group_id = 5;
+	int64 group_id = 4;
 }
 
 message ListBuildRuleRequest {
@@ -492,12 +493,11 @@ message ListBuildRuleRequest {
 message BuildinRule {
 	int64 id = 1;
 	int64 risk_level = 2;
-	int64 status = 3;
-	string name = 4;
-	string description = 5;
-	int64 group_id = 6;
-	string created_at = 7;
-	string updated_at = 8;
+	string name = 3;
+	string description = 4;
+	int64 group_id = 5;
+	string created_at = 6;
+	string updated_at = 7;
 }
 
 message ListBuildRuleReply {
@@ -523,28 +523,21 @@ message CreateUserRuleRequest {
 				expression: "size(this) >= 1"
 			}
 	];
-	int64 status = 3[
-			(buf.validate.field).cel = {
-				id: "status",
-				message: "请选择规则是否启用",
-				expression: "this in [1 , 2]"
-			}
-	];
-	int64 risk_level = 4 [
+	int64 risk_level = 3 [
 			(buf.validate.field).cel = {
 				id: "risk_level",
 				message: "请选择此规则的风险等级",
 				expression: "this in [1 , 2 , 3 , 4]"
 			}
 	];
-	int64 group_id = 5 [
+	int64 group_id = 4 [
 			(buf.validate.field).cel = {
 				id: "group_id",
 				message: "请选择此规则所属的规则组",
 				expression: "this > 0"
 			}
 	];
-	SeclangMod seclang_mod = 6 [
+	SeclangMod seclang_mod = 5 [
 		(buf.validate.field).required = true,
 		(buf.validate.field).cel = {
 			id: "seclang_mod",
@@ -577,28 +570,21 @@ message UpdateUserRuleRequest {
 			expression: "size(this) >= 1"
 		}
 	];
-	int64 status = 4[
-		(buf.validate.field).cel = {
-			id: "status",
-			message: "请选择规则是否启用",
-			expression: "this in [1 , 2]"
-		}
-	];
-	int64 risk_level = 5[
+	int64 risk_level = 4[
 		(buf.validate.field).cel = {
 			id: "risk_level",
 			message: "请选择此规则的风险等级",
 			expression: "this in [1 , 2 , 3 , 4]"
 		}
 	];
-	int64 group_id = 6 [
+	int64 group_id = 5 [
 		(buf.validate.field).cel = {
 			id: "group_id",
 			message: "请选择此规则所属的规则组",
 			expression: "this > 0"
 		}
 	];
-	SeclangMod seclang_mod = 7 [
+	SeclangMod seclang_mod = 6 [
 		(buf.validate.field).required = true,
 		(buf.validate.field).cel = {
 			id: "seclang_mod",
