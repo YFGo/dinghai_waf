@@ -72,3 +72,13 @@ func (r ruleGroupRepo) ListByWhere(ctx context.Context, limit, offset int64, opt
 	err := mysqlDB.Limit(int(limit)).Offset(int(offset)).Find(&ruleGroupList).Error
 	return ruleGroupList, err
 }
+
+// ListRuleGroupByStrategyID 通过策略ID查询规则组列表
+func (r ruleGroupRepo) ListRuleGroupByStrategyID(ctx context.Context, strategyId int64) ([]model.RuleGroup, error) {
+	var listRuleGroup []model.RuleGroup
+	err := r.data.db.Table(model.TableNameRuleGroup).
+		Joins("LEFT JOIN "+model.StrategyConfigTableName+" ON "+model.StrategyConfigTableName+".rule_group_id = "+model.TableNameRuleGroup+".id").
+		Where(model.StrategyConfigTableName+".strategy_id = ?", strategyId).
+		Find(&listRuleGroup).Error
+	return listRuleGroup, err
+}

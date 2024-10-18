@@ -12,6 +12,7 @@ import (
 
 type RuleGroupRepo interface {
 	iface.BaseRepo[model.RuleGroup]
+	ListRuleGroupByStrategyID(ctx context.Context, strategyId int64) ([]model.RuleGroup, error)
 }
 
 type RuleGroupUsecase struct {
@@ -67,7 +68,6 @@ func (r *RuleGroupUsecase) GetRuleGroupDetail(ctx context.Context, id int64) (*d
 				ID:          int64(buildinRule.ID),
 				Name:        buildinRule.Name,
 				Description: buildinRule.Description,
-				Status:      buildinRule.Status,
 				RiskLevel:   buildinRule.RiskLevel,
 			}
 			ruleInfos = append(ruleInfos, ruleInfo)
@@ -83,7 +83,6 @@ func (r *RuleGroupUsecase) GetRuleGroupDetail(ctx context.Context, id int64) (*d
 				ID:          int64(userRule.ID),
 				Name:        userRule.Name,
 				Description: userRule.Description,
-				Status:      userRule.Status,
 				RiskLevel:   userRule.RiskLevel,
 				SecLangMod:  userRule.SeclangMod,
 			}

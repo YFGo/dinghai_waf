@@ -34,7 +34,6 @@ func (s *BuildRuleService) GetBuildRule(ctx context.Context, req *pb.GetBuildRul
 		Name:        buildinRule.Name,
 		Description: buildinRule.Description,
 		RiskLevel:   int64(buildinRule.RiskLevel),
-		Status:      int64(buildinRule.Status),
 		GroupId:     buildinRule.GroupId,
 	}, nil
 }
@@ -55,7 +54,6 @@ func (s *BuildRuleService) ListBuildRule(ctx context.Context, req *pb.ListBuildR
 		buildinRes := &pb.BuildinRule{
 			Id:          int64(buildinRule.ID),
 			RiskLevel:   int64(buildinRule.RiskLevel),
-			Status:      int64(buildinRule.Status),
 			Name:        buildinRule.Name,
 			Description: buildinRule.Description,
 			GroupId:     buildinRule.GroupId,

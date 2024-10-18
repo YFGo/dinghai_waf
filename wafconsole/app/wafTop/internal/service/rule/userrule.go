@@ -25,7 +25,6 @@ func (s *UserRuleService) CreateUserRule(ctx context.Context, req *pb.CreateUser
 		Name:        req.Name,
 		Description: req.Description,
 		RiskLevel:   uint8(req.RiskLevel),
-		Status:      uint8(req.Status),
 		GroupId:     req.GroupId,
 		SeclangMod: model.SeclangMod{
 			MatchGoal:    req.SeclangMod.MatchGoal,
@@ -45,7 +44,6 @@ func (s *UserRuleService) UpdateUserRule(ctx context.Context, req *pb.UpdateUser
 		Name:        req.Name,
 		Description: req.Description,
 		RiskLevel:   uint8(req.RiskLevel),
-		Status:      uint8(req.Status),
 		GroupId:     req.GroupId,
 		SeclangMod: model.SeclangMod{
 			MatchGoal:    req.SeclangMod.MatchGoal,

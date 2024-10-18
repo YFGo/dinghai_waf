@@ -90,7 +90,6 @@ func (s *RuleGroupService) GetRuleGroup(ctx context.Context, req *pb.GetRuleGrou
 			Id:          rule.ID,
 			Name:        rule.Name,
 			Description: rule.Description,
-			Status:      int64(rule.Status),
 			RiskLevel:   int64(rule.RiskLevel),
 			SeclangMod:  seclangMod,
 		}
