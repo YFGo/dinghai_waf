@@ -50,7 +50,7 @@ func wireApp(confServer *conf.Server, bootstrap *conf.Bootstrap, logger log.Logg
 	userRuleUsecase := ruleBiz.NewUserRuleUsecase(userRuleRepo, ruleGroupRepo)
 	userRuleService := service2.NewUserRuleService(userRuleUsecase)
 	wafStrategyRepo := data.NewWafStrategyRepo(dataData)
-	wafStrategyUsecase := strategyBiz.NewWafStrategyUsecase(wafStrategyRepo, ruleGroupRepo)
+	wafStrategyUsecase := strategyBiz.NewWafStrategyUsecase(wafStrategyRepo, ruleGroupRepo, buildRuleRepo, userRuleRepo)
 	strategyService := service3.NewStrategyService(wafStrategyUsecase)
 	grpcServer := server.NewGRPCServer(confServer, wafAppService, serverService, buildRuleService, ruleGroupService, userRuleService, strategyService, logger)
 	httpServer := server.NewHTTPServer(confServer, wafAppService, serverService, buildRuleService, ruleGroupService, userRuleService, strategyService, logger)

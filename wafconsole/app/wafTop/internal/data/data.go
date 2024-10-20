@@ -4,8 +4,11 @@ import (
 	"fmt"
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/google/wire"
+	clientv3 "go.etcd.io/etcd/client/v3"
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
+	"log/slog"
+	"time"
 	"wafconsole/app/wafTop/internal/conf"
 )
 
@@ -14,7 +17,8 @@ var ProviderSet = wire.NewSet(NewData, NewAppWafRepo, NewServerRepo, NewBuildRul
 
 // Data .
 type Data struct {
-	db *gorm.DB
+	db   *gorm.DB
+	etcd *clientv3.Client
 }
 
 // NewData .
@@ -24,15 +28,20 @@ func NewData(s *conf.Server, bootstrap *conf.Bootstrap) (*Data, func(), error) {
 	if err != nil {
 		return nil, nil, err
 	}
+	etcd := newETCD()
 	cleanup := func() {
 		if mysql != nil {
 			if db, err := mysql.DB(); err == nil && db != nil {
 				db.Close()
 			}
 		}
+		if etcd != nil {
+			etcd.Close()
+		}
 	}
 	return &Data{
-		db: mysql,
+		db:   mysql,
+		etcd: etcd,
 	}, cleanup, nil
 }
 
@@ -63,4 +72,16 @@ func newMysql(cfg *conf.Data_Mysql) (*gorm.DB, error) {
 	//db.AutoMigrate(model.StrategyConfig{})
 	//db.AutoMigrate(model.UserRule{})
 	return db, nil
+}
+
+func newETCD() *clientv3.Client {
+	etcdClient, err := clientv3.New(clientv3.Config{
+		Endpoints:   []string{"152.136.50.60:2379"},
+		DialTimeout: 5 * time.Second,
+	})
+	if err != nil {
+		slog.Error("etcd client failed: ", err)
+		panic(err)
+	}
+	return etcdClient
 }

@@ -133,3 +133,8 @@ func (w wafStrategyRepo) ListByWhere(ctx context.Context, limit, offset int64, o
 	err := mysqlDB.Limit(int(limit)).Offset(int(offset)).Find(&strategyInfos).Error
 	return strategyInfos, err
 }
+
+func (w wafStrategyRepo) CreateStrategyForEtcd(ctx context.Context, strategyKey, strategyValue string) error {
+	_, err := w.data.etcd.KV.Put(ctx, strategyKey, strategyValue)
+	return err
+}
