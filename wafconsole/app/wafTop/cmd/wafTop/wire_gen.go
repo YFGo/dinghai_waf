@@ -38,7 +38,7 @@ func wireApp(confServer *conf.Server, bootstrap *conf.Bootstrap, logger log.Logg
 	wafAppUsecase := siteBiz.NewGreeterUsecase(wafAppRepo, logger)
 	wafAppService := service.NewWafAppService(wafAppUsecase)
 	serverRepo := data.NewServerRepo(dataData)
-	serverUsecase := siteBiz.NewServerUsecase(serverRepo)
+	serverUsecase := siteBiz.NewServerUsecase(serverRepo, wafAppRepo)
 	serverService := service.NewServerService(serverUsecase)
 	buildRuleRepo := data.NewBuildRuleRepo(dataData)
 	buildRuleUsecase := ruleBiz.NewBuildRuleUsecase(buildRuleRepo)

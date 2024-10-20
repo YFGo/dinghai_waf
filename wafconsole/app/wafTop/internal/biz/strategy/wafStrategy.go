@@ -87,8 +87,9 @@ func (w *WafStrategyUsecase) CreateStrategy(ctx context.Context, strategy model.
 			}
 			for _, userRule := range userRuleList {
 				seclang := dto.ModifyStrategyDto{
-					RuleName: userRule.Name,
-					Seclang:  userRule.ModSecurity,
+					IsBuilding: ruleGroupInfo.IsBuildin,
+					RuleName:   userRule.Name,
+					Seclang:    userRule.ModSecurity,
 				}
 				modifyStrategyList = append(modifyStrategyList, seclang)
 			}

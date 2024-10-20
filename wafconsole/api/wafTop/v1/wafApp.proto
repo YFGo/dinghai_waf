@@ -22,19 +22,4 @@ service WafApp {
 			body: "*"
 		};
 	};
-	rpc DeleteWafApp (DeleteRequest) returns (DeleteReply) {
-		option (google.api.http) = {
-			delete: "/app/wafTop/v1/wafApp"
-		};
-	};
-	rpc GetWafApp (GetWafAppRequest) returns (GetWafAppReply) {
-		option (google.api.http) = {
-			get: "/app/wafTop/v1/wafApp/{id}"
-		};
-	};
-	rpc ListWafApp (ListWafAppRequest) returns (ListWafAppReply) {
-		option (google.api.http) = {
-			get: "/app/wafTop/v1/wafApps"
-		};
-	};
 }

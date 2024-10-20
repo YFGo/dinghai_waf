@@ -5,8 +5,16 @@ import (
 	"errors"
 	"gorm.io/gorm"
 	"log/slog"
+	"strings"
 	"wafconsole/app/wafTop/internal/biz/iface"
 	"wafconsole/app/wafTop/internal/data/model"
+)
+
+const (
+	IPSameMod = "SecRule REMOTE_ADDR \"METHOD IP_MOD\" \"id:1,block,msg:'IP address is not allowed.'\""
+	Same      = "等于"
+	NotSame   = "不等于"
+	Like      = "Like"
 )
 
 type UserRuleRepo interface {
@@ -52,6 +60,9 @@ func (u *UserRuleUsecase) CreateUserRule(ctx context.Context, userRule model.Use
 	if !u.checkRuleGroupIsExist(ctx, userRule.GroupId) {
 		return errors.New("规则组不存在")
 	}
+	// 处理用户自定义规则
+	seclang := u.disposeUserRule(ctx, userRule.SeclangMod)
+	userRule.ModSecurity = seclang
 	_, err := u.repo.Create(ctx, userRule)
 	if err != nil {
 		slog.ErrorContext(ctx, "create user_rule is failed: ", err)
@@ -68,6 +79,8 @@ func (u *UserRuleUsecase) UpdateUserRule(ctx context.Context, id int64, userRule
 	if !u.checkRuleGroupIsExist(ctx, userRule.GroupId) {
 		return errors.New("规则组不存在")
 	}
+	seclang := u.disposeUserRule(ctx, userRule.SeclangMod)
+	userRule.ModSecurity = seclang
 	if err := u.repo.Update(ctx, id, userRule); err != nil {
 		slog.ErrorContext(ctx, "update user_rule is failed: ", err)
 		return err
@@ -83,4 +96,22 @@ func (u *UserRuleUsecase) DeleteUserRule(ctx context.Context, ids []int64) error
 		return err
 	}
 	return nil
+}
+
+func (u *UserRuleUsecase) disposeUserRule(ctx context.Context, userRule model.SeclangMod) string {
+	var (
+		res    string
+		method string
+	)
+	switch userRule.MatchGoal {
+	case "IP":
+		if userRule.MatchAction == Same {
+			method = "@eq"
+		} else if userRule.MatchAction == NotSame {
+			method = "!@eq"
+		}
+		res = strings.ReplaceAll(IPSameMod, "METHOD", method)
+		res = strings.ReplaceAll(res, "IP_MOD", userRule.MatchContent)
+	}
+	return res
 }

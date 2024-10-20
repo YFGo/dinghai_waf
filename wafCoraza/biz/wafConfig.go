@@ -1,6 +1,7 @@
 package biz
 
 import (
+	"encoding/json"
 	coreruleset "github.com/corazawaf/coraza-coreruleset/v4"
 	"github.com/corazawaf/coraza/v3"
 	"github.com/jcchavezs/mergefs"
@@ -23,15 +24,29 @@ type WafConfigRepo interface {
 
 type WafConfigUsercase struct {
 	repo WafConfigRepo
-	waf  map[string]coraza.WAF
+	waf  map[string]*model.CorazaWaf
 	mu   sync.Mutex
 }
 
 func NewWafConfigUsercase(repo WafConfigRepo) *WafConfigUsercase {
 	return &WafConfigUsercase{
 		repo: repo,
-		waf:  make(map[string]coraza.WAF),
+		waf:  make(map[string]*model.CorazaWaf),
 	}
+}
+
+// 处理从etcd中取出的seclang 安全规则 , 使其符合规范
+func (w *WafConfigUsercase) disposeSeclang(seclang string) string {
+	seclangArr := strings.Split(seclang, types.SeclangCutOFF)
+	// 使用strings.Builder来构建最终的字符串
+	var formattedSeclang strings.Builder
+	for i, rule := range seclangArr {
+		if i > 0 {
+			formattedSeclang.WriteString("\n")
+		}
+		formattedSeclang.WriteString(rule)
+	}
+	return formattedSeclang.String()
 }
 
 // CreateWaf 内核服务启动之初 , 根据策略创建waf实列 , 后续通过etcd通知 修改waf实列
@@ -45,8 +60,8 @@ func (w *WafConfigUsercase) CreateWaf() {
 }
 
 // GetAppWAF 根据域名和访问的端口 , 获取此web程序应用的策略的waf实列
-func (w *WafConfigUsercase) GetAppWAF(host string) []coraza.WAF {
-	wafs := make([]coraza.WAF, 0)
+func (w *WafConfigUsercase) GetAppWAF(host string) []*model.CorazaWaf {
+	wafs := make([]*model.CorazaWaf, 0)
 	strategyIDs, err := w.repo.GetAppForStrategyIDs(host) //获取策略ID
 	if err != nil || len(strategyIDs) == 0 {
 		slog.Error("get strategy failed: ", err, "strategyIDs: ", strategyIDs)
@@ -71,20 +86,6 @@ func (w *WafConfigUsercase) GetRealAddr(host string) (string, error) {
 		return realAddr, nil
 	}
 	return realAddr, nil
-}
-
-// 处理从etcd中取出的seclang 安全规则 , 使其符合规范
-func (w *WafConfigUsercase) disposeSeclang(seclang string) string {
-	seclangArr := strings.Split(seclang, types.SeclangCutOFF)
-	// 使用strings.Builder来构建最终的字符串
-	var formattedSeclang strings.Builder
-	for i, rule := range seclangArr {
-		if i > 0 {
-			formattedSeclang.WriteString("\n")
-		}
-		formattedSeclang.WriteString(rule)
-	}
-	return formattedSeclang.String()
 }
 
 func (w *WafConfigUsercase) WatchStrategy() {
@@ -122,20 +123,40 @@ func (w *WafConfigUsercase) wafConfig(wafStrategy []model.WAFStrategy) {
 	for _, strategy := range wafStrategy {
 		cfg := coraza.NewWAFConfig()
 		seclang := strategy.SeclangRules
-		rightSeclang := w.disposeSeclang(seclang) //获取正确格式的seclang
-		if strategy.ID == types.BUILDIN {         //如果是内置策略
-			cfg = cfg.WithDirectives(rightSeclang).WithRootFS(mergefs.Merge(coreruleset.FS, io.OSFS))
-		} else {
-			cfg = cfg.WithDirectives(rightSeclang)
+		var wafConfigInfo model.WafConfig
+		err := json.Unmarshal([]byte(seclang), &wafConfigInfo)
+		if err != nil {
+			slog.Error("waf_config json unmarshal is failed: ", err)
+			continue
 		}
-		//创建waf
+		var (
+			userRuleSeclang    string
+			buildinRuleSeclang string
+		)
+		for _, modify := range wafConfigInfo.ModifyStrategyDTOList {
+			if modify.IsBuildin == types.BUILDIN {
+				buildinRuleSeclang = buildinRuleSeclang + types.SeclangCutOFF + modify.Seclang
+			} else {
+				userRuleSeclang = userRuleSeclang + types.SeclangCutOFF + modify.Seclang
+			}
+		}
+		buildinRuleSeclang = w.disposeSeclang(buildinRuleSeclang)
+		userRuleSeclang = w.disposeSeclang(userRuleSeclang)
+		cfg = cfg.WithDirectives(buildinRuleSeclang).WithRootFS(mergefs.Merge(coreruleset.FS, io.OSFS))
+		cfg = cfg.WithDirectives(userRuleSeclang)
 		waf, err := coraza.NewWAF(cfg)
 		if err != nil {
 			slog.Error("创建waf失败", err)
 			return
 		}
 		w.mu.Lock()
-		w.waf[strategy.ID] = waf //每个策略均对应一个waf实列
+		w.waf[strategy.ID] = &model.CorazaWaf{ //每个策略均对应一个waf实列
+			WAF:         waf,
+			Action:      wafConfigInfo.Action,
+			NextAction:  wafConfigInfo.NextAction,
+			Name:        wafConfigInfo.Name,
+			Description: wafConfigInfo.Description,
+		}
 		w.mu.Unlock()
 	}
 }
