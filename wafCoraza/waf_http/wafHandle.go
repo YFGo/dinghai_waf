@@ -68,7 +68,7 @@ func (w *WafHandleService) ProxyHandler() http.HandlerFunc {
 		isAllow := true //  默认值为true , 当此程序无waf实列时 , 直接放行
 		//根据这些waf实列 , 校验请求是否可以放行 , 只要存在一个waf实列拦截了请求 , 就不再检测
 		for _, waf := range wafs {
-			tx = waf.NewTransaction()
+			tx = waf.WAF.NewTransaction()
 			tx.ProcessConnection(clientIP, port, serverIP, serverPort) // 模拟网络连接，使用请求的远程地址和端口
 			tx.ProcessURI(req.RequestURI, req.Method, req.Proto)       // Request URI was /some-url?with=args
 			_, reqHeaderIsLegal := w.WafParseHeader(tx, req, rw)
@@ -77,9 +77,19 @@ func (w *WafHandleService) ProxyHandler() http.HandlerFunc {
 			if reqHeaderIsLegal && reqBodyIsLegal { // 此waf实列检测 请求头和请求体的检测均无问题
 				isAllow = true
 			} else {
-				isAllow = false
+				if waf.Action == 1 { //仅仅记录 不拦截
+					isAllow = true
+				} else {
+					isAllow = false
+					break
+				}
 				w.uc.LogAttackEvent(attackMathRules, req, requestBody) //记录攻击日志
-				break
+				if waf.NextAction == 1 {                               //不再拦截
+					isAllow = true
+				} else {
+					isAllow = false
+					break
+				}
 			}
 		}
 		if isAllow { //允许放行
