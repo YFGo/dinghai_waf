@@ -11,6 +11,7 @@ import (
 // WafAppRepo is a Greater repo.
 type WafAppRepo interface {
 	iface.BaseRepo[model.AppWaf]
+	GetAppWafByServerId(ctx context.Context, serverId int64) (appInfo model.AppWaf, err error)
 }
 
 // WafAppUsecase is a Greeter usecase.

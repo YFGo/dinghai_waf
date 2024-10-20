@@ -163,7 +163,13 @@ message CreateServerRequest {
 			expression: "this >= 1 && this <= 65535"
 		}
 	];
-	repeated int64 strategy_ids = 5 ;
+	repeated int64 strategy_ids = 5 [
+			(buf.validate.field).cel = {
+				id: "strategy_ids",
+				message: "请选择服务器使用的策略",
+				expression: "size(this)  > 0"
+			}
+	] ;
 }
 message CreateServerReply {}
 
@@ -203,7 +209,13 @@ message UpdateServerRequest {
 				expression: "this > 0"
 			}
 	];
-	repeated int64 strategy_ids = 6 ;
+	repeated int64 strategy_ids = 6 [
+		(buf.validate.field).cel = {
+			id: "strategy_ids",
+			message: "请选择服务器使用的策略",
+			expression: "size(this)  > 0"
+		}
+	] ;
 }
 message UpdateServerReply {}
 
@@ -239,8 +251,8 @@ message GetServerReply {
 	string ip = 2;
 	string host = 3;
 	int64 port = 4;
-	repeated WafAppInfo waf_apps = 5;
-	repeated StrategyInfo strategy_infos = 6;
+	repeated int64 strategies_id = 5;
+	WafAppInfo waf_apps = 6;
 }
 
 // 查询服务器列表

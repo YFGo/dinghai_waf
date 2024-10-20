@@ -22,9 +22,10 @@ func NewAppWafRepo(data *Data, logger log.Logger) siteBiz.WafAppRepo {
 	}
 }
 
-func (g appWafRepo) Get(ctx context.Context, i int64) (model.AppWaf, error) {
-	//TODO implement me
-	panic("implement me")
+func (g appWafRepo) Get(ctx context.Context, id int64) (model.AppWaf, error) {
+	var appWaf model.AppWaf
+	err := g.data.db.Where("id = ?", id).First(&appWaf).Error
+	return appWaf, err
 }
 
 func (g appWafRepo) GetByNameAndID(ctx context.Context, name string, id int64) (model.AppWaf, error) {
@@ -55,4 +56,9 @@ func (g appWafRepo) Count(ctx context.Context, withReturn ...iface.WhereOptionWi
 func (g appWafRepo) ListByWhere(ctx context.Context, limit, offset int64, opts ...iface.WhereOptionWithReturn) ([]model.AppWaf, error) {
 	//TODO implement me
 	panic("implement me")
+}
+
+func (g appWafRepo) GetAppWafByServerId(ctx context.Context, serverId int64) (appInfo model.AppWaf, err error) {
+	err = g.data.db.Where("server_id = ?", serverId).First(&appInfo).Error
+	return
 }
