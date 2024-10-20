@@ -2,9 +2,11 @@ package strategyBiz
 
 import (
 	"context"
+	"encoding/json"
 	"errors"
 	"gorm.io/gorm"
 	"log/slog"
+	"strconv"
 	"wafconsole/app/wafTop/internal/biz/iface"
 	ruleBiz "wafconsole/app/wafTop/internal/biz/rule"
 	"wafconsole/app/wafTop/internal/data/dto"
@@ -13,15 +15,23 @@ import (
 
 type WafStrategyRepo interface {
 	iface.BaseRepo[model.Strategy]
+	CreateStrategyForEtcd(ctx context.Context, strategyKey, strategyValue string) error
 }
 
 type WafStrategyUsecase struct {
 	repo          WafStrategyRepo
 	ruleGroupRepo ruleBiz.RuleGroupRepo
+	buildinRepo   ruleBiz.BuildRuleRepo
+	userRuleRepo  ruleBiz.UserRuleRepo
 }
 
-func NewWafStrategyUsecase(repo WafStrategyRepo, ruleGroupRepo ruleBiz.RuleGroupRepo) *WafStrategyUsecase {
-	return &WafStrategyUsecase{repo: repo, ruleGroupRepo: ruleGroupRepo}
+func NewWafStrategyUsecase(repo WafStrategyRepo, ruleGroupRepo ruleBiz.RuleGroupRepo, buildinRepo ruleBiz.BuildRuleRepo, userRuleRepo ruleBiz.UserRuleRepo) *WafStrategyUsecase {
+	return &WafStrategyUsecase{
+		repo:          repo,
+		ruleGroupRepo: ruleGroupRepo,
+		buildinRepo:   buildinRepo,
+		userRuleRepo:  userRuleRepo,
+	}
 }
 
 func (w *WafStrategyUsecase) checkStrategyIsExist(ctx context.Context, id int64, name string) bool {
@@ -32,12 +42,12 @@ func (w *WafStrategyUsecase) checkStrategyIsExist(ctx context.Context, id int64,
 	return false
 }
 
-func (w *WafStrategyUsecase) checkRuleGroupIsExist(ctx context.Context, groupId int64) bool {
-	_, err := w.ruleGroupRepo.Get(ctx, groupId)
+func (w *WafStrategyUsecase) checkRuleGroupIsExist(ctx context.Context, groupId int64) (model.RuleGroup, bool) {
+	ruleGroupInfo, err := w.ruleGroupRepo.Get(ctx, groupId)
 	if errors.Is(err, gorm.ErrRecordNotFound) { //规则不存在 , 禁止插入数据
-		return false
+		return ruleGroupInfo, false
 	}
-	return true
+	return ruleGroupInfo, true
 }
 
 // CreateStrategy 新增策略
@@ -45,14 +55,60 @@ func (w *WafStrategyUsecase) CreateStrategy(ctx context.Context, strategy model.
 	if !w.checkStrategyIsExist(ctx, 0, strategy.Name) {
 		return errors.New("策略已存在")
 	}
+	modifyStrategyList := make([]dto.ModifyStrategyDto, 0)
 	for _, strategyConfig := range strategy.StrategyConfig {
-		if !w.checkRuleGroupIsExist(ctx, strategyConfig.RuleGroupID) {
+		ruleGroupInfo, ok := w.checkRuleGroupIsExist(ctx, strategyConfig.RuleGroupID)
+		if !ok {
 			return errors.New("规则组不存在")
 		}
+		//根据规则组id , 查询所有的规则信息
+		switch ruleGroupInfo.IsBuildin {
+		case 1: //内置规则
+			buildinRuleList, err := w.buildinRepo.ListByWhere(ctx, -1, -1, func(db *gorm.DB) *gorm.DB {
+				return db.Where("group_id = ?", ruleGroupInfo.ID)
+			})
+			if err != nil {
+				slog.ErrorContext(ctx, "strategy buildin rule failed: ", err)
+				return err
+			}
+			for _, buildinRule := range buildinRuleList {
+				seclang := dto.ModifyStrategyDto{
+					IsBuilding: ruleGroupInfo.IsBuildin,
+					RuleName:   buildinRule.Name,
+					Seclang:    buildinRule.Seclang,
+				}
+				modifyStrategyList = append(modifyStrategyList, seclang)
+			}
+		case 2: //自定义规则
+			userRuleList, err := w.userRuleRepo.ListUserRulesByGroupId(int64(ruleGroupInfo.ID))
+			if err != nil {
+				slog.ErrorContext(ctx, "strategy user rule failed: ", err)
+				return err
+			}
+			for _, userRule := range userRuleList {
+				seclang := dto.ModifyStrategyDto{
+					RuleName: userRule.Name,
+					Seclang:  userRule.ModSecurity,
+				}
+				modifyStrategyList = append(modifyStrategyList, seclang)
+			}
+		}
 	}
-	_, err := w.repo.Create(ctx, strategy)
+	strategyID, err := w.repo.Create(ctx, strategy)
 	if err != nil {
 		slog.ErrorContext(ctx, "create strategy failed: ", err)
+		return err
+	}
+	strategySeclang := dto.StrategyEtcdInfo{
+		ID:                    strategyID,
+		Action:                strategy.Action,
+		NextAction:            strategy.NextAction,
+		Name:                  strategy.Name,
+		Description:           strategy.Description,
+		ModifyStrategyDtoList: modifyStrategyList,
+	}
+	if err = w.CreateStrategyEtcd(ctx, strategySeclang); err != nil {
+		slog.ErrorContext(ctx, "create strategy etcd failed: ", err)
 		return err
 	}
 	return nil
@@ -64,7 +120,8 @@ func (w *WafStrategyUsecase) UpdateStrategy(ctx context.Context, id int64, strat
 		return errors.New("策略已存在")
 	}
 	for _, strategyConfig := range strategy.StrategyConfig {
-		if !w.checkRuleGroupIsExist(ctx, strategyConfig.RuleGroupID) {
+		_, ok := w.checkRuleGroupIsExist(ctx, strategyConfig.RuleGroupID)
+		if !ok {
 			return errors.New("规则组不存在")
 		}
 	}
@@ -134,4 +191,19 @@ func (w *WafStrategyUsecase) ListStrategyInfo(ctx context.Context, limit, offset
 		return nil, 0, err
 	}
 	return listStrategy, total, nil
+}
+
+// CreateStrategyEtcd 将策略信息整合存入etcd
+func (w *WafStrategyUsecase) CreateStrategyEtcd(ctx context.Context, strategySeclang dto.StrategyEtcdInfo) error {
+	strategyKey := "strategy_" + strconv.Itoa(int(strategySeclang.ID))
+	strategySeclangValue, err := json.Marshal(&strategySeclang)
+	if err != nil {
+		slog.ErrorContext(ctx, "create_strategy etcd failed: ", err)
+		return err
+	}
+	if err = w.repo.CreateStrategyForEtcd(ctx, strategyKey, string(strategySeclangValue)); err != nil {
+		slog.ErrorContext(ctx, "create_strategy for etcd failed: ", err)
+		return err
+	}
+	return nil
 }

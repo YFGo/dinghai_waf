@@ -60,7 +60,7 @@ func (b buildRuleRepo) ListByWhere(ctx context.Context, limit, offset int64, opt
 	for _, opt := range opts {
 		mysqlDB = opt(mysqlDB)
 	}
-	err := mysqlDB.Offset(int(offset)).Limit(int(limit)).Find(&buildinRules).Error
+	err := mysqlDB.Debug().Offset(int(offset)).Limit(int(limit)).Find(&buildinRules).Error
 	return buildinRules, err
 }
 
