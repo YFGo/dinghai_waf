@@ -47,8 +47,14 @@ func (w *WafHandleService) ProxyHandler() http.HandlerFunc {
 			slog.Error("LogAttackEvent Error reading request body: ", err)
 			return
 		}
-		wafs := w.wafConfigUc.GetAppWAF(req.Host)            //根据访问的域名 获取收到保护的web程序所应用的策略 对应的WAF实列
-		realAddr, err := w.wafConfigUc.GetRealAddr(req.Host) //  获取真实的后端地址
+		// 提取请求地址中的关键字段
+		hostBaseUrl := strings.Split(req.URL.Path, "/")
+		wafs := w.wafConfigUc.GetAppWAF(hostBaseUrl[1])            //根据访问的域名 获取收到保护的web程序所应用的策略 对应的WAF实列
+		realAddr, err := w.wafConfigUc.GetRealAddr(hostBaseUrl[1]) //  获取真实的后端地址
+		// 重构请求路径
+		newPath := strings.Join(hostBaseUrl[2:], "/")
+		req.URL.Path = newPath
+		fmt.Println(newPath)
 		var tx types.Transaction
 		defer func() {
 			if tx != nil {

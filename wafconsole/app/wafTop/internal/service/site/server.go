@@ -14,8 +14,6 @@ type ServerService struct {
 	pb.UnimplementedServerServer
 }
 
-const host = "127.0.0.1" //waf内核所在的地址
-
 func NewServerService(uc *siteBiz.ServerUsecase) *ServerService {
 	return &ServerService{
 		uc: uc,
@@ -26,7 +24,7 @@ func NewServerService(uc *siteBiz.ServerUsecase) *ServerService {
 func (s *ServerService) CreateServer(ctx context.Context, req *pb.CreateServerRequest) (*pb.CreateServerReply, error) {
 	serverInfo := model.ServerWaf{
 		Name:         req.Name,
-		Host:         host,
+		Host:         req.Host,
 		IP:           req.Ip,
 		Port:         int(req.Port),
 		StrategiesID: req.StrategyIds,
@@ -43,7 +41,7 @@ func (s *ServerService) CreateServer(ctx context.Context, req *pb.CreateServerRe
 func (s *ServerService) UpdateServer(ctx context.Context, req *pb.UpdateServerRequest) (*pb.UpdateServerReply, error) {
 	serverInfo := model.ServerWaf{
 		Name:         req.Name,
-		Host:         host,
+		Host:         req.Host,
 		IP:           req.Ip,
 		Port:         int(req.Port),
 		StrategiesID: req.StrategyIds,
