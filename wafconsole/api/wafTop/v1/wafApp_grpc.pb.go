@@ -21,9 +21,6 @@ const _ = grpc.SupportPackageIsVersion9
 const (
 	WafApp_CreateWafApp_FullMethodName = "/api.wafTop.v1.WafApp/CreateWafApp"
 	WafApp_UpdateWafApp_FullMethodName = "/api.wafTop.v1.WafApp/UpdateWafApp"
-	WafApp_DeleteWafApp_FullMethodName = "/api.wafTop.v1.WafApp/DeleteWafApp"
-	WafApp_GetWafApp_FullMethodName    = "/api.wafTop.v1.WafApp/GetWafApp"
-	WafApp_ListWafApp_FullMethodName   = "/api.wafTop.v1.WafApp/ListWafApp"
 )
 
 // WafAppClient is the client API for WafApp service.
@@ -32,9 +29,6 @@ const (
 type WafAppClient interface {
 	CreateWafApp(ctx context.Context, in *CreateWafAppRequest, opts ...grpc.CallOption) (*CreateWafAppReply, error)
 	UpdateWafApp(ctx context.Context, in *UpdateWafAppRequest, opts ...grpc.CallOption) (*UpdateWafAppReply, error)
-	DeleteWafApp(ctx context.Context, in *DeleteRequest, opts ...grpc.CallOption) (*DeleteReply, error)
-	GetWafApp(ctx context.Context, in *GetWafAppRequest, opts ...grpc.CallOption) (*GetWafAppReply, error)
-	ListWafApp(ctx context.Context, in *ListWafAppRequest, opts ...grpc.CallOption) (*ListWafAppReply, error)
 }
 
 type wafAppClient struct {
@@ -65,45 +59,12 @@ func (c *wafAppClient) UpdateWafApp(ctx context.Context, in *UpdateWafAppRequest
 	return out, nil
 }
 
-func (c *wafAppClient) DeleteWafApp(ctx context.Context, in *DeleteRequest, opts ...grpc.CallOption) (*DeleteReply, error) {
-	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	out := new(DeleteReply)
-	err := c.cc.Invoke(ctx, WafApp_DeleteWafApp_FullMethodName, in, out, cOpts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
-func (c *wafAppClient) GetWafApp(ctx context.Context, in *GetWafAppRequest, opts ...grpc.CallOption) (*GetWafAppReply, error) {
-	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	out := new(GetWafAppReply)
-	err := c.cc.Invoke(ctx, WafApp_GetWafApp_FullMethodName, in, out, cOpts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
-func (c *wafAppClient) ListWafApp(ctx context.Context, in *ListWafAppRequest, opts ...grpc.CallOption) (*ListWafAppReply, error) {
-	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	out := new(ListWafAppReply)
-	err := c.cc.Invoke(ctx, WafApp_ListWafApp_FullMethodName, in, out, cOpts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
 // WafAppServer is the server API for WafApp service.
 // All implementations must embed UnimplementedWafAppServer
 // for forward compatibility.
 type WafAppServer interface {
 	CreateWafApp(context.Context, *CreateWafAppRequest) (*CreateWafAppReply, error)
 	UpdateWafApp(context.Context, *UpdateWafAppRequest) (*UpdateWafAppReply, error)
-	DeleteWafApp(context.Context, *DeleteRequest) (*DeleteReply, error)
-	GetWafApp(context.Context, *GetWafAppRequest) (*GetWafAppReply, error)
-	ListWafApp(context.Context, *ListWafAppRequest) (*ListWafAppReply, error)
 	mustEmbedUnimplementedWafAppServer()
 }
 
@@ -119,15 +80,6 @@ func (UnimplementedWafAppServer) CreateWafApp(context.Context, *CreateWafAppRequ
 }
 func (UnimplementedWafAppServer) UpdateWafApp(context.Context, *UpdateWafAppRequest) (*UpdateWafAppReply, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method UpdateWafApp not implemented")
-}
-func (UnimplementedWafAppServer) DeleteWafApp(context.Context, *DeleteRequest) (*DeleteReply, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method DeleteWafApp not implemented")
-}
-func (UnimplementedWafAppServer) GetWafApp(context.Context, *GetWafAppRequest) (*GetWafAppReply, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method GetWafApp not implemented")
-}
-func (UnimplementedWafAppServer) ListWafApp(context.Context, *ListWafAppRequest) (*ListWafAppReply, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method ListWafApp not implemented")
 }
 func (UnimplementedWafAppServer) mustEmbedUnimplementedWafAppServer() {}
 func (UnimplementedWafAppServer) testEmbeddedByValue()                {}
@@ -186,60 +138,6 @@ func _WafApp_UpdateWafApp_Handler(srv interface{}, ctx context.Context, dec func
 	return interceptor(ctx, in, info, handler)
 }
 
-func _WafApp_DeleteWafApp_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(DeleteRequest)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(WafAppServer).DeleteWafApp(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: WafApp_DeleteWafApp_FullMethodName,
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(WafAppServer).DeleteWafApp(ctx, req.(*DeleteRequest))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
-func _WafApp_GetWafApp_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(GetWafAppRequest)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(WafAppServer).GetWafApp(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: WafApp_GetWafApp_FullMethodName,
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(WafAppServer).GetWafApp(ctx, req.(*GetWafAppRequest))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
-func _WafApp_ListWafApp_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(ListWafAppRequest)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(WafAppServer).ListWafApp(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: WafApp_ListWafApp_FullMethodName,
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(WafAppServer).ListWafApp(ctx, req.(*ListWafAppRequest))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
 // WafApp_ServiceDesc is the grpc.ServiceDesc for WafApp service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -254,18 +152,6 @@ var WafApp_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "UpdateWafApp",
 			Handler:    _WafApp_UpdateWafApp_Handler,
-		},
-		{
-			MethodName: "DeleteWafApp",
-			Handler:    _WafApp_DeleteWafApp_Handler,
-		},
-		{
-			MethodName: "GetWafApp",
-			Handler:    _WafApp_GetWafApp_Handler,
-		},
-		{
-			MethodName: "ListWafApp",
-			Handler:    _WafApp_ListWafApp_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

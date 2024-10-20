@@ -41,13 +41,7 @@ message CreateWafAppRequest {
 				expression: "size(this) >=1 && size(this) <=15"
 			}
 	];
-	string url = 2 [
-			(buf.validate.field).cel = {
-				id: "url",
-				message: "url格式错误",
-				expression: "this.isHostname()"
-			}
-	];
+	string url = 2;
 	int64 server_id = 3 [
 			(buf.validate.field).cel = {
 				id: "server_id",
@@ -66,13 +60,7 @@ message UpdateWafAppRequest {
 			expression: "size(this) >=1 && size(this) <=15"
 		}
 	];
-	string url = 2 [
-		(buf.validate.field).cel = {
-			id: "url",
-			message: "url格式错误",
-			expression: "this.isHostname()"
-		}
-	];
+	string url = 2;
 	int64 server_id = 3 [
 		(buf.validate.field).cel = {
 			id: "server_id",
@@ -149,13 +137,6 @@ message CreateServerRequest {
 			expression: "this.isIp()"
 		}
 	];
-	string host = 3 [
-		(buf.validate.field).cel = {
-			id: "host",
-			message: "域名格式不规范",
-			expression: " this.isHostname()"
-		}
-	];
 	int64 port = 4 [
 		(buf.validate.field).cel = {
 			id: "port",
@@ -186,13 +167,6 @@ message UpdateServerRequest {
 			id: "ip",
 			message: "IP地址格式不规范",
 			expression: "this.isIp()"
-		}
-	];
-	string host = 3 [
-		(buf.validate.field).cel = {
-			id: "host",
-			message: "域名格式不规范",
-			expression: " this.isHostname()"
 		}
 	];
 	int64 port = 4 [

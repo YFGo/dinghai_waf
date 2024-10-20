@@ -2,7 +2,6 @@ package service
 
 import (
 	"context"
-	"fmt"
 	"log/slog"
 	siteBiz "wafconsole/app/wafTop/internal/biz/site"
 	"wafconsole/app/wafTop/internal/data/model"
@@ -15,6 +14,8 @@ type ServerService struct {
 	pb.UnimplementedServerServer
 }
 
+const host = "127.0.0.1" //waf内核所在的地址
+
 func NewServerService(uc *siteBiz.ServerUsecase) *ServerService {
 	return &ServerService{
 		uc: uc,
@@ -25,7 +26,7 @@ func NewServerService(uc *siteBiz.ServerUsecase) *ServerService {
 func (s *ServerService) CreateServer(ctx context.Context, req *pb.CreateServerRequest) (*pb.CreateServerReply, error) {
 	serverInfo := model.ServerWaf{
 		Name:         req.Name,
-		Host:         req.Host,
+		Host:         host,
 		IP:           req.Ip,
 		Port:         int(req.Port),
 		StrategiesID: req.StrategyIds,
@@ -42,7 +43,7 @@ func (s *ServerService) CreateServer(ctx context.Context, req *pb.CreateServerRe
 func (s *ServerService) UpdateServer(ctx context.Context, req *pb.UpdateServerRequest) (*pb.UpdateServerReply, error) {
 	serverInfo := model.ServerWaf{
 		Name:         req.Name,
-		Host:         req.Host,
+		Host:         host,
 		IP:           req.Ip,
 		Port:         int(req.Port),
 		StrategiesID: req.StrategyIds,
@@ -80,7 +81,6 @@ func (s *ServerService) GetServer(ctx context.Context, req *pb.GetServerRequest)
 		StrategiesId: serverInfo.StrategiesID,
 	}
 	if appInfo != nil {
-		fmt.Println(appInfo.Model == nil)
 		wafAppInfo := &pb.WafAppInfo{
 			Id:   int64(appInfo.ID),
 			Name: appInfo.Name,

@@ -82,7 +82,7 @@ func (s serverRepo) Update(ctx context.Context, id int64, serverInfo model.Serve
 		}
 		for _, strategyId := range serverInfo.StrategiesID {
 			serverStrategy := model.ServerStrategies{
-				ServerID:   int64(serverInfo.ID),
+				ServerID:   id,
 				StrategyId: strategyId,
 			}
 			serverStrategies = append(serverStrategies, serverStrategy)
@@ -106,6 +106,7 @@ func (s serverRepo) Delete(ctx context.Context, serverIds []int64) (int64, error
 		if err != nil {
 			return err
 		}
+		err = tx.Where("server_id in (?)", serverIds).Delete(&model.AppWaf{}).Error //删除应用程序
 		return nil
 	})
 	return 0, err
@@ -147,5 +148,15 @@ func (s serverRepo) SaveServerToEtcd(ctx context.Context, serverStrategiesKey, s
 		return err
 	}
 	_, err = s.data.etcd.KV.Put(ctx, serverRealAddrKey, serverRealAddr)
+	return err
+}
+
+// DeleteServerToEtcd 删除etcd中指定的服务器信息值
+func (s serverRepo) DeleteServerToEtcd(ctx context.Context, serverStrategiesKey, serverRealAddrKey string) error {
+	_, err := s.data.etcd.KV.Delete(ctx, serverStrategiesKey)
+	if err != nil {
+		return err
+	}
+	_, err = s.data.etcd.KV.Delete(ctx, serverRealAddrKey)
 	return err
 }

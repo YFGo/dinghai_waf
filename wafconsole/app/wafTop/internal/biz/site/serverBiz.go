@@ -21,6 +21,7 @@ type ServerRepo interface {
 	iface.BaseRepo[model.ServerWaf]
 	GetServerStrategiesID(ctx context.Context, id int64) ([]int64, error)
 	SaveServerToEtcd(ctx context.Context, serverStrategiesKey, serverRealAddrKey, serverStrategies, serverRealAddr string) error
+	DeleteServerToEtcd(ctx context.Context, serverStrategiesKey, serverRealAddrKey string) error
 }
 
 type ServerUsecase struct {
@@ -39,6 +40,26 @@ func (s *ServerUsecase) GetServerInfoByName(ctx context.Context, name string, id
 	return s.repo.GetByNameAndID(ctx, name, id)
 }
 
+// UpdateServerInfoEtcd 将服务器信息整理存入etcd
+func (s *ServerUsecase) UpdateServerInfoEtcd(ctx context.Context, serverInfo model.ServerWaf) error {
+	serverStrategiesKey := serverInfo.Host + ":" + strconv.Itoa(wafCorazaPort)
+	var serverStrategies string
+	for i := 0; i < len(serverInfo.StrategiesID); i++ {
+		if i == len(serverInfo.StrategiesID)-1 {
+			serverStrategies += strconv.Itoa(int(serverInfo.StrategiesID[i]))
+		} else {
+			serverStrategies += strconv.Itoa(int(serverInfo.StrategiesID[i])) + "_"
+		}
+	}
+	serverRealAddrKey := serverStrategiesKey + serverAddrKey
+	serverRealAddrValue := serverInfo.IP + ":" + strconv.Itoa(serverInfo.Port)
+	if err := s.repo.SaveServerToEtcd(ctx, serverStrategiesKey, serverRealAddrKey, serverStrategies, serverRealAddrValue); err != nil {
+		slog.ErrorContext(ctx, "save server to etcd failed: ", err, "server_info", serverInfo)
+		return err
+	}
+	return nil
+}
+
 // CreateServerSite 新增服务器站点
 func (s *ServerUsecase) CreateServerSite(ctx context.Context, serverInfo model.ServerWaf) error {
 	// 1. 检测服务器名称是否重复
@@ -55,19 +76,9 @@ func (s *ServerUsecase) CreateServerSite(ctx context.Context, serverInfo model.S
 		slog.ErrorContext(ctx, "create server failed: ", err, "server_info", serverInfo)
 		return err
 	}
-	serverStrategiesKey := serverInfo.Host + ":" + strconv.Itoa(wafCorazaPort)
-	var serverStrategies string
-	for i := 0; i < len(serverInfo.StrategiesID); i++ {
-		if i == len(serverInfo.StrategiesID)-1 {
-			serverStrategies += strconv.Itoa(int(serverInfo.StrategiesID[i]))
-		} else {
-			serverStrategies += strconv.Itoa(int(serverInfo.StrategiesID[i])) + "_"
-		}
-	}
-	serverRealAddrKey := serverStrategiesKey + serverAddrKey
-	serverRealAddrValue := serverInfo.Host + ":" + strconv.Itoa(serverInfo.Port)
-	if err = s.repo.SaveServerToEtcd(ctx, serverStrategiesKey, serverRealAddrKey, serverStrategies, serverRealAddrValue); err != nil {
-		slog.ErrorContext(ctx, "save server to etcd failed: ", err, "server_info", serverInfo)
+	// 3. 保存服务器到etcd
+	if err = s.UpdateServerInfoEtcd(ctx, serverInfo); err != nil {
+		slog.ErrorContext(ctx, "update server to etcd failed: ", err, "server_info", serverInfo)
 		return err
 	}
 	return nil
@@ -86,6 +97,11 @@ func (s *ServerUsecase) UpdateServerSite(ctx context.Context, id int64, serverIn
 	}
 	if err = s.repo.Update(ctx, id, serverInfo); err != nil {
 		slog.ErrorContext(ctx, "update server failed: ", err, "server_info", serverInfo)
+		return err
+	}
+	// 3. 保存服务器到etcd
+	if err = s.UpdateServerInfoEtcd(ctx, serverInfo); err != nil {
+		slog.ErrorContext(ctx, "update server to etcd failed: ", err, "server_info", serverInfo)
 		return err
 	}
 	return nil
