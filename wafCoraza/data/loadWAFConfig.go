@@ -2,6 +2,7 @@ package data
 
 import (
 	"context"
+	"encoding/json"
 	clientv3 "go.etcd.io/etcd/client/v3"
 	"strings"
 	"wafCoraza/biz"
@@ -30,7 +31,7 @@ func (l loadWAFConfigRepo) GetAppForStrategyIDs(appAddr string) ([]string, error
 	return strategyIDsStr, nil
 }
 
-// GetAllSeclangRules 获取所有策略对应的安全规则
+// GetAllSeclangRules 获取所有策略对应的信息
 func (l loadWAFConfigRepo) GetAllSeclangRules() ([]model.WAFStrategy, error) {
 	seclangRulesResp, err := l.data.etcdClient.KV.Get(context.Background(), types.StrategyKey, clientv3.WithPrefix())
 	if err != nil {
@@ -46,6 +47,23 @@ func (l loadWAFConfigRepo) GetAllSeclangRules() ([]model.WAFStrategy, error) {
 		seclangRules = append(seclangRules, seclangRule)
 	}
 	return seclangRules, nil
+}
+
+func (l loadWAFConfigRepo) GetAllRuleGroup() ([]model.RuleGroup, error) {
+	ruleGroupResp, err := l.data.etcdClient.KV.Get(context.Background(), types.RuleGroupPrefix, clientv3.WithPrefix())
+	if err != nil {
+		return nil, err
+	}
+	var ruleGroups []model.RuleGroup
+	for _, kv := range ruleGroupResp.Kvs {
+		ruleGroup := model.RuleGroup{}
+		err = json.Unmarshal(kv.Value, &ruleGroup)
+		if err != nil {
+			return nil, err
+		}
+		ruleGroups = append(ruleGroups, ruleGroup)
+	}
+	return ruleGroups, nil
 }
 
 // GetRealAddr 根据etcd中的请求地址 , 获取其真实访问的地址
@@ -64,4 +82,21 @@ func (l loadWAFConfigRepo) GetRealAddr(domain string) (string, error) {
 // AirUpdateStrategy 热更新策略
 func (l loadWAFConfigRepo) AirUpdateStrategy() clientv3.WatchChan {
 	return l.data.etcdClient.Watch(context.Background(), types.StrategyKey, clientv3.WithPrefix())
+}
+
+func (l loadWAFConfigRepo) GetAllRule() ([]model.Rule, error) {
+	ruleResp, err := l.data.etcdClient.KV.Get(context.Background(), types.RulePrefix, clientv3.WithPrefix())
+	if err != nil {
+		return nil, err
+	}
+	var rules []model.Rule
+	for _, kv := range ruleResp.Kvs {
+		rule := model.Rule{}
+		err = json.Unmarshal(kv.Value, &rule)
+		if err != nil {
+			return nil, err
+		}
+		rules = append(rules, rule)
+	}
+	return rules, nil
 }
