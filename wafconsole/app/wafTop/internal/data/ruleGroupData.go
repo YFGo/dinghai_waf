@@ -101,3 +101,21 @@ func (r ruleGroupRepo) GetRuleGroupEtcd(ctx context.Context, ruleGroupKey string
 	}
 	return res, err
 }
+
+func (r ruleGroupRepo) GetStrategyIdsByGroupID(ctx context.Context, groupID int64) ([]int64, error) {
+	var strategyIds []int64
+	err := r.data.db.Table(model.StrategyConfigTableName).
+		Select("strategy_id").
+		Where("rule_group_id = ?", groupID).
+		Find(&strategyIds).Error
+	return strategyIds, err
+}
+
+func (r ruleGroupRepo) GetStrategyEtcd(ctx context.Context, strategyKey string) (string, error) {
+	strategyInfoEtcd, err := r.data.etcd.KV.Get(ctx, strategyKey)
+	var res string
+	for _, kv := range strategyInfoEtcd.Kvs {
+		res = string(kv.Value)
+	}
+	return res, err
+}

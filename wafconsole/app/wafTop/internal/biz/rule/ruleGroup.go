@@ -18,6 +18,8 @@ type RuleGroupRepo interface {
 	CreateRuleGroupInfoToEtcd(ctx context.Context, ruleGroupKey string, ruleGroupValue string) error
 	DeleteRuleGroupInfoToEtcd(ctx context.Context, ruleGroupKey string) error
 	GetRuleGroupEtcd(ctx context.Context, ruleGroupKey string) (string, error)
+	GetStrategyIdsByGroupID(ctx context.Context, groupID int64) ([]int64, error)
+	GetStrategyEtcd(ctx context.Context, strategyKey string) (string, error)
 }
 
 const ruleGroupPrefix = "rule_group_"
@@ -182,6 +184,43 @@ func (r *RuleGroupUsecase) DeleteRuleGroup(ctx context.Context, ids []int64) err
 		if err := r.repo.DeleteRuleGroupInfoToEtcd(ctx, ruleGroupKey); err != nil {
 			slog.ErrorContext(ctx, "delete rule group info to etcd err : %v", err)
 			return err
+		}
+		// 获取使用了此规则组的策略
+		strategyIds, err := r.repo.GetStrategyIdsByGroupID(ctx, id)
+		if err != nil {
+			slog.ErrorContext(ctx, "get strategy ids by group id err : %v", err)
+			return err
+		}
+		var newStrategyIds []int64
+		// 获取etcd中存储的策略信息 删除此规则组id
+		for _, strategyId := range strategyIds {
+			strategyInfoEtcd, err := r.repo.GetStrategyEtcd(ctx, "strategy_"+strconv.Itoa(int(strategyId)))
+			if err != nil {
+				slog.ErrorContext(ctx, "get strategy etcd err : %v", err)
+				return err
+			}
+			var strategyEtcd dto.StrategyEtcdInfo
+			if err := json.Unmarshal([]byte(strategyInfoEtcd), &strategyEtcd); err != nil {
+				slog.ErrorContext(ctx, "unmarshal strategy etcd err : %v", err)
+				return err
+			}
+			for _, ruleGroupId := range strategyEtcd.RuleGroupIdList {
+				if ruleGroupId != id {
+					newStrategyIds = append(newStrategyIds, ruleGroupId)
+				}
+			}
+			//更新策略信息
+			strategyEtcd.RuleGroupIdList = newStrategyIds
+			strategyValue, err := json.Marshal(&strategyEtcd)
+			if err != nil {
+				slog.ErrorContext(ctx, "marshal strategy etcd err : %v", err)
+				return err
+			}
+			// 此处是存储新的策略信息的 , 复用存储规则组信息的方法
+			if err = r.repo.CreateRuleGroupInfoToEtcd(ctx, "strategy_"+strconv.Itoa(int(strategyId)), string(strategyValue)); err != nil {
+				slog.ErrorContext(ctx, "create strategy info to etcd err : %v", err)
+				return err
+			}
 		}
 	}
 	affected, err := r.repo.Delete(ctx, ids)
