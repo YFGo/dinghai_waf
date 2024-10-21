@@ -102,11 +102,11 @@ func (s serverRepo) Delete(ctx context.Context, serverIds []int64) (int64, error
 		if err != nil {
 			return err
 		}
-		err = tx.Where("id in (?)", serverIds).Delete(&model.ServerWaf{}).Error //删除主表数据")
+		err = tx.Where("id in (?)", serverIds).Unscoped().Delete(&model.ServerWaf{}).Error //删除主表数据")
 		if err != nil {
 			return err
 		}
-		err = tx.Where("server_id in (?)", serverIds).Delete(&model.AppWaf{}).Error //删除应用程序
+		err = tx.Where("server_id in (?)", serverIds).Unscoped().Delete(&model.AppWaf{}).Error //删除应用程序
 		return nil
 	})
 	return 0, err
@@ -159,4 +159,10 @@ func (s serverRepo) DeleteServerToEtcd(ctx context.Context, serverStrategiesKey,
 	}
 	_, err = s.data.etcd.KV.Delete(ctx, serverRealAddrKey)
 	return err
+}
+
+func (s serverRepo) ListHostByIds(ctx context.Context, ids []int64) ([]string, error) {
+	var hosts []string
+	err := s.data.db.Table(model.ServerWafTableName).Select("host").Where("id in (?)", ids).Find(&hosts).Error
+	return hosts, err
 }

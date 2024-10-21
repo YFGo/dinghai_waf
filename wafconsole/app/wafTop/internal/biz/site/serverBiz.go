@@ -21,6 +21,7 @@ type ServerRepo interface {
 	GetServerStrategiesID(ctx context.Context, id int64) ([]int64, error)
 	SaveServerToEtcd(ctx context.Context, serverStrategiesKey, serverRealAddrKey, serverStrategies, serverRealAddr string) error
 	DeleteServerToEtcd(ctx context.Context, serverStrategiesKey, serverRealAddrKey string) error
+	ListHostByIds(ctx context.Context, ids []int64) ([]string, error)
 }
 
 type ServerUsecase struct {
@@ -108,7 +109,18 @@ func (s *ServerUsecase) UpdateServerSite(ctx context.Context, id int64, serverIn
 
 // DeleteServerSite 删除服务器站点
 func (s *ServerUsecase) DeleteServerSite(ctx context.Context, ids []int64) error {
-	if _, err := s.repo.Delete(ctx, ids); err != nil {
+	hosts, err := s.repo.ListHostByIds(ctx, ids)
+	if err != nil {
+		slog.ErrorContext(ctx, "get server host failed: ", err, "ids", ids)
+		return err
+	}
+	for _, host := range hosts {
+		if err = s.repo.DeleteServerToEtcd(ctx, host, host+serverAddrKey); err != nil {
+			slog.ErrorContext(ctx, "delete server to etcd failed: ", err, "host", host)
+			return err
+		}
+	}
+	if _, err = s.repo.Delete(ctx, ids); err != nil {
 		slog.ErrorContext(ctx, "delete server failed: ", err, "ids", ids)
 		return err
 	}
