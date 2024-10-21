@@ -13,7 +13,6 @@ import (
 
 const (
 	serverAddrKey = "_real"
-	wafCorazaPort = 8887 //waf内核的端口
 )
 
 // ServerRepo 服务器上层实现
@@ -42,7 +41,7 @@ func (s *ServerUsecase) GetServerInfoByName(ctx context.Context, name string, id
 
 // UpdateServerInfoEtcd 将服务器信息整理存入etcd
 func (s *ServerUsecase) UpdateServerInfoEtcd(ctx context.Context, serverInfo model.ServerWaf) error {
-	serverStrategiesKey := serverInfo.Host + ":" + strconv.Itoa(wafCorazaPort)
+	serverStrategiesKey := serverInfo.Host
 	var serverStrategies string
 	for i := 0; i < len(serverInfo.StrategiesID); i++ {
 		if i == len(serverInfo.StrategiesID)-1 {

@@ -78,7 +78,7 @@ func (w *WafConfigUsercase) GetAppWAF(host string) []*model.CorazaWaf {
 	return wafs
 }
 
-// GetRealAddr 根据主机地址 , 获取真正的后端请求地址
+// GetRealAddr 根据请求地址 , 获取真正的后端请求地址
 func (w *WafConfigUsercase) GetRealAddr(host string) (string, error) {
 	realAddr, err := w.repo.GetRealAddr(host)
 	if err != nil {

@@ -48,7 +48,7 @@ func (l loadWAFConfigRepo) GetAllSeclangRules() ([]model.WAFStrategy, error) {
 	return seclangRules, nil
 }
 
-// GetRealAddr 根据etcd中的域名+端口 , 获取其真实访问的地址
+// GetRealAddr 根据etcd中的请求地址 , 获取其真实访问的地址
 func (l loadWAFConfigRepo) GetRealAddr(domain string) (string, error) {
 	var realAddr string
 	realAddrResp, err := l.data.etcdClient.KV.Get(context.Background(), domain+types.RealAddr)

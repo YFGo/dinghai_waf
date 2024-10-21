@@ -17,14 +17,14 @@ type Data struct {
 }
 
 func NewData() (*Data, func()) {
-	kafkaProducer := newKafkaProducer()
+	//kafkaProducer := newKafkaProducer()
 	timeTask := newTimeTask()
 	etcdClient := newETCD()
 	cleanup := func() {
-		if kafkaProducer != nil {
-			slog.Info("close kafka producer")
-			kafkaProducer.Close()
-		}
+		//if kafkaProducer != nil {
+		//	slog.Info("close kafka producer")
+		//	kafkaProducer.Close()
+		//}
 		if timeTask != nil {
 			slog.Info("close time task")
 			timeTask.Stop()
@@ -35,9 +35,9 @@ func NewData() (*Data, func()) {
 		}
 	}
 	return &Data{
-		kafkaProducer: kafkaProducer,
-		timeTask:      timeTask,
-		etcdClient:    etcdClient,
+		//kafkaProducer: kafkaProducer,
+		timeTask:   timeTask,
+		etcdClient: etcdClient,
 	}, cleanup
 }
 
