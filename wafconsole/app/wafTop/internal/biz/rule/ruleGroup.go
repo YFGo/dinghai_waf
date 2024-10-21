@@ -177,6 +177,13 @@ func (r *RuleGroupUsecase) UpdateRuleGroup(ctx context.Context, id int64, ruleGr
 
 // DeleteRuleGroup 删除规则组
 func (r *RuleGroupUsecase) DeleteRuleGroup(ctx context.Context, ids []int64) error {
+	for _, id := range ids {
+		ruleGroupKey := ruleGroupPrefix + strconv.Itoa(int(id))
+		if err := r.repo.DeleteRuleGroupInfoToEtcd(ctx, ruleGroupKey); err != nil {
+			slog.ErrorContext(ctx, "delete rule group info to etcd err : %v", err)
+			return err
+		}
+	}
 	affected, err := r.repo.Delete(ctx, ids)
 	if err != nil {
 		slog.ErrorContext(ctx, "delete rule_group err: ", err)
@@ -184,13 +191,6 @@ func (r *RuleGroupUsecase) DeleteRuleGroup(ctx context.Context, ids []int64) err
 	}
 	if int(affected) != len(ids) {
 		slog.ErrorContext(ctx, "rule_group is not exists", ids)
-	}
-	for _, id := range ids {
-		ruleGroupKey := ruleGroupPrefix + strconv.Itoa(int(id))
-		if err = r.repo.DeleteRuleGroupInfoToEtcd(ctx, ruleGroupKey); err != nil {
-			slog.ErrorContext(ctx, "delete rule group info to etcd err : %v", err)
-			return err
-		}
 	}
 	return nil
 }

@@ -16,6 +16,7 @@ import (
 type WafStrategyRepo interface {
 	iface.BaseRepo[model.Strategy]
 	CreateStrategyForEtcd(ctx context.Context, strategyKey, strategyValue string) error
+	DeleteStrategyForEtcd(ctx context.Context, strategyKey string) error
 }
 
 type WafStrategyUsecase struct {
@@ -55,45 +56,14 @@ func (w *WafStrategyUsecase) CreateStrategy(ctx context.Context, strategy model.
 	if !w.checkStrategyIsExist(ctx, 0, strategy.Name) {
 		return errors.New("策略已存在")
 	}
-	modifyStrategyList := make([]dto.ModifyStrategyDto, 0)
+	groupIDList := make([]int64, 0)
 	for _, strategyConfig := range strategy.StrategyConfig {
-		ruleGroupInfo, ok := w.checkRuleGroupIsExist(ctx, strategyConfig.RuleGroupID)
+		_, ok := w.checkRuleGroupIsExist(ctx, strategyConfig.RuleGroupID)
 		if !ok {
 			return errors.New("规则组不存在")
 		}
 		//根据规则组id , 查询所有的规则信息
-		switch ruleGroupInfo.IsBuildin {
-		case 1: //内置规则
-			buildinRuleList, err := w.buildinRepo.ListByWhere(ctx, -1, -1, func(db *gorm.DB) *gorm.DB {
-				return db.Where("group_id = ?", ruleGroupInfo.ID)
-			})
-			if err != nil {
-				slog.ErrorContext(ctx, "strategy buildin rule failed: ", err)
-				return err
-			}
-			for _, buildinRule := range buildinRuleList {
-				seclang := dto.ModifyStrategyDto{
-					IsBuilding: ruleGroupInfo.IsBuildin,
-					RuleName:   buildinRule.Name,
-					Seclang:    buildinRule.Seclang,
-				}
-				modifyStrategyList = append(modifyStrategyList, seclang)
-			}
-		case 2: //自定义规则
-			userRuleList, err := w.userRuleRepo.ListUserRulesByGroupId(int64(ruleGroupInfo.ID))
-			if err != nil {
-				slog.ErrorContext(ctx, "strategy user rule failed: ", err)
-				return err
-			}
-			for _, userRule := range userRuleList {
-				seclang := dto.ModifyStrategyDto{
-					IsBuilding: ruleGroupInfo.IsBuildin,
-					RuleName:   userRule.Name,
-					Seclang:    userRule.ModSecurity,
-				}
-				modifyStrategyList = append(modifyStrategyList, seclang)
-			}
-		}
+		groupIDList = append(groupIDList, strategyConfig.RuleGroupID)
 	}
 	strategyID, err := w.repo.Create(ctx, strategy)
 	if err != nil {
@@ -101,12 +71,12 @@ func (w *WafStrategyUsecase) CreateStrategy(ctx context.Context, strategy model.
 		return err
 	}
 	strategySeclang := dto.StrategyEtcdInfo{
-		ID:                    strategyID,
-		Action:                strategy.Action,
-		NextAction:            strategy.NextAction,
-		Name:                  strategy.Name,
-		Description:           strategy.Description,
-		ModifyStrategyDtoList: modifyStrategyList,
+		ID:              strategyID,
+		Action:          strategy.Action,
+		NextAction:      strategy.NextAction,
+		Name:            strategy.Name,
+		Description:     strategy.Description,
+		RuleGroupIdList: groupIDList,
 	}
 	if err = w.CreateStrategyEtcd(ctx, strategySeclang); err != nil {
 		slog.ErrorContext(ctx, "create strategy etcd failed: ", err)
@@ -120,14 +90,29 @@ func (w *WafStrategyUsecase) UpdateStrategy(ctx context.Context, id int64, strat
 	if !w.checkStrategyIsExist(ctx, id, strategy.Name) {
 		return errors.New("策略已存在")
 	}
+	groupIDList := make([]int64, 0)
 	for _, strategyConfig := range strategy.StrategyConfig {
 		_, ok := w.checkRuleGroupIsExist(ctx, strategyConfig.RuleGroupID)
 		if !ok {
 			return errors.New("规则组不存在")
 		}
+		//根据规则组id , 查询所有的规则信息
+		groupIDList = append(groupIDList, strategyConfig.RuleGroupID)
 	}
 	if err := w.repo.Update(ctx, id, strategy); err != nil {
 		slog.ErrorContext(ctx, "update strategy failed: ", err)
+		return err
+	}
+	strategySeclang := dto.StrategyEtcdInfo{
+		ID:              id,
+		Action:          strategy.Action,
+		NextAction:      strategy.NextAction,
+		Name:            strategy.Name,
+		Description:     strategy.Description,
+		RuleGroupIdList: groupIDList,
+	}
+	if err := w.CreateStrategyEtcd(ctx, strategySeclang); err != nil {
+		slog.ErrorContext(ctx, "create strategy etcd failed: ", err)
 		return err
 	}
 	return nil
@@ -135,6 +120,12 @@ func (w *WafStrategyUsecase) UpdateStrategy(ctx context.Context, id int64, strat
 
 // DeleteStrategy 删除策略
 func (w *WafStrategyUsecase) DeleteStrategy(ctx context.Context, ids []int64) error {
+	for _, id := range ids {
+		if err := w.repo.DeleteStrategyForEtcd(ctx, "strategy_"+strconv.Itoa(int(id))); err != nil {
+			slog.ErrorContext(ctx, "delete strategy etcd failed: ", err)
+			return err
+		}
+	}
 	_, err := w.repo.Delete(ctx, ids)
 	if err != nil {
 		slog.ErrorContext(ctx, "delete strategy failed: ", err)
