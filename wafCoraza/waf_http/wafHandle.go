@@ -54,7 +54,6 @@ func (w *WafHandleService) ProxyHandler() http.HandlerFunc {
 		// 重构请求路径
 		newPath := strings.Join(hostBaseUrl[2:], "/")
 		req.URL.Path = newPath
-		fmt.Println(newPath)
 		var tx types.Transaction
 		defer func() {
 			if tx != nil {
