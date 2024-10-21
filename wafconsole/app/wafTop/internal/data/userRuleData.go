@@ -17,9 +17,10 @@ func NewUserRuleRepo(data *Data) ruleBiz.UserRuleRepo {
 	}
 }
 
-func (u userRuleRepo) Get(ctx context.Context, i int64) (model.UserRule, error) {
-	//TODO implement me
-	panic("implement me")
+func (u userRuleRepo) Get(ctx context.Context, id int64) (model.UserRule, error) {
+	var userRule model.UserRule
+	err := u.data.db.Where("id = ?", id).First(&userRule).Error
+	return userRule, err
 }
 
 func (u userRuleRepo) GetByNameAndID(ctx context.Context, name string, id int64) (model.UserRule, error) {

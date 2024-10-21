@@ -71,6 +71,33 @@ func (u *UserRuleUsecase) createRuleToEtcd(ctx context.Context, ruleID int64, us
 		slog.ErrorContext(ctx, "marshal user_rule_info is failed: ", err)
 		return err
 	}
+	ruleGroupKey := "rule_group_" + strconv.Itoa(int(userRule.GroupId))
+	//根据规则组id查询 规则组信息
+	ruleGroup, err := u.ruleGroupRepo.GetRuleGroupEtcd(ctx, ruleGroupKey)
+	if err != nil {
+		slog.ErrorContext(ctx, "get rule_group_info from etcd is failed: ", err)
+		return err
+	}
+	// 将规则组信息转换为json
+	var ruleGroupDto dto.RuleGroupEtcd
+	err = json.Unmarshal([]byte(ruleGroup), &ruleGroupDto)
+	if err != nil {
+		slog.ErrorContext(ctx, "unmarshal rule_group_info is failed: ", err)
+		return err
+	}
+	// 将新的信息追加到此规则组中
+	ruleGroupDto.RuleIdList = append(ruleGroupDto.RuleIdList, ruleID)
+	newRuleInfoDto, err := json.Marshal(&ruleGroupDto)
+	if err != nil {
+		slog.ErrorContext(ctx, "marshal rule_group_info is failed: ", err)
+		return err
+	}
+	// 更新数据
+	if err = u.ruleGroupRepo.CreateRuleGroupInfoToEtcd(ctx, ruleGroupKey, string(newRuleInfoDto)); err != nil {
+		slog.ErrorContext(ctx, "create rule_group_info to etcd is failed: ", err)
+		return err
+	}
+	// 需要更新规则组的键值对
 	if err = u.repo.CreateRuleInfoToEtcd(ctx, ruleInfoKey, string(ruleInfoValue)); err != nil {
 		slog.ErrorContext(ctx, "create rule_info to etcd is failed: ", err)
 		return err
@@ -127,17 +154,55 @@ func (u *UserRuleUsecase) UpdateUserRule(ctx context.Context, id int64, userRule
 
 // DeleteUserRule 删除用户自定义规则
 func (u *UserRuleUsecase) DeleteUserRule(ctx context.Context, ids []int64) error {
+	for _, id := range ids {
+		ruleInfoKey := RulePrefix + strconv.Itoa(int(id))
+		if err := u.repo.DeleteRuleInfoToEtcd(ctx, ruleInfoKey); err != nil { // 删除etcd中的规则信息
+			slog.ErrorContext(ctx, "delete rule_info to etcd is failed: ", err)
+			return err
+		}
+		// 获取规则组id
+		ruleGroupInfo, err := u.repo.Get(ctx, id)
+		if err != nil {
+			slog.ErrorContext(ctx, "get rule_group_id is failed: ", err)
+			return err
+		}
+		ruleGroupKey := "rule_group_" + strconv.Itoa(int(ruleGroupInfo.GroupId))
+		// 获取规则组信息
+		ruleGroupInfoEtcd, err := u.ruleGroupRepo.GetRuleGroupEtcd(ctx, ruleGroupKey)
+		if err != nil {
+			slog.ErrorContext(ctx, "get rule_group_info from etcd is failed: ", err)
+			return err
+		}
+		// 将规则组信息转换为json
+		var ruleGroupDto dto.RuleGroupEtcd
+		err = json.Unmarshal([]byte(ruleGroupInfoEtcd), &ruleGroupDto)
+		if err != nil {
+			slog.ErrorContext(ctx, "unmarshal rule_group_info is failed: ", err)
+			return err
+		}
+		// 删除规则组中的此规则id
+		var newRuleIDList []int64
+		for _, ruleID := range ruleGroupDto.RuleIdList {
+			if ruleID != id {
+				newRuleIDList = append(newRuleIDList, ruleID)
+			}
+		}
+		ruleGroupDto.RuleIdList = newRuleIDList
+		newRuleInfoDto, err := json.Marshal(&ruleGroupDto)
+		if err != nil {
+			slog.ErrorContext(ctx, "marshal rule_group_info is failed: ", err)
+			return err
+		}
+		// 更新数据
+		if err = u.ruleGroupRepo.CreateRuleGroupInfoToEtcd(ctx, ruleGroupKey, string(newRuleInfoDto)); err != nil { // 更新规则组信息
+			slog.ErrorContext(ctx, "create rule_group_info to etcd is failed: ", err)
+			return err
+		}
+	}
 	_, err := u.repo.Delete(ctx, ids)
 	if err != nil {
 		slog.ErrorContext(ctx, "delete user_rule is failed: ", err)
 		return err
-	}
-	for _, id := range ids {
-		ruleInfoKey := RulePrefix + strconv.Itoa(int(id))
-		if err = u.repo.DeleteRuleInfoToEtcd(ctx, ruleInfoKey); err != nil {
-			slog.ErrorContext(ctx, "delete rule_info to etcd is failed: ", err)
-			return err
-		}
 	}
 	return nil
 }

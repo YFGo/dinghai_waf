@@ -23,3 +23,9 @@ type RuleGroupInfo struct {
 	CreateAt    string `json:"create_at"`
 	UpdateAt    string `json:"update_at"`
 }
+
+type RuleGroupEtcd struct {
+	ID         int64   `json:"id"`
+	IsBuildin  uint8   `json:"is_buildin"`
+	RuleIdList []int64 `json:"rule_id_list"`
+}
