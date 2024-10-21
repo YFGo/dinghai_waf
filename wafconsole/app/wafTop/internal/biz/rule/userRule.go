@@ -2,11 +2,14 @@ package ruleBiz
 
 import (
 	"context"
+	"encoding/json"
 	"errors"
 	"gorm.io/gorm"
 	"log/slog"
+	"strconv"
 	"strings"
 	"wafconsole/app/wafTop/internal/biz/iface"
+	"wafconsole/app/wafTop/internal/data/dto"
 	"wafconsole/app/wafTop/internal/data/model"
 )
 
@@ -15,11 +18,15 @@ const (
 	Same      = "等于"
 	NotSame   = "不等于"
 	Like      = "Like"
+
+	RulePrefix = "rule_"
 )
 
 type UserRuleRepo interface {
 	iface.BaseRepo[model.UserRule]
 	ListUserRulesByGroupId(groupId int64) ([]model.UserRule, error)
+	CreateRuleInfoToEtcd(ctx context.Context, ruleInfoKey, ruleInfoValue string) error
+	DeleteRuleInfoToEtcd(ctx context.Context, ruleInfoKey string) error
 }
 
 type UserRuleUsecase struct {
@@ -52,6 +59,25 @@ func (u *UserRuleUsecase) checkRuleGroupIsExist(ctx context.Context, groupId int
 	return true
 }
 
+func (u *UserRuleUsecase) createRuleToEtcd(ctx context.Context, ruleID int64, userRule model.UserRule) error {
+	userRuleInfo := dto.UserRuleInfo{
+		ID:        ruleID,
+		RiskLevel: userRule.RiskLevel,
+		Seclang:   userRule.ModSecurity,
+	}
+	ruleInfoKey := RulePrefix + strconv.Itoa(int(userRuleInfo.ID))
+	ruleInfoValue, err := json.Marshal(&userRuleInfo)
+	if err != nil {
+		slog.ErrorContext(ctx, "marshal user_rule_info is failed: ", err)
+		return err
+	}
+	if err = u.repo.CreateRuleInfoToEtcd(ctx, ruleInfoKey, string(ruleInfoValue)); err != nil {
+		slog.ErrorContext(ctx, "create rule_info to etcd is failed: ", err)
+		return err
+	}
+	return nil
+}
+
 // CreateUserRule 创建用户自定义规则
 func (u *UserRuleUsecase) CreateUserRule(ctx context.Context, userRule model.UserRule) error {
 	if !u.checkUserRuleIsExist(ctx, 0, userRule.Name) {
@@ -63,9 +89,14 @@ func (u *UserRuleUsecase) CreateUserRule(ctx context.Context, userRule model.Use
 	// 处理用户自定义规则
 	seclang := u.disposeUserRule(ctx, userRule.SeclangMod)
 	userRule.ModSecurity = seclang
-	_, err := u.repo.Create(ctx, userRule)
+	userRuleID, err := u.repo.Create(ctx, userRule)
 	if err != nil {
 		slog.ErrorContext(ctx, "create user_rule is failed: ", err)
+		return err
+	}
+	err = u.createRuleToEtcd(ctx, userRuleID, userRule)
+	if err != nil {
+		slog.ErrorContext(ctx, "create rule_info to etcd is failed: ", err)
 		return err
 	}
 	return nil
@@ -85,6 +116,12 @@ func (u *UserRuleUsecase) UpdateUserRule(ctx context.Context, id int64, userRule
 		slog.ErrorContext(ctx, "update user_rule is failed: ", err)
 		return err
 	}
+	// 更新规则信息存入etcd
+	err := u.createRuleToEtcd(ctx, id, userRule)
+	if err != nil {
+		slog.ErrorContext(ctx, "create rule_info to etcd is failed: ", err)
+		return err
+	}
 	return nil
 }
 
@@ -94,6 +131,13 @@ func (u *UserRuleUsecase) DeleteUserRule(ctx context.Context, ids []int64) error
 	if err != nil {
 		slog.ErrorContext(ctx, "delete user_rule is failed: ", err)
 		return err
+	}
+	for _, id := range ids {
+		ruleInfoKey := RulePrefix + strconv.Itoa(int(id))
+		if err = u.repo.DeleteRuleInfoToEtcd(ctx, ruleInfoKey); err != nil {
+			slog.ErrorContext(ctx, "delete rule_info to etcd is failed: ", err)
+			return err
+		}
 	}
 	return nil
 }

@@ -64,3 +64,13 @@ func (u userRuleRepo) ListUserRulesByGroupId(groupId int64) ([]model.UserRule, e
 	err := u.data.db.Where("group_id = ?", groupId).Find(&userRules).Error
 	return userRules, err
 }
+
+func (u userRuleRepo) CreateRuleInfoToEtcd(ctx context.Context, ruleInfoKey, ruleInfoValue string) error {
+	_, err := u.data.etcd.KV.Put(ctx, ruleInfoKey, ruleInfoValue)
+	return err
+}
+
+func (u userRuleRepo) DeleteRuleInfoToEtcd(ctx context.Context, ruleInfoKey string) error {
+	_, err := u.data.etcd.KV.Delete(ctx, ruleInfoKey)
+	return err
+}
