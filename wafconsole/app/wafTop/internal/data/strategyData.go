@@ -138,3 +138,8 @@ func (w wafStrategyRepo) CreateStrategyForEtcd(ctx context.Context, strategyKey,
 	_, err := w.data.etcd.KV.Put(ctx, strategyKey, strategyValue)
 	return err
 }
+
+func (w wafStrategyRepo) DeleteStrategyForEtcd(ctx context.Context, strategyKey string) error {
+	_, err := w.data.etcd.KV.Delete(ctx, strategyKey)
+	return err
+}

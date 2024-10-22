@@ -17,9 +17,10 @@ func NewUserRuleRepo(data *Data) ruleBiz.UserRuleRepo {
 	}
 }
 
-func (u userRuleRepo) Get(ctx context.Context, i int64) (model.UserRule, error) {
-	//TODO implement me
-	panic("implement me")
+func (u userRuleRepo) Get(ctx context.Context, id int64) (model.UserRule, error) {
+	var userRule model.UserRule
+	err := u.data.db.Where("id = ?", id).First(&userRule).Error
+	return userRule, err
 }
 
 func (u userRuleRepo) GetByNameAndID(ctx context.Context, name string, id int64) (model.UserRule, error) {
@@ -63,4 +64,14 @@ func (u userRuleRepo) ListUserRulesByGroupId(groupId int64) ([]model.UserRule, e
 	var userRules []model.UserRule
 	err := u.data.db.Where("group_id = ?", groupId).Find(&userRules).Error
 	return userRules, err
+}
+
+func (u userRuleRepo) CreateRuleInfoToEtcd(ctx context.Context, ruleInfoKey, ruleInfoValue string) error {
+	_, err := u.data.etcd.KV.Put(ctx, ruleInfoKey, ruleInfoValue)
+	return err
+}
+
+func (u userRuleRepo) DeleteRuleInfoToEtcd(ctx context.Context, ruleInfoKey string) error {
+	_, err := u.data.etcd.KV.Delete(ctx, ruleInfoKey)
+	return err
 }

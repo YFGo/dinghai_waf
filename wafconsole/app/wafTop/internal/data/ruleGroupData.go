@@ -82,3 +82,40 @@ func (r ruleGroupRepo) ListRuleGroupByStrategyID(ctx context.Context, strategyId
 		Find(&listRuleGroup).Error
 	return listRuleGroup, err
 }
+
+func (r ruleGroupRepo) CreateRuleGroupInfoToEtcd(ctx context.Context, ruleGroupKey string, ruleGroupValue string) error {
+	_, err := r.data.etcd.KV.Put(ctx, ruleGroupKey, ruleGroupValue)
+	return err
+}
+
+func (r ruleGroupRepo) DeleteRuleGroupInfoToEtcd(ctx context.Context, ruleGroupKey string) error {
+	_, err := r.data.etcd.KV.Delete(ctx, ruleGroupKey)
+	return err
+}
+
+func (r ruleGroupRepo) GetRuleGroupEtcd(ctx context.Context, ruleGroupKey string) (string, error) {
+	ruleGroupInfoEtcd, err := r.data.etcd.KV.Get(ctx, ruleGroupKey)
+	var res string
+	for _, kv := range ruleGroupInfoEtcd.Kvs {
+		res = string(kv.Value)
+	}
+	return res, err
+}
+
+func (r ruleGroupRepo) GetStrategyIdsByGroupID(ctx context.Context, groupID int64) ([]int64, error) {
+	var strategyIds []int64
+	err := r.data.db.Table(model.StrategyConfigTableName).
+		Select("strategy_id").
+		Where("rule_group_id = ?", groupID).
+		Find(&strategyIds).Error
+	return strategyIds, err
+}
+
+func (r ruleGroupRepo) GetStrategyEtcd(ctx context.Context, strategyKey string) (string, error) {
+	strategyInfoEtcd, err := r.data.etcd.KV.Get(ctx, strategyKey)
+	var res string
+	for _, kv := range strategyInfoEtcd.Kvs {
+		res = string(kv.Value)
+	}
+	return res, err
+}

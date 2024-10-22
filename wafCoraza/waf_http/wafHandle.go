@@ -171,7 +171,10 @@ func (w *WafHandleService) WafMatchRules(tx types.Transaction) []types.MatchedRu
 	return attackMatchRule
 }
 
-// WatchStrategyService 监听策略的变化
-func (w *WafHandleService) WatchStrategyService() {
+// WatchEtcdService 监听etcd键值对的变化
+func (w *WafHandleService) WatchEtcdService() {
+	w.wafConfigUc.WatchRuleGroup()
+	w.wafConfigUc.WatchRule()
 	w.wafConfigUc.WatchStrategy()
+
 }

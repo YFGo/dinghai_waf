@@ -12,12 +12,12 @@ type StrategyDetailDto struct {
 }
 
 type StrategyEtcdInfo struct {
-	ID                    int64               `json:"id"`
-	Action                uint8               `json:"action"`
-	NextAction            uint8               `json:"next_action"`
-	Name                  string              `json:"name"`
-	Description           string              `json:"description"`
-	ModifyStrategyDtoList []ModifyStrategyDto `json:"modify_strategy_dto_list"`
+	ID              int64   `json:"id"`
+	Action          uint8   `json:"action"`
+	NextAction      uint8   `json:"next_action"`
+	Name            string  `json:"name"`
+	Description     string  `json:"description"`
+	RuleGroupIdList []int64 `json:"rule_group_id_list"`
 }
 
 type ModifyStrategyDto struct {
