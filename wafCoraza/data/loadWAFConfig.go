@@ -84,6 +84,14 @@ func (l loadWAFConfigRepo) AirUpdateStrategy() clientv3.WatchChan {
 	return l.data.etcdClient.Watch(context.Background(), types.StrategyKey, clientv3.WithPrefix())
 }
 
+func (l loadWAFConfigRepo) AirUpdateRuleGroup() clientv3.WatchChan {
+	return l.data.etcdClient.Watch(context.Background(), types.RuleGroupPrefix, clientv3.WithPrefix())
+}
+
+func (l loadWAFConfigRepo) AirUpdateRule() clientv3.WatchChan {
+	return l.data.etcdClient.Watch(context.Background(), types.RulePrefix, clientv3.WithPrefix())
+}
+
 func (l loadWAFConfigRepo) GetAllRule() ([]model.Rule, error) {
 	ruleResp, err := l.data.etcdClient.KV.Get(context.Background(), types.RulePrefix, clientv3.WithPrefix())
 	if err != nil {
@@ -99,4 +107,21 @@ func (l loadWAFConfigRepo) GetAllRule() ([]model.Rule, error) {
 		rules = append(rules, rule)
 	}
 	return rules, nil
+}
+
+func (l loadWAFConfigRepo) GetStrategyListById(strategyKey string) ([]model.WAFStrategy, error) {
+	strategyInfoResp, err := l.data.etcdClient.KV.Get(context.Background(), strategyKey)
+	if err != nil {
+		return nil, err
+	}
+	var seclangRules []model.WAFStrategy
+	for _, kv := range strategyInfoResp.Kvs {
+		keyLoad := strings.Split(string(kv.Key), types.CutOFF)
+		seclangRule := model.WAFStrategy{
+			ID:           keyLoad[1],
+			SeclangRules: string(kv.Value),
+		}
+		seclangRules = append(seclangRules, seclangRule)
+	}
+	return seclangRules, nil
 }

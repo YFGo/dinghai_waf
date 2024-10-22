@@ -40,7 +40,7 @@ func main() {
 	wafService.InitWAF()
 	// 配置热更新waf实列
 	go func() {
-		wafService.WatchStrategyService()
+		wafService.WatchEtcdService()
 	}()
 	// 设置 HTTP 处理函数
 	http.HandleFunc("/", wafService.ProxyHandler())
