@@ -3,8 +3,251 @@
 
 openapi: 3.0.3
 info:
-    title: ""
+    title: WafUser API
     version: 0.0.1
-paths: {}
+paths:
+    /app/user/v1/wafUser:
+        post:
+            tags:
+                - WafUser
+            operationId: WafUser_CreateWafUser
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/CreateWafUserRequest'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/CreateWafUserReply'
+                default:
+                    description: Default error response
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/Status'
+        delete:
+            tags:
+                - WafUser
+            operationId: WafUser_DeleteWafUser
+            parameters:
+                - name: id
+                  in: query
+                  schema:
+                    type: string
+                - name: code
+                  in: query
+                  schema:
+                    type: string
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/DeleteWafUserReply'
+                default:
+                    description: Default error response
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/Status'
+        patch:
+            tags:
+                - WafUser
+            operationId: WafUser_UpdateWafUser
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/UpdateWafUserRequest'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/UpdateWafUserReply'
+                default:
+                    description: Default error response
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/Status'
+    /app/user/v1/wafUser/login:
+        post:
+            tags:
+                - WafUser
+            operationId: WafUser_Login
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/LoginUserInfoRequest'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/LoginUserInfoReply'
+                default:
+                    description: Default error response
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/Status'
+    /app/user/v1/wafUser/password:
+        patch:
+            tags:
+                - WafUser
+            operationId: WafUser_UpdatePassword
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/UpdatePasswordRequest'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/UpdatePasswordReply'
+                default:
+                    description: Default error response
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/Status'
+    /app/user/v1/wafUser/{id}:
+        get:
+            tags:
+                - WafUser
+            operationId: WafUser_GetWafUser
+            parameters:
+                - name: id
+                  in: path
+                  required: true
+                  schema:
+                    type: string
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/GetWafUserReply'
+                default:
+                    description: Default error response
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/Status'
 components:
-    schemas: {}
+    schemas:
+        CreateWafUserReply:
+            type: object
+            properties: {}
+        CreateWafUserRequest:
+            type: object
+            properties:
+                email:
+                    type: string
+                code:
+                    type: string
+                password:
+                    type: string
+        DeleteWafUserReply:
+            type: object
+            properties: {}
+        GetWafUserReply:
+            type: object
+            properties:
+                email:
+                    type: string
+                userName:
+                    type: string
+                avatarAddr:
+                    type: string
+                phone:
+                    type: string
+        GoogleProtobufAny:
+            type: object
+            properties:
+                '@type':
+                    type: string
+                    description: The type of the serialized message.
+            additionalProperties: true
+            description: Contains an arbitrary serialized message along with a @type that describes the type of the serialized message.
+        LoginUserInfoReply:
+            type: object
+            properties:
+                id:
+                    type: string
+                accessToken:
+                    type: string
+        LoginUserInfoRequest:
+            type: object
+            properties:
+                loginMethod:
+                    type: string
+                phone:
+                    type: string
+                email:
+                    type: string
+                code:
+                    type: string
+                password:
+                    type: string
+        Status:
+            type: object
+            properties:
+                code:
+                    type: integer
+                    description: The status code, which should be an enum value of [google.rpc.Code][google.rpc.Code].
+                    format: int32
+                message:
+                    type: string
+                    description: A developer-facing error message, which should be in English. Any user-facing error message should be localized and sent in the [google.rpc.Status.details][google.rpc.Status.details] field, or localized by the client.
+                details:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/GoogleProtobufAny'
+                    description: A list of messages that carry the error details.  There is a common set of message types for APIs to use.
+            description: 'The `Status` type defines a logical error model that is suitable for different programming environments, including REST APIs and RPC APIs. It is used by [gRPC](https://github.com/grpc). Each `Status` message contains three pieces of data: error code, error message, and error details. You can find out more about this error model and how to work with it in the [API Design Guide](https://cloud.google.com/apis/design/errors).'
+        UpdatePasswordReply:
+            type: object
+            properties: {}
+        UpdatePasswordRequest:
+            type: object
+            properties:
+                updateMethod:
+                    type: string
+                phone:
+                    type: string
+                email:
+                    type: string
+                code:
+                    type: string
+                password:
+                    type: string
+        UpdateWafUserReply:
+            type: object
+            properties: {}
+        UpdateWafUserRequest:
+            type: object
+            properties:
+                userName:
+                    type: string
+                avatarAddr:
+                    type: string
+tags:
+    - name: WafUser
