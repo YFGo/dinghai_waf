@@ -6,6 +6,7 @@ import (
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
 	"wafconsole/app/user/internal/conf"
+	"wafconsole/app/user/internal/data/model"
 )
 
 // ProviderSet is data providers.
@@ -50,5 +51,8 @@ func newMysql(cfg *conf.Data_Mysql) (*gorm.DB, error) {
 	}
 	sqlDB.SetMaxIdleConns(int(cfg.MaxIdle))
 	sqlDB.SetMaxOpenConns(int(cfg.MaxOpen))
+
+	db.AutoMigrate(&model.UserInfo{})
+
 	return db, nil
 }

@@ -26,8 +26,8 @@ message CreateWafUserRequest {
     string password = 3 [
             (buf.validate.field).cel = {
                 id: "password",
-                message: "密码不能为空",
-                expression: "size(this) > 0"
+                message: "密码在10~15之间 , 且需要包含大小写字母,数据以及特殊字符",
+                expression: "size(this) >= 10 && size(this) <= 15 && this.matches('^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)(?=.*[@$!%*?&])[A-Za-z\\d@$!%*?&]{10,15}$')"
             }
     ];
 }
@@ -42,6 +42,7 @@ message UpdateWafUserRequest {
             }
     ];
     string avatar_addr = 2;
+    string phone = 3;
 }
 message UpdateWafUserReply {}
 
@@ -94,17 +95,21 @@ message LoginUserInfoReply{
 }
 
 message UpdatePasswordRequest {
-    int64 update_method = 1 [
+    int64 id = 1 [
             (buf.validate.field).cel = {
-                id: "update_method",
-                message: "选择修改方法",
-                expression: "this in [1 , 2]"
+                id: "id",
+                message: "用户不存在",
+                expression: "this > 0"
             }
     ];
-    string phone = 2;
-    string email = 3;
-    string code = 4;
-    string password = 5 [
+    string code = 2 [
+            (buf.validate.field).cel = {
+                id: "code",
+                message: "验证码不能为空",
+                expression: "size(this) > 0"
+            }
+    ];
+    string password = 3 [
             (buf.validate.field).cel = {
                 id: "password",
                 message: "密码长度在10~15字符之间,且必须包含大小写字母,数字以及特殊字符",
@@ -113,6 +118,4 @@ message UpdatePasswordRequest {
     ];
 }
 
-message UpdatePasswordReply {
-
-}
+message UpdatePasswordReply {}

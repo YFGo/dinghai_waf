@@ -5,6 +5,8 @@ server:
   grpc:
     addr: 0.0.0.0:9000
     timeout: 1s
+  jwt:
+    key: zyf
 data:
   mysql:
     host: 152.136.50.60
@@ -18,3 +20,4 @@ data:
     addr: 152.136.50.60:6379
     read_timeout: 0.2s
     write_timeout: 0.2s
+
