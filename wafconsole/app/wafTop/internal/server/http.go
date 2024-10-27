@@ -78,6 +78,7 @@ func NewHTTPServer(c *conf.Server, appWafTop *site.WafAppService, serverWaf *sit
 		http.Middleware(
 			recovery.Recovery(),
 			protoValidate.ValidateUnaryServerInterceptor(), //参数校验
+			plugin.MiddlewareCors(),                        //跨域
 		),
 		http.ResponseEncoder(ResponseEncoder), //自定义返回值
 		http.ErrorEncoder(ErrorEncoder),       //自定义错误返回值

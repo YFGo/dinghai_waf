@@ -3,6 +3,8 @@ package server
 import (
 	"encoding/json"
 	"github.com/go-kratos/kratos/v2/errors"
+	"github.com/go-kratos/kratos/v2/middleware/auth/jwt"
+	jwt2 "github.com/golang-jwt/jwt/v5"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 	"log/slog"
@@ -77,6 +79,9 @@ func NewHTTPServer(c *conf.Server, userService *service.WafUserService, logger l
 		http.Middleware(
 			recovery.Recovery(),
 			protoValidate.ValidateUnaryServerInterceptor(), //参数校验
+			jwt.Server(func(token *jwt2.Token) (interface{}, error) {
+				return []byte(c.Jwt.Key), nil
+			}),
 		),
 		http.ErrorEncoder(ErrorEncoder),
 		http.ResponseEncoder(ResponseEncoder),

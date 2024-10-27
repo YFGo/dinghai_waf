@@ -3,6 +3,7 @@ package service
 import (
 	"context"
 	"wafconsole/app/user/internal/biz"
+	"wafconsole/app/user/internal/data/model"
 
 	pb "wafconsole/api/user/v1"
 )
@@ -19,6 +20,14 @@ func NewWafUserService(uc *biz.WafUserUsecase) *WafUserService {
 }
 
 func (s *WafUserService) CreateWafUser(ctx context.Context, req *pb.CreateWafUserRequest) (*pb.CreateWafUserReply, error) {
+	userInfo := model.UserInfo{
+		Email:    req.Email,
+		Password: req.Password,
+	}
+	err := s.uc.SignUp(ctx, userInfo)
+	if err != nil {
+		return nil, err
+	}
 	return &pb.CreateWafUserReply{}, nil
 }
 func (s *WafUserService) UpdateWafUser(ctx context.Context, req *pb.UpdateWafUserRequest) (*pb.UpdateWafUserReply, error) {

@@ -25,9 +25,9 @@ func (w wafUserRepo) GetByNameAndID(ctx context.Context, s string, i int64) (mod
 	panic("implement me")
 }
 
-func (w wafUserRepo) Create(ctx context.Context, t model.UserInfo) (int64, error) {
-	//TODO implement me
-	panic("implement me")
+func (w wafUserRepo) Create(ctx context.Context, userInfo model.UserInfo) (int64, error) {
+	err := w.data.db.Create(&userInfo).Error
+	return int64(userInfo.ID), err
 }
 
 func (w wafUserRepo) Update(ctx context.Context, i int64, t model.UserInfo) error {
@@ -48,4 +48,9 @@ func (w wafUserRepo) Count(ctx context.Context, withReturn ...iface.WhereOptionW
 func (w wafUserRepo) ListByWhere(ctx context.Context, limit, offset int64, opts ...iface.WhereOptionWithReturn) ([]model.UserInfo, error) {
 	//TODO implement me
 	panic("implement me")
+}
+
+func (w wafUserRepo) LoginByEmailPassword(ctx context.Context, user model.UserInfo) error {
+	err := w.data.db.Where("email = ? AND password = ?", user.Email, user.Password).First(&user).Error
+	return err
 }
