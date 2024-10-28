@@ -2,8 +2,10 @@ package service
 
 import (
 	"context"
+	"log/slog"
 	"wafconsole/app/user/internal/biz"
 	"wafconsole/app/user/internal/data/model"
+	"wafconsole/app/user/internal/server/plugin"
 
 	pb "wafconsole/api/user/v1"
 )
@@ -37,10 +39,36 @@ func (s *WafUserService) DeleteWafUser(ctx context.Context, req *pb.DeleteWafUse
 	return &pb.DeleteWafUserReply{}, nil
 }
 func (s *WafUserService) GetWafUser(ctx context.Context, req *pb.GetWafUserRequest) (*pb.GetWafUserReply, error) {
-	return &pb.GetWafUserReply{}, nil
+	userId := req.Id
+	if userId == 0 { //查询自己
+		userId = int64(ctx.Value(plugin.UserIDMid).(uint64))
+	}
+	userInfo, err := s.uc.GetUserInfoByID(ctx, userId)
+	if err != nil {
+		slog.ErrorContext(ctx, "GetUserInfoByID err : %v", err)
+		return nil, plugin.ServerEr()
+	}
+	return &pb.GetWafUserReply{
+		Email:      userInfo.Email,
+		UserName:   userInfo.UserName,
+		AvatarAddr: userInfo.AvatarAddr,
+		Phone:      userInfo.Phone,
+	}, nil
 }
 func (s *WafUserService) Login(ctx context.Context, req *pb.LoginUserInfoRequest) (*pb.LoginUserInfoReply, error) {
-	return &pb.LoginUserInfoReply{}, nil
+	userInfo := model.UserInfo{
+		Email:    req.Email,
+		Password: req.Password,
+	}
+	accessToken, refreshToken, err := s.uc.LoginByEmailPassword(ctx, userInfo)
+	if err != nil {
+		slog.ErrorContext(ctx, "LoginByEmailPassword err : %v", err)
+		return nil, plugin.ServerEr()
+	}
+	return &pb.LoginUserInfoReply{
+		AccessToken:  accessToken,
+		RefreshToken: refreshToken,
+	}, nil
 }
 func (s *WafUserService) UpdatePassword(ctx context.Context, req *pb.UpdatePasswordRequest) (*pb.UpdatePasswordReply, error) {
 	return &pb.UpdatePasswordReply{}, nil

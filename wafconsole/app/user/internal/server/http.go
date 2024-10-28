@@ -1,10 +1,10 @@
 package server
 
 import (
+	"context"
 	"encoding/json"
 	"github.com/go-kratos/kratos/v2/errors"
-	"github.com/go-kratos/kratos/v2/middleware/auth/jwt"
-	jwt2 "github.com/golang-jwt/jwt/v5"
+	"github.com/go-kratos/kratos/v2/middleware/selector"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 	"log/slog"
@@ -68,6 +68,20 @@ func ErrorEncoder(w http.ResponseWriter, r *http.Request, err error) {
 	w.Write(body)
 }
 
+func NewWhiteListMatcher() selector.MatchFunc {
+
+	whiteList := make(map[string]struct{})
+	whiteList["/api.user.v1.WafUser/CreateWafUser"] = struct{}{}
+	whiteList["/api.user.v1.WafUser/Login"] = struct{}{}
+
+	return func(ctx context.Context, operation string) bool {
+		if _, ok := whiteList[operation]; ok {
+			return false
+		}
+		return true
+	}
+}
+
 // NewHTTPServer new an HTTP server.
 func NewHTTPServer(c *conf.Server, userService *service.WafUserService, logger log.Logger) *http.Server {
 	protoValidate, err := plugin.NewValidate()
@@ -79,9 +93,9 @@ func NewHTTPServer(c *conf.Server, userService *service.WafUserService, logger l
 		http.Middleware(
 			recovery.Recovery(),
 			protoValidate.ValidateUnaryServerInterceptor(), //参数校验
-			jwt.Server(func(token *jwt2.Token) (interface{}, error) {
-				return []byte(c.Jwt.Key), nil
-			}),
+			selector.Server(
+				plugin.JWTMiddleware(), //token验证
+			).Match(NewWhiteListMatcher()).Build(),
 		),
 		http.ErrorEncoder(ErrorEncoder),
 		http.ResponseEncoder(ResponseEncoder),

@@ -12,7 +12,7 @@ option java_package = "api.user.v1";
 service WafUser {
 	rpc CreateWafUser (CreateWafUserRequest) returns (CreateWafUserReply) {
 		option (google.api.http) = {
-			post: "/app/user/v1/wafUser"
+			post: "/app/user/v1/wafUser/signup"
 			body: "*"
 		};
 	};

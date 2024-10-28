@@ -15,9 +15,10 @@ func NewWafUserRepo(data *Data) biz.WafUserRepo {
 	return &wafUserRepo{data: data}
 }
 
-func (w wafUserRepo) Get(ctx context.Context, i int64) (model.UserInfo, error) {
-	//TODO implement me
-	panic("implement me")
+func (w wafUserRepo) Get(ctx context.Context, id int64) (model.UserInfo, error) {
+	var userInfo model.UserInfo
+	err := w.data.db.Where("id = ?", id).First(&userInfo).Error
+	return userInfo, err
 }
 
 func (w wafUserRepo) GetByNameAndID(ctx context.Context, s string, i int64) (model.UserInfo, error) {
@@ -50,7 +51,7 @@ func (w wafUserRepo) ListByWhere(ctx context.Context, limit, offset int64, opts 
 	panic("implement me")
 }
 
-func (w wafUserRepo) LoginByEmailPassword(ctx context.Context, user model.UserInfo) error {
+func (w wafUserRepo) LoginByEmailPassword(ctx context.Context, user model.UserInfo) (model.UserInfo, error) {
 	err := w.data.db.Where("email = ? AND password = ?", user.Email, user.Password).First(&user).Error
-	return err
+	return user, err
 }

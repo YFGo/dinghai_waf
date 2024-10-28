@@ -37,7 +37,7 @@ type WafUserHTTPServer interface {
 
 func RegisterWafUserHTTPServer(s *http.Server, srv WafUserHTTPServer) {
 	r := s.Route("/")
-	r.POST("/app/user/v1/wafUser", _WafUser_CreateWafUser0_HTTP_Handler(srv))
+	r.POST("/app/user/v1/wafUser/signup", _WafUser_CreateWafUser0_HTTP_Handler(srv))
 	r.PATCH("/app/user/v1/wafUser", _WafUser_UpdateWafUser0_HTTP_Handler(srv))
 	r.DELETE("/app/user/v1/wafUser", _WafUser_DeleteWafUser0_HTTP_Handler(srv))
 	r.GET("/app/user/v1/wafUser/{id}", _WafUser_GetWafUser0_HTTP_Handler(srv))
@@ -193,7 +193,7 @@ func NewWafUserHTTPClient(client *http.Client) WafUserHTTPClient {
 
 func (c *WafUserHTTPClientImpl) CreateWafUser(ctx context.Context, in *CreateWafUserRequest, opts ...http.CallOption) (*CreateWafUserReply, error) {
 	var out CreateWafUserReply
-	pattern := "/app/user/v1/wafUser"
+	pattern := "/app/user/v1/wafUser/signup"
 	path := binding.EncodeURL(pattern, in, false)
 	opts = append(opts, http.Operation(OperationWafUserCreateWafUser))
 	opts = append(opts, http.PathTemplate(pattern))
