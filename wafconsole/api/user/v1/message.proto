@@ -27,7 +27,7 @@ message CreateWafUserRequest {
             (buf.validate.field).cel = {
                 id: "password",
                 message: "密码在10~15之间 , 且需要包含大小写字母,数据以及特殊字符",
-                expression: "size(this) >= 10 && size(this) <= 15 && this.matches('^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)(?=.*[@$!%*?&])[A-Za-z\\d@$!%*?&]{10,15}$')"
+                expression: "size(this) >= 10 && size(this) <= 15"
             }
     ];
 }
@@ -90,8 +90,8 @@ message LoginUserInfoRequest {
 }
 
 message LoginUserInfoReply{
-    int64 id = 1;
-    string access_token = 2;
+    string access_token = 1;
+    string refresh_token = 2;
 }
 
 message UpdatePasswordRequest {

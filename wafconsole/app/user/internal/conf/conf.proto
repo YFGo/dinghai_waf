@@ -23,6 +23,8 @@ message Server {
   }
   message Jwt {
     string key = 1;
+    string refresh_key = 2;
+    int64 time_out = 3;
   }
   HTTP http = 1;
   GRPC grpc = 2;

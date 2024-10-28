@@ -50,7 +50,7 @@ func (w wafUserRepo) ListByWhere(ctx context.Context, limit, offset int64, opts 
 	panic("implement me")
 }
 
-func (w wafUserRepo) LoginByEmailPassword(ctx context.Context, user model.UserInfo) error {
+func (w wafUserRepo) LoginByEmailPassword(ctx context.Context, user model.UserInfo) (model.UserInfo, error) {
 	err := w.data.db.Where("email = ? AND password = ?", user.Email, user.Password).First(&user).Error
-	return err
+	return user, err
 }

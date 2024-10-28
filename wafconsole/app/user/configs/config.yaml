@@ -3,10 +3,12 @@ server:
     addr: 0.0.0.0:8888
     timeout: 1s
   grpc:
-    addr: 0.0.0.0:9000
+    addr: 0.0.0.0:9002
     timeout: 1s
   jwt:
-    key: zyf
+    key: waf
+    refresh_key: wafRe
+    time_out: 2
 data:
   mysql:
     host: 152.136.50.60
