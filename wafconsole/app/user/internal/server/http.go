@@ -73,6 +73,7 @@ func NewWhiteListMatcher() selector.MatchFunc {
 	whiteList := make(map[string]struct{})
 	whiteList["/api.user.v1.WafUser/CreateWafUser"] = struct{}{}
 	whiteList["/api.user.v1.WafUser/Login"] = struct{}{}
+	whiteList["/api.user.v1.Common/CreateNewToken"] = struct{}{}
 
 	return func(ctx context.Context, operation string) bool {
 		if _, ok := whiteList[operation]; ok {
@@ -83,7 +84,7 @@ func NewWhiteListMatcher() selector.MatchFunc {
 }
 
 // NewHTTPServer new an HTTP server.
-func NewHTTPServer(c *conf.Server, userService *service.WafUserService, logger log.Logger) *http.Server {
+func NewHTTPServer(c *conf.Server, userService *service.WafUserService, commonService *service.CommonService, logger log.Logger) *http.Server {
 	protoValidate, err := plugin.NewValidate()
 	if err != nil {
 		slog.Error("protoValidate", err)
@@ -111,5 +112,6 @@ func NewHTTPServer(c *conf.Server, userService *service.WafUserService, logger l
 	}
 	srv := http.NewServer(opts...)
 	v1.RegisterWafUserHTTPServer(srv, userService)
+	v1.RegisterCommonHTTPServer(srv, commonService)
 	return srv
 }

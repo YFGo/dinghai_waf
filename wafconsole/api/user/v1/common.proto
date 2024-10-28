@@ -1,0 +1,21 @@
+syntax = "proto3";
+
+// kratos proto server api/wafTop/v1/server.proto -t app/wafTop/internal/service/site
+
+package api.user.v1;
+
+import "api/user/v1/message.proto";
+import "google/api/annotations.proto";
+
+option go_package = "wafconsole/api/user/v1;v1";
+option java_multiple_files = true;
+option java_package = "api.user.v1";
+
+service Common {
+	rpc CreateNewToken (CreateNewTokenRequest) returns (CreateNewTokenReply) {
+		option (google.api.http) = {
+			post: "/app/user/v1/waf/refreshToken"
+			body: "*"
+		};
+	};
+}
