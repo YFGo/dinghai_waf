@@ -669,6 +669,117 @@ func (*UpdatePasswordReply) Descriptor() ([]byte, []int) {
 	return file_api_user_v1_message_proto_rawDescGZIP(), []int{11}
 }
 
+// ####### common ########
+type CreateNewTokenRequest struct {
+	state         protoimpl.MessageState
+	sizeCache     protoimpl.SizeCache
+	unknownFields protoimpl.UnknownFields
+
+	RefreshToken string `protobuf:"bytes,1,opt,name=refresh_token,json=refreshToken,proto3" json:"refresh_token,omitempty"`
+}
+
+func (x *CreateNewTokenRequest) Reset() {
+	*x = CreateNewTokenRequest{}
+	if protoimpl.UnsafeEnabled {
+		mi := &file_api_user_v1_message_proto_msgTypes[12]
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		ms.StoreMessageInfo(mi)
+	}
+}
+
+func (x *CreateNewTokenRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*CreateNewTokenRequest) ProtoMessage() {}
+
+func (x *CreateNewTokenRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_api_user_v1_message_proto_msgTypes[12]
+	if protoimpl.UnsafeEnabled && x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use CreateNewTokenRequest.ProtoReflect.Descriptor instead.
+func (*CreateNewTokenRequest) Descriptor() ([]byte, []int) {
+	return file_api_user_v1_message_proto_rawDescGZIP(), []int{12}
+}
+
+func (x *CreateNewTokenRequest) GetRefreshToken() string {
+	if x != nil {
+		return x.RefreshToken
+	}
+	return ""
+}
+
+type CreateNewTokenReply struct {
+	state         protoimpl.MessageState
+	sizeCache     protoimpl.SizeCache
+	unknownFields protoimpl.UnknownFields
+
+	AccessToken  string `protobuf:"bytes,1,opt,name=access_token,json=accessToken,proto3" json:"access_token,omitempty"`
+	RefreshToken string `protobuf:"bytes,2,opt,name=refresh_token,json=refreshToken,proto3" json:"refresh_token,omitempty"`
+	ExpireAt     int64  `protobuf:"varint,3,opt,name=expire_at,json=expireAt,proto3" json:"expire_at,omitempty"`
+}
+
+func (x *CreateNewTokenReply) Reset() {
+	*x = CreateNewTokenReply{}
+	if protoimpl.UnsafeEnabled {
+		mi := &file_api_user_v1_message_proto_msgTypes[13]
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		ms.StoreMessageInfo(mi)
+	}
+}
+
+func (x *CreateNewTokenReply) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*CreateNewTokenReply) ProtoMessage() {}
+
+func (x *CreateNewTokenReply) ProtoReflect() protoreflect.Message {
+	mi := &file_api_user_v1_message_proto_msgTypes[13]
+	if protoimpl.UnsafeEnabled && x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use CreateNewTokenReply.ProtoReflect.Descriptor instead.
+func (*CreateNewTokenReply) Descriptor() ([]byte, []int) {
+	return file_api_user_v1_message_proto_rawDescGZIP(), []int{13}
+}
+
+func (x *CreateNewTokenReply) GetAccessToken() string {
+	if x != nil {
+		return x.AccessToken
+	}
+	return ""
+}
+
+func (x *CreateNewTokenReply) GetRefreshToken() string {
+	if x != nil {
+		return x.RefreshToken
+	}
+	return ""
+}
+
+func (x *CreateNewTokenReply) GetExpireAt() int64 {
+	if x != nil {
+		return x.ExpireAt
+	}
+	return 0
+}
+
 var File_api_user_v1_message_proto protoreflect.FileDescriptor
 
 var file_api_user_v1_message_proto_rawDesc = []byte{
@@ -780,10 +891,25 @@ var file_api_user_v1_message_proto_rawDesc = []byte{
 	0x21, 0x25, 0x2a, 0x3f, 0x26, 0x5d, 0x7b, 0x31, 0x30, 0x2c, 0x31, 0x35, 0x7d, 0x24, 0x27, 0x29,
 	0x52, 0x08, 0x70, 0x61, 0x73, 0x73, 0x77, 0x6f, 0x72, 0x64, 0x22, 0x15, 0x0a, 0x13, 0x55, 0x70,
 	0x64, 0x61, 0x74, 0x65, 0x50, 0x61, 0x73, 0x73, 0x77, 0x6f, 0x72, 0x64, 0x52, 0x65, 0x70, 0x6c,
-	0x79, 0x42, 0x2a, 0x0a, 0x0b, 0x61, 0x70, 0x69, 0x2e, 0x75, 0x73, 0x65, 0x72, 0x2e, 0x76, 0x31,
-	0x50, 0x01, 0x5a, 0x19, 0x77, 0x61, 0x66, 0x63, 0x6f, 0x6e, 0x73, 0x6f, 0x6c, 0x65, 0x2f, 0x61,
-	0x70, 0x69, 0x2f, 0x75, 0x73, 0x65, 0x72, 0x2f, 0x76, 0x31, 0x3b, 0x76, 0x31, 0x62, 0x06, 0x70,
-	0x72, 0x6f, 0x74, 0x6f, 0x33,
+	0x79, 0x22, 0x76, 0x0a, 0x15, 0x43, 0x72, 0x65, 0x61, 0x74, 0x65, 0x4e, 0x65, 0x77, 0x54, 0x6f,
+	0x6b, 0x65, 0x6e, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x12, 0x5d, 0x0a, 0x0d, 0x72, 0x65,
+	0x66, 0x72, 0x65, 0x73, 0x68, 0x5f, 0x74, 0x6f, 0x6b, 0x65, 0x6e, 0x18, 0x01, 0x20, 0x01, 0x28,
+	0x09, 0x42, 0x38, 0xba, 0x48, 0x35, 0xba, 0x01, 0x32, 0x0a, 0x0d, 0x72, 0x65, 0x66, 0x72, 0x65,
+	0x73, 0x68, 0x5f, 0x74, 0x6f, 0x6b, 0x65, 0x6e, 0x12, 0x11, 0x74, 0x6f, 0x6b, 0x65, 0x6e, 0xe4,
+	0xb8, 0x8d, 0xe8, 0x83, 0xbd, 0xe4, 0xb8, 0xba, 0xe7, 0xa9, 0xba, 0x1a, 0x0e, 0x73, 0x69, 0x7a,
+	0x65, 0x28, 0x74, 0x68, 0x69, 0x73, 0x29, 0x20, 0x3e, 0x20, 0x30, 0x52, 0x0c, 0x72, 0x65, 0x66,
+	0x72, 0x65, 0x73, 0x68, 0x54, 0x6f, 0x6b, 0x65, 0x6e, 0x22, 0x7a, 0x0a, 0x13, 0x43, 0x72, 0x65,
+	0x61, 0x74, 0x65, 0x4e, 0x65, 0x77, 0x54, 0x6f, 0x6b, 0x65, 0x6e, 0x52, 0x65, 0x70, 0x6c, 0x79,
+	0x12, 0x21, 0x0a, 0x0c, 0x61, 0x63, 0x63, 0x65, 0x73, 0x73, 0x5f, 0x74, 0x6f, 0x6b, 0x65, 0x6e,
+	0x18, 0x01, 0x20, 0x01, 0x28, 0x09, 0x52, 0x0b, 0x61, 0x63, 0x63, 0x65, 0x73, 0x73, 0x54, 0x6f,
+	0x6b, 0x65, 0x6e, 0x12, 0x23, 0x0a, 0x0d, 0x72, 0x65, 0x66, 0x72, 0x65, 0x73, 0x68, 0x5f, 0x74,
+	0x6f, 0x6b, 0x65, 0x6e, 0x18, 0x02, 0x20, 0x01, 0x28, 0x09, 0x52, 0x0c, 0x72, 0x65, 0x66, 0x72,
+	0x65, 0x73, 0x68, 0x54, 0x6f, 0x6b, 0x65, 0x6e, 0x12, 0x1b, 0x0a, 0x09, 0x65, 0x78, 0x70, 0x69,
+	0x72, 0x65, 0x5f, 0x61, 0x74, 0x18, 0x03, 0x20, 0x01, 0x28, 0x03, 0x52, 0x08, 0x65, 0x78, 0x70,
+	0x69, 0x72, 0x65, 0x41, 0x74, 0x42, 0x2a, 0x0a, 0x0b, 0x61, 0x70, 0x69, 0x2e, 0x75, 0x73, 0x65,
+	0x72, 0x2e, 0x76, 0x31, 0x50, 0x01, 0x5a, 0x19, 0x77, 0x61, 0x66, 0x63, 0x6f, 0x6e, 0x73, 0x6f,
+	0x6c, 0x65, 0x2f, 0x61, 0x70, 0x69, 0x2f, 0x75, 0x73, 0x65, 0x72, 0x2f, 0x76, 0x31, 0x3b, 0x76,
+	0x31, 0x62, 0x06, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x33,
 }
 
 var (
@@ -798,7 +924,7 @@ func file_api_user_v1_message_proto_rawDescGZIP() []byte {
 	return file_api_user_v1_message_proto_rawDescData
 }
 
-var file_api_user_v1_message_proto_msgTypes = make([]protoimpl.MessageInfo, 12)
+var file_api_user_v1_message_proto_msgTypes = make([]protoimpl.MessageInfo, 14)
 var file_api_user_v1_message_proto_goTypes = []any{
 	(*CreateWafUserRequest)(nil),  // 0: api.user.v1.CreateWafUserRequest
 	(*CreateWafUserReply)(nil),    // 1: api.user.v1.CreateWafUserReply
@@ -812,6 +938,8 @@ var file_api_user_v1_message_proto_goTypes = []any{
 	(*LoginUserInfoReply)(nil),    // 9: api.user.v1.LoginUserInfoReply
 	(*UpdatePasswordRequest)(nil), // 10: api.user.v1.UpdatePasswordRequest
 	(*UpdatePasswordReply)(nil),   // 11: api.user.v1.UpdatePasswordReply
+	(*CreateNewTokenRequest)(nil), // 12: api.user.v1.CreateNewTokenRequest
+	(*CreateNewTokenReply)(nil),   // 13: api.user.v1.CreateNewTokenReply
 }
 var file_api_user_v1_message_proto_depIdxs = []int32{
 	0, // [0:0] is the sub-list for method output_type
@@ -971,6 +1099,30 @@ func file_api_user_v1_message_proto_init() {
 				return nil
 			}
 		}
+		file_api_user_v1_message_proto_msgTypes[12].Exporter = func(v any, i int) any {
+			switch v := v.(*CreateNewTokenRequest); i {
+			case 0:
+				return &v.state
+			case 1:
+				return &v.sizeCache
+			case 2:
+				return &v.unknownFields
+			default:
+				return nil
+			}
+		}
+		file_api_user_v1_message_proto_msgTypes[13].Exporter = func(v any, i int) any {
+			switch v := v.(*CreateNewTokenReply); i {
+			case 0:
+				return &v.state
+			case 1:
+				return &v.sizeCache
+			case 2:
+				return &v.unknownFields
+			default:
+				return nil
+			}
+		}
 	}
 	type x struct{}
 	out := protoimpl.TypeBuilder{
@@ -978,7 +1130,7 @@ func file_api_user_v1_message_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: file_api_user_v1_message_proto_rawDesc,
 			NumEnums:      0,
-			NumMessages:   12,
+			NumMessages:   14,
 			NumExtensions: 0,
 			NumServices:   0,
 		},

@@ -119,3 +119,20 @@ message UpdatePasswordRequest {
 }
 
 message UpdatePasswordReply {}
+
+// ####### common ########
+message CreateNewTokenRequest {
+    string refresh_token = 1 [
+            (buf.validate.field).cel = {
+                id: "refresh_token",
+                message: "token不能为空",
+                expression: "size(this) > 0"
+            }
+    ];
+}
+
+message CreateNewTokenReply {
+    string access_token = 1;
+    string refresh_token = 2;
+    int64 expire_at = 3;
+}

@@ -85,7 +85,7 @@ func (jm *JWTUtils) ParseRefreshToken(refreshTokenStr string) (*CustomClaims, bo
 	})
 	if err != nil {
 		//生成refreshToken失败
-		fmt.Errorf("生成refreshToken失败: %v\n", err)
+		slog.Error("refreshToken解析失败")
 		return nil, false, err
 	}
 	if claims, ok := refreshToken.Claims.(*CustomClaims); ok && refreshToken.Valid {

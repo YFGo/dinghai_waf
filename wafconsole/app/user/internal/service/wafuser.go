@@ -46,7 +46,7 @@ func (s *WafUserService) GetWafUser(ctx context.Context, req *pb.GetWafUserReque
 	userInfo, err := s.uc.GetUserInfoByID(ctx, userId)
 	if err != nil {
 		slog.ErrorContext(ctx, "GetUserInfoByID err : %v", err)
-		return nil, plugin.ServerEr()
+		return nil, plugin.ServerErr()
 	}
 	return &pb.GetWafUserReply{
 		Email:      userInfo.Email,
@@ -63,7 +63,7 @@ func (s *WafUserService) Login(ctx context.Context, req *pb.LoginUserInfoRequest
 	accessToken, refreshToken, err := s.uc.LoginByEmailPassword(ctx, userInfo)
 	if err != nil {
 		slog.ErrorContext(ctx, "LoginByEmailPassword err : %v", err)
-		return nil, plugin.ServerEr()
+		return nil, plugin.ServerErr()
 	}
 	return &pb.LoginUserInfoReply{
 		AccessToken:  accessToken,
