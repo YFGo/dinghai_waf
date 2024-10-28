@@ -5,8 +5,15 @@ import (
 	"fmt"
 	"github.com/golang-jwt/jwt"
 	jwtv4 "github.com/golang-jwt/jwt/v4"
+	"log/slog"
 	"time"
-	"wafconsole/app/user/internal/conf"
+)
+
+const (
+	AccessTokenExpire  = 3600
+	RefreshTokenExpire = 7200
+	AccessTokenKey     = "waf"
+	RefreshToken       = "refresh"
 )
 
 type UserClaims struct {
@@ -28,10 +35,10 @@ type JWTUtils struct {
 
 func InitNewJWTUtils() *JWTUtils {
 	authMiddleware := &JWTUtils{
-		AccessSecret:  []byte(conf.Server_Jwt{}.Key),
-		RefreshSecret: []byte(conf.Server_Jwt{}.RefreshKey),
-		Timeout:       int(conf.Server_Jwt{}.TimeOut),
-		MaxRefresh:    int(conf.Server_Jwt{}.TimeOut),
+		AccessSecret:  []byte(AccessTokenKey),
+		RefreshSecret: []byte(RefreshToken),
+		Timeout:       AccessTokenExpire,
+		MaxRefresh:    RefreshTokenExpire,
 	}
 	return authMiddleware
 }
@@ -93,11 +100,12 @@ func (jm *JWTUtils) ParseAccessToken(accessTokenStr string) (*CustomClaims, bool
 		return jm.AccessSecret, nil
 	})
 	if err != nil {
-		v, _ := err.(*jwt.ValidationError)
+		var v *jwt.ValidationError
+		errors.As(err, &v)
 		if v.Errors == jwt.ValidationErrorExpired {
-			fmt.Println("token过期")
+			slog.Error("accessToken已过期")
 		} else {
-			fmt.Errorf("生成accessToken失败: %v\n", err)
+			slog.Error("accessToken解析失败")
 			return nil, false, err
 		}
 

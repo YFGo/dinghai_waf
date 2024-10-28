@@ -15,9 +15,10 @@ func NewWafUserRepo(data *Data) biz.WafUserRepo {
 	return &wafUserRepo{data: data}
 }
 
-func (w wafUserRepo) Get(ctx context.Context, i int64) (model.UserInfo, error) {
-	//TODO implement me
-	panic("implement me")
+func (w wafUserRepo) Get(ctx context.Context, id int64) (model.UserInfo, error) {
+	var userInfo model.UserInfo
+	err := w.data.db.Where("id = ?", id).First(&userInfo).Error
+	return userInfo, err
 }
 
 func (w wafUserRepo) GetByNameAndID(ctx context.Context, s string, i int64) (model.UserInfo, error) {

@@ -63,7 +63,7 @@ message GetWafUserRequest {
             (buf.validate.field).cel = {
                 id: "id",
                 message: "用户不存在",
-                expression: "this > 0"
+                expression: "this > -1"
             }
     ];
 }

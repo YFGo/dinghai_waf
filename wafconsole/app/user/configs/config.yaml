@@ -5,10 +5,6 @@ server:
   grpc:
     addr: 0.0.0.0:9002
     timeout: 1s
-  jwt:
-    key: waf
-    refresh_key: wafRe
-    time_out: 2
 data:
   mysql:
     host: 152.136.50.60

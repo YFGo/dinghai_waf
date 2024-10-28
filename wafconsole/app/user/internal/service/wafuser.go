@@ -39,7 +39,21 @@ func (s *WafUserService) DeleteWafUser(ctx context.Context, req *pb.DeleteWafUse
 	return &pb.DeleteWafUserReply{}, nil
 }
 func (s *WafUserService) GetWafUser(ctx context.Context, req *pb.GetWafUserRequest) (*pb.GetWafUserReply, error) {
-	return &pb.GetWafUserReply{}, nil
+	userId := req.Id
+	if userId == 0 { //查询自己
+		userId = int64(ctx.Value(plugin.UserIDMid).(uint64))
+	}
+	userInfo, err := s.uc.GetUserInfoByID(ctx, userId)
+	if err != nil {
+		slog.ErrorContext(ctx, "GetUserInfoByID err : %v", err)
+		return nil, plugin.ServerEr()
+	}
+	return &pb.GetWafUserReply{
+		Email:      userInfo.Email,
+		UserName:   userInfo.UserName,
+		AvatarAddr: userInfo.AvatarAddr,
+		Phone:      userInfo.Phone,
+	}, nil
 }
 func (s *WafUserService) Login(ctx context.Context, req *pb.LoginUserInfoRequest) (*pb.LoginUserInfoReply, error) {
 	userInfo := model.UserInfo{

@@ -53,3 +53,16 @@ func (w *WafUserUsecase) LoginByEmailPassword(ctx context.Context, user model.Us
 	accessToken, refreshToken, _ := jwtUtils.GetToken(userclaims)
 	return accessToken, refreshToken, nil
 }
+
+// GetUserInfoByID 获取用户信息
+func (w *WafUserUsecase) GetUserInfoByID(ctx context.Context, id int64) (model.UserInfo, error) {
+	userInfo, err := w.repo.Get(ctx, id)
+	if err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return model.UserInfo{}, status.Error(codes.NotFound, "user not found")
+		}
+		slog.ErrorContext(ctx, "GetUserInfo error : ", err)
+		return model.UserInfo{}, err
+	}
+	return userInfo, nil
+}
