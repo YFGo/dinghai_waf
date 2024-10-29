@@ -76,7 +76,7 @@ func newMysql(cfg *conf.Data_Mysql) (*gorm.DB, error) {
 
 func newETCD() *clientv3.Client {
 	etcdClient, err := clientv3.New(clientv3.Config{
-		Endpoints:   []string{"152.136.50.60:2379"},
+		Endpoints:   []string{"127.0.0.1:2379"},
 		DialTimeout: 5 * time.Second,
 	})
 	if err != nil {
