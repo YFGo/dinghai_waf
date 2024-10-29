@@ -1,14 +1,10 @@
-.PHONY: api
-# generate api
-api:
-	find app -type d -depth 1 -print | xargs -L 1 bash -c 'cd "$$0" && pwd && $(MAKE) api'
+GOHOSTOS:=$(shell go env GOHOSTOS)
+GOPATH:=$(shell go env GOPATH)
+VERSION=$(shell git describe --tags --always)
 
-.PHONY: wire
-# generate wire
-wire:
-	find app -type d -depth 2 -print | xargs -L 1 bash -c 'cd "$$0" && pwd && $(MAKE) wire'
 
-.PHONY: proto
-# generate proto
-proto:
-	find app -type d -depth 2 -print | xargs -L 1 bash -c 'cd "$$0" && pwd && $(MAKE) proto'
+.PHONY: build
+# build
+build:
+	mkdir -p bin/ && go build -ldflags "-X main.Version=$(VERSION)" -o ./bin/ ./...
+
