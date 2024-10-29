@@ -1496,7 +1496,7 @@ Improvements:
 * Added Ignore Static Content (Performance enhancement) rule set
 * Added XML Enabler (Web Services) rule set which will parse XML data
 * Added Authorized Vulnerability Scanning (AVS) Whitelist rule set
-* Added Denial of Service (DoS) Protection rule set
+* Added Denial of WafAppService (DoS) Protection rule set
 * Added Slow HTTP DoS (Connection Consumption) Protection rule set
 * Added Brute Force Attack Protection rule set
 * Added Session Hijacking Detection rule set

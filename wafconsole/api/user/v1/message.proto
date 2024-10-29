@@ -1,0 +1,138 @@
+syntax = "proto3";
+
+package api.user.v1;
+
+import "buf/validate/validate.proto";
+
+option go_package = "wafconsole/api/user/v1;v1";
+option java_multiple_files = true;
+option java_package = "api.user.v1";
+
+message CreateWafUserRequest {
+    string email = 1 [
+            (buf.validate.field).cel = {
+                id: "email",
+                message: "邮箱格式错误",
+                expression: "this.isEmail()"
+            }
+    ];
+    string code = 2 [
+            (buf.validate.field).cel = {
+                id: "code",
+                message: "邮件验证码不能为空",
+                expression: "size(this) > 0"
+            }
+    ];
+    string password = 3 [
+            (buf.validate.field).cel = {
+                id: "password",
+                message: "密码在10~15之间 , 且需要包含大小写字母,数据以及特殊字符",
+                expression: "size(this) >= 10 && size(this) <= 15"
+            }
+    ];
+}
+message CreateWafUserReply {}
+
+message UpdateWafUserRequest {
+    string user_name = 1[
+            (buf.validate.field).cel = {
+                id: "user_name",
+                message: "用户名不能超过10字符",
+                expression: "size(this) <= 10"
+            }
+    ];
+    string avatar_addr = 2;
+    string phone = 3;
+}
+message UpdateWafUserReply {}
+
+message DeleteWafUserRequest {
+    int64 id = 1;
+    string code = 2 [
+            (buf.validate.field).cel = {
+                id: "code",
+                message: "验证码不能为空",
+                expression: "size(this) > 0"
+            }
+    ];
+}
+message DeleteWafUserReply {}
+
+message GetWafUserRequest {
+    int64 id = 1 [
+            (buf.validate.field).cel = {
+                id: "id",
+                message: "用户不存在",
+                expression: "this > -1"
+            }
+    ];
+}
+message GetWafUserReply {
+    string email = 1;
+    string user_name = 2;
+    string avatar_addr = 3;
+    string phone = 4;
+}
+
+
+message LoginUserInfoRequest {
+    int64 login_method = 1 [
+            (buf.validate.field).cel = {
+                id: "login_method",
+                message: "请选择登录方式",
+                expression: "this in [1 ,2 , 3]"
+            }
+    ];
+    string phone = 2;
+    string email = 3;
+    string code = 4;
+    string password = 5;
+}
+
+message LoginUserInfoReply{
+    string access_token = 1;
+    string refresh_token = 2;
+}
+
+message UpdatePasswordRequest {
+    int64 id = 1 [
+            (buf.validate.field).cel = {
+                id: "id",
+                message: "用户不存在",
+                expression: "this > 0"
+            }
+    ];
+    string code = 2 [
+            (buf.validate.field).cel = {
+                id: "code",
+                message: "验证码不能为空",
+                expression: "size(this) > 0"
+            }
+    ];
+    string password = 3 [
+            (buf.validate.field).cel = {
+                id: "password",
+                message: "密码长度在10~15字符之间,且必须包含大小写字母,数字以及特殊字符",
+                expression: "size(this) >= 10 && size(this) <= 15 && this.matches('^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)(?=.*[@$!%*?&])[A-Za-z\\d@$!%*?&]{10,15}$')"
+            }
+    ];
+}
+
+message UpdatePasswordReply {}
+
+// ####### common ########
+message CreateNewTokenRequest {
+    string refresh_token = 1 [
+            (buf.validate.field).cel = {
+                id: "refresh_token",
+                message: "token不能为空",
+                expression: "size(this) > 0"
+            }
+    ];
+}
+
+message CreateNewTokenReply {
+    string access_token = 1;
+    string refresh_token = 2;
+    int64 expire_at = 3;
+}

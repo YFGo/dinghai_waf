@@ -1,0 +1,48 @@
+syntax = "proto3";
+
+package api.user.v1;
+
+import "api/user/v1/message.proto";
+import "google/api/annotations.proto";
+
+option go_package = "wafconsole/api/user/v1;v1";
+option java_multiple_files = true;
+option java_package = "api.user.v1";
+
+service WafUser {
+	rpc CreateWafUser (CreateWafUserRequest) returns (CreateWafUserReply) {
+		option (google.api.http) = {
+			post: "/app/user/v1/wafUser/signup"
+			body: "*"
+		};
+	};
+	rpc UpdateWafUser (UpdateWafUserRequest) returns (UpdateWafUserReply) {
+		option (google.api.http) = {
+			patch: "/app/user/v1/wafUser"
+			body: "*"
+		};
+	};
+	rpc DeleteWafUser (DeleteWafUserRequest) returns (DeleteWafUserReply) {
+		option (google.api.http) = {
+			delete: "/app/user/v1/wafUser"
+		};
+	};
+	rpc GetWafUser (GetWafUserRequest) returns (GetWafUserReply) {
+		option (google.api.http) = {
+			get: "/app/user/v1/wafUser/{id}"
+		};
+	};
+	rpc Login(LoginUserInfoRequest) returns (LoginUserInfoReply) {
+		option (google.api.http) = {
+			post: "/app/user/v1/wafUser/login"
+			body: "*"
+		};
+	};
+	rpc UpdatePassword(UpdatePasswordRequest) returns (UpdatePasswordReply) {
+		option (google.api.http) = {
+			patch: "/app/user/v1/wafUser/password"
+			body: "*"
+		};
+	};
+}
+

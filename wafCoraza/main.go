@@ -25,8 +25,8 @@ func initApp() (func(), *wafHttp.WafHandleService) {
 	loadWafRepo := data.NewLoadWAFConfigRepo(dataDB)
 	wafConfigUsercase := biz.NewWafConfigUsercase(loadWafRepo)
 	//开启定时任务
-	timeTask := attackUsercase.StartTimeTask()
-	timeTask()
+	//timeTask := attackUsercase.StartTimeTask()
+	//timeTask()
 	attackHttp := wafHttp.NewWafHandleService(attackUsercase, wafConfigUsercase)
 
 	// 在服务启动之处 , 创建存储攻击日志的csv文件
@@ -40,7 +40,7 @@ func main() {
 	wafService.InitWAF()
 	// 配置热更新waf实列
 	go func() {
-		wafService.WatchStrategyService()
+		wafService.WatchEtcdService()
 	}()
 	// 设置 HTTP 处理函数
 	http.HandleFunc("/", wafService.ProxyHandler())
