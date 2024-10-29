@@ -2,6 +2,6 @@
 wafCoraza/waf_log
 *.exe
 
-wafconsole/app/dashBorad/configs/config.dev.yaml
-wafconsole/app/user/configs/config.dev.yaml
-wafconsole/app/wafTop/configs/config.dev.yaml
+wafconsole/app/dashBorad/configs/config_dev.yaml
+wafconsole/app/user/configs/config_dev.yaml
+wafconsole/app/wafTop/configs/config_dev.yaml
