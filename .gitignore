@@ -7,6 +7,7 @@ wafconsole/app/user/configs/config_dev.yaml
 wafconsole/app/wafTop/configs/config_dev.yaml
 
 DingHai
+DingHai_linux
 
 wafCoraza/conf/conf_dev.ini
 *.zip
