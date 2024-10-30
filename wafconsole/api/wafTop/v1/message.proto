@@ -1,0 +1,741 @@
+syntax = "proto3";
+
+package api.wafTop.v1;
+
+option go_package = "wafconsole/api/wafTop/v1;v1";
+option java_multiple_files = true;
+option java_package = "api.wafTop.v1";
+
+import "buf/validate/validate.proto";
+
+message SeclangMod {
+	string match_goal = 1 [
+			(buf.validate.field).cel = {
+				id: "match_goal",
+				message: "请选择正确的匹配目标",
+				expression: "this in ['IP' , 'COOKIE' , 'HEADER']"
+			}
+	];
+	string match_action = 2 [
+			(buf.validate.field).cel = {
+				id: "match_action",
+				message: "请选择正确的匹配方式",
+				expression: "this in ['等于' , '模糊匹配' , '不等于']"
+			}
+	];
+	string match_content = 3 [
+			(buf.validate.field).cel = {
+				id: "match_content",
+				message: "请输入匹配内容",
+				expression: "size(this) > 0"
+			}
+	];
+}
+
+// waf保护的应用程序
+message CreateWafAppRequest {
+	string name = 1 [
+			(buf.validate.field).cel = {
+				id: "name",
+				message: "应用程序名称长度应为1~15",
+				expression: "size(this) >=1 && size(this) <=15"
+			}
+	];
+	string url = 2;
+	int64 server_id = 3 [
+			(buf.validate.field).cel = {
+				id: "server_id",
+				message: "服务器不存在",
+				expression: "this > 0"
+			}
+	];
+}
+message CreateWafAppReply {}
+
+message UpdateWafAppRequest {
+	string name = 1 [
+		(buf.validate.field).cel = {
+			id: "name",
+			message: "应用程序名称长度应为1~15",
+			expression: "size(this) >=1 && size(this) <=15"
+		}
+	];
+	string url = 2;
+	int64 server_id = 3 [
+		(buf.validate.field).cel = {
+			id: "server_id",
+			message: "服务器不存在",
+			expression: "this > 0"
+		}
+	];
+	int64 id = 4 [
+			(buf.validate.field).cel = {
+				id: "id",
+				message: "web程序不存在",
+				expression: "this > 0"
+			}
+	];
+}
+message UpdateWafAppReply {}
+
+message GetWafAppRequest {
+	int64 id = 1 [
+			(buf.validate.field).cel = {
+				id: "id",
+				message: "应用程序不存在",
+				expression: "this > 0"
+			}
+	];
+}
+message GetWafAppReply {
+	string name = 1;
+	string url = 2;
+	ServerInfo server_info = 3;
+}
+
+message ListWafAppRequest {
+	string name = 1;
+	int64 page_now = 2 [
+		(buf.validate.field).cel = {
+			id: "page_now",
+			message: "分页参数错误",
+			expression: "this > 0"
+		}
+	];
+	int64 page_size = 3 [
+		(buf.validate.field).cel = {
+			id: "page_size"
+			message: "分页参数错误",
+			expression: "this > 0"
+		}
+	];
+}
+message WafAppInfo {
+	int64 id = 1;
+	string name = 2;
+	string url = 3;
+}
+message ListWafAppReply {
+	int64 total = 1;
+	repeated WafAppInfo waf_apps = 2;
+}
+// waf保护的应用程序
+
+// waf保护的服务器
+message CreateServerRequest {
+	string name = 1 [
+		(buf.validate.field).cel = {
+			id: "name",
+			message: "名字长度在1~15字之间",
+			expression: "size(this) >= 1 && size(this) <= 15"
+		}
+	];
+	string ip = 2 [
+		(buf.validate.field).cel = {
+			id: "ip",
+			message: "IP地址格式不规范",
+			expression: "this.isIp()"
+		}
+	];
+	string host = 3 [
+			(buf.validate.field).cel = {
+				id: "base_url",
+				message: "基础地址格式错误",
+				expression: "size(this) > 0"
+			}
+	];
+	int64 port = 4 [
+		(buf.validate.field).cel = {
+			id: "port",
+			message: "端口选择在1~65535之间",
+			expression: "this >= 1 && this <= 65535"
+		}
+	];
+	repeated int64 strategy_ids = 5 [
+			(buf.validate.field).cel = {
+				id: "strategy_ids",
+				message: "请选择服务器使用的策略",
+				expression: "size(this)  > 0"
+			}
+	] ;
+}
+message CreateServerReply {}
+
+message UpdateServerRequest {
+	string name = 1 [
+		(buf.validate.field).cel = {
+			id: "name",
+			message: "名字长度在1~15字之间",
+			expression: "size(this) >= 1 && size(this) <= 15"
+		}
+	];
+	string ip = 2 [
+		(buf.validate.field).cel = {
+			id: "ip",
+			message: "IP地址格式不规范",
+			expression: "this.isIp()"
+		}
+	];
+	string host = 3 [
+		(buf.validate.field).cel = {
+			id: "base_url",
+			message: "基础地址格式错误",
+			expression: "size(this) > 0"
+		}
+	];
+	int64 port = 4 [
+		(buf.validate.field).cel = {
+			id: "port",
+			message: "端口选择在1~65535之间",
+			expression: "this >= 1 && this <= 65535"
+		}
+	];
+	int64 id = 5 [
+			(buf.validate.field).cel = {
+				id: "id",
+				message: "服务器不存在",
+				expression: "this > 0"
+			}
+	];
+	repeated int64 strategy_ids = 6 [
+		(buf.validate.field).cel = {
+			id: "strategy_ids",
+			message: "请选择服务器使用的策略",
+			expression: "size(this)  > 0"
+		}
+	] ;
+}
+message UpdateServerReply {}
+
+// 删除服务器
+message DeleteRequest {
+	repeated int64 ids = 1[
+		(buf.validate.field).cel = {
+			id: "ids",
+			message: "服务器不能为空",
+			expression: "size(this) > 0"
+		},
+		(buf.validate.field).repeated.items.cel = {
+			id: "ids",
+			message: "服务器选择错误",
+			expression: "this > 0"
+		}
+	];
+}
+message DeleteReply {}
+
+// 根据服务器id 查询服务器详细信息
+message GetServerRequest {
+	int64 id = 1[
+		(buf.validate.field).cel = {
+			id: "id",
+			message: "服务器选择错误",
+			expression: "this > 0"
+		}
+	];
+}
+message GetServerReply {
+	string name = 1;
+	string ip = 2;
+	string host = 3;
+	int64 port = 4;
+	repeated int64 strategies_id = 5;
+	WafAppInfo waf_apps = 6;
+}
+
+// 查询服务器列表
+message ListServerRequest {
+	string name = 1;
+	int64 page_now = 2 [
+		(buf.validate.field).cel = {
+			id: "page_now",
+			message: "分页参数错误",
+			expression: "this > 0"
+		}
+	];
+	int64 page_size = 3 [
+		(buf.validate.field).cel = {
+			id: "page_size"
+			message: "分页参数错误",
+			expression: "this > 0"
+		}
+	];
+}
+message ServerInfo {
+	string name = 1;
+	string ip = 2;
+	string host = 3;
+	int64 port = 4;
+	int64  id = 5;
+}
+message ListServerReply {
+	int64 total = 1;
+	repeated ServerInfo list_servers = 2;
+}
+// 服务器##########
+
+// 策略 ###########
+
+message CreateStrategyRequest {
+	string name = 1 [
+			(buf.validate.field).cel = {
+				id: "name",
+				message: "策略昵称长度必须在1~15之间",
+				expression: "size(this) >= 1 && size(this) <= 15"
+			}
+	];
+	string description = 2 [
+			(buf.validate.field).cel = {
+				id: "description",
+				message: "策略描述不能为空",
+				expression: "size(this) > 0"
+			}
+	];
+	int64 status = 3 [
+			(buf.validate.field).cel = {
+				id: "status",
+				message: "策略状态",
+				expression: "this in [1 , 2]"
+			}
+	];
+	int64 action = 4 [
+			(buf.validate.field).cel = {
+				id: "action",
+				message: "命中此策略时的行为",
+				expression: "this in [1 , 2]"
+			}
+	];
+	int64 next_action = 5 [
+			(buf.validate.field).cel = {
+				id: "next_action",
+				message: "命中此策略后的行为",
+				expression: "this in [1 , 2]"
+			}
+	];
+	repeated int64 group_id = 6 [
+			(buf.validate.field).cel = {
+				id: "group_id",
+				message: "请选择规则组",
+				expression: "size(this) > 0"
+			},
+			(buf.validate.field).repeated.items.cel = {
+				id: "group_id",
+				message: "规则组不存在",
+				expression: "this > 0"
+			}
+	];
+}
+message CreateStrategyReply {}
+
+message UpdateStrategyRequest {
+	string name = 1 [
+		(buf.validate.field).cel = {
+			id: "name",
+			message: "策略昵称长度必须在1~15之间",
+			expression: "size(this) >= 1 && size(this) <= 15"
+		}
+	];
+	string description = 2 [
+		(buf.validate.field).cel = {
+			id: "description",
+			message: "策略描述不能为空",
+			expression: "size(this) > 0"
+		}
+	];
+	int64 status = 3 [
+		(buf.validate.field).cel = {
+			id: "status",
+			message: "策略状态",
+			expression: "this in [1 , 2]"
+		}
+	];
+	int64 action = 4 [
+		(buf.validate.field).cel = {
+			id: "action",
+			message: "命中此策略时的行为",
+			expression: "this in [1 , 2]"
+		}
+	];
+	int64 next_action = 5 [
+		(buf.validate.field).cel = {
+			id: "next_action",
+			message: "命中此策略后的行为",
+			expression: "this in [1 , 2]"
+		}
+	];
+	repeated int64 group_id = 6 [
+		(buf.validate.field).cel = {
+			id: "group_id",
+			message: "请选择规则组",
+			expression: "size(this) > 0"
+		},
+		(buf.validate.field).repeated.items.cel = {
+			id: "group_id",
+			message: "规则组不存在",
+			expression: "this > 0"
+		}
+	];
+	int64 id = 7 [
+			(buf.validate.field).cel = {
+				id: "id" ,
+				message: "策略不存在",
+				expression: "this > 0"
+			}
+	];
+}
+message UpdateStrategyReply {}
+
+message DeleteStrategyRequest {
+	repeated int64 ids = 1[
+			(buf.validate.field).cel = {
+				id: "ids",
+				message: "请选择需要删除的策略",
+				expression: "size(this) > 0"
+			},
+			(buf.validate.field).repeated.items.cel = {
+				id: "ids",
+				message: "策略不存在",
+				expression: "this > 0"
+			}
+	] ;
+}
+message DeleteStrategyReply {}
+
+message GetStrategyRequest {
+	int64 id = 1[
+			(buf.validate.field).cel = {
+				id: "id",
+				message: "策略不存在",
+				expression: "this > 0"
+			}
+	];
+}
+message GetStrategyReply {
+	string name = 1 ;
+	string description = 2 ;
+	int64 status = 3 ;
+	int64 action = 4 ;
+	int64 next_action = 5 ;
+	repeated RuleGroupInfo rule_group_infos = 6;
+}
+
+message ListStrategyRequest {
+	string name = 1;
+	int64 status = 2;
+	int64 page_now = 3[
+			(buf.validate.field).cel = {
+				id: "page_now",
+				message: "分页参数错误",
+				expression: "this > 0"
+			}
+	];
+	int64 page_size = 4 [
+			(buf.validate.field).cel = {
+				id: "page_size",
+				message: "分页参数错误",
+				expression: "this > 0"
+			}
+	];
+}
+
+message StrategyInfo {
+	int64 id = 1;
+	int64 status = 2;
+	int64 action = 3;
+	int64 next_action = 4;
+	string name = 5;
+	string description = 6;
+	string created_at = 7;
+	string updated_at = 8;
+}
+
+message ListStrategyReply {
+	int64 total = 1;
+	repeated StrategyInfo strategies = 2;
+}
+// 策略 ###########
+
+// ########## 内置规则 ###########
+message GetBuildRuleRequest {
+	int64 id = 1 [
+			(buf.validate.field).cel = {
+				id: "id",
+				message: "内置规则不存在",
+				expression: "this > 0"
+			}
+	];
+}
+message GetBuildRuleReply {
+	string name = 1;
+	string description = 2;
+	int64 risk_level = 3;
+	int64 group_id = 4;
+}
+
+message ListBuildRuleRequest {
+	string name = 1;
+	int64 page_now = 2[
+			(buf.validate.field).cel = {
+				id: "page_now",
+				message: "分页参数错误",
+				expression: "this > 0"
+			}
+	];
+	int64 page_size = 3 [
+			(buf.validate.field).cel = {
+				id: "page_size",
+				message: "分页参数错误",
+				expression: "this > 0"
+			}
+	];
+}
+
+message BuildinRule {
+	int64 id = 1;
+	int64 risk_level = 2;
+	string name = 3;
+	string description = 4;
+	int64 group_id = 5;
+	string created_at = 6;
+	string updated_at = 7;
+}
+
+message ListBuildRuleReply {
+	int64 total = 1;
+	repeated BuildinRule buildin_rules = 2;
+}
+// ########## 内置规则 ##########
+
+
+// ########## 用户自定义规则 #########
+message CreateUserRuleRequest {
+	string name = 1[
+			(buf.validate.field).cel = {
+				id: "name",
+				message: "规则昵称在1~15字符之间",
+				expression: "size(this) >= 1 && size(this) <= 15"
+			}
+	];
+	string description =2 [
+			(buf.validate.field).cel = {
+				id: "description",
+				message: "规则描述不能为空",
+				expression: "size(this) >= 1"
+			}
+	];
+	int64 risk_level = 3 [
+			(buf.validate.field).cel = {
+				id: "risk_level",
+				message: "请选择此规则的风险等级",
+				expression: "this in [1 , 2 , 3 , 4]"
+			}
+	];
+	int64 group_id = 4 [
+			(buf.validate.field).cel = {
+				id: "group_id",
+				message: "请选择此规则所属的规则组",
+				expression: "this > 0"
+			}
+	];
+	SeclangMod seclang_mod = 5 [
+		(buf.validate.field).required = true,
+		(buf.validate.field).cel = {
+			id: "seclang_mod",
+			message: "请完善规则行为",
+			expression: "this != null"
+		}
+	];
+}
+message CreateUserRuleReply {}
+
+message UpdateUserRuleRequest {
+	int64 id = 1[
+			(buf.validate.field).cel = {
+				id: "id",
+				message: "请选择需要修改的规则",
+				expression: "this > 0"
+			}
+	];
+	string name = 2[
+		(buf.validate.field).cel = {
+			id: "name",
+			message: "规则昵称在1~15字符之间",
+			expression: "size(this) >= 1 && size(this) <= 15"
+		}
+	];
+	string description =3 [
+		(buf.validate.field).cel = {
+			id: "description",
+			message: "规则描述不能为空",
+			expression: "size(this) >= 1"
+		}
+	];
+	int64 risk_level = 4[
+		(buf.validate.field).cel = {
+			id: "risk_level",
+			message: "请选择此规则的风险等级",
+			expression: "this in [1 , 2 , 3 , 4]"
+		}
+	];
+	int64 group_id = 5 [
+		(buf.validate.field).cel = {
+			id: "group_id",
+			message: "请选择此规则所属的规则组",
+			expression: "this > 0"
+		}
+	];
+	SeclangMod seclang_mod = 6 [
+		(buf.validate.field).required = true,
+		(buf.validate.field).cel = {
+			id: "seclang_mod",
+			message: "请完善规则行为",
+			expression: "this != null"
+		}
+	];
+}
+message UpdateUserRuleReply {}
+
+message DeleteUserRuleRequest {
+	repeated int64 ids = 1[
+			(buf.validate.field).cel = {
+				id: "ids",
+				message: "请选择需要删除的规则",
+				expression: "size(this) > 0"
+			}
+	];
+}
+message DeleteUserRuleReply {}
+// ########## 用户自定义规则 #########
+
+// ####### 规则组 #########
+message CreateRuleGroupRequest {
+	string name = 1 [
+			(buf.validate.field).cel = {
+				id: "name",
+				message: "规则组昵称在1~15字符之间",
+				expression: "size(this) >= 1 && size(this) <= 15"
+			}
+	];
+	string description = 2 [
+			(buf.validate.field).cel = {
+				id: "description",
+				message: "规则组描述禁止为空",
+				expression: "size(this) > 0"
+			}
+	];
+	int64 is_buildin = 3 [
+			(buf.validate.field).cel = {
+				id: "is_buildin",
+				message: "请选择是否是默认规则",
+				expression: "this in [1 , 2]"
+			}
+	];
+}
+message CreateRuleGroupReply {}
+
+message UpdateRuleGroupRequest {
+	int64 id = 1 [
+			(buf.validate.field).cel = {
+				id: "id",
+				message: "规则组不存在",
+				expression: "this > 0"
+			}
+	];
+	string name = 2 [
+		(buf.validate.field).cel = {
+			id: "name",
+			message: "规则组昵称在1~15字符之间",
+			expression: "size(this) >= 1 && size(this) <= 15"
+		}
+	];
+	string description = 3 [
+		(buf.validate.field).cel = {
+			id: "description",
+			message: "规则组描述禁止为空",
+			expression: "size(this) > 0"
+		}
+	];
+	int64 is_buildin = 4 [
+		(buf.validate.field).cel = {
+			id: "is_buildin",
+			message: "请选择是否是默认规则",
+			expression: "this in [1 , 2]"
+		}
+	];
+}
+message UpdateRuleGroupReply {}
+
+message DeleteRuleGroupRequest {
+	repeated int64 ids = 1[
+			(buf.validate.field).cel = {
+				id: "ids",
+				message: "请选择规则组",
+				expression: "size(this) > 0"
+			},
+			(buf.validate.field).repeated.items.cel = {
+				id: "ids",
+				message: "规则组选择错误",
+				expression: "this > 0"
+			}
+	];
+}
+message DeleteRuleGroupReply {}
+
+message GetRuleGroupRequest {
+	int64 id = 1[
+			(buf.validate.field).cel = {
+				id: "id",
+				message: "规则组不存在",
+				expression: "this > 0"
+			}
+	];
+}
+message GetRuleGroupReply {
+	string name = 1;
+	string description = 2;
+	int64 is_buildin = 3;
+	repeated ListRuleInfoByGroup list_rules = 4;
+}
+
+message ListRuleGroupRequest {
+	string name = 1;
+	int64 is_buildin = 2 ;
+	int64 page_now = 3 [
+			(buf.validate.field).cel = {
+				id: "page_now",
+				message: "分页参数错误",
+				expression: "this > 0"
+			}
+	];
+	int64 page_size = 4 [
+			(buf.validate.field).cel = {
+				id: "page_size",
+				message: "分页参数错误",
+				expression: "this > 0"
+			}
+	];
+}
+message ListRuleGroupReply {
+	int64 total = 1;
+	repeated RuleGroupInfo rule_group_infos = 2;
+}
+
+message RuleGroupInfo {
+	int64 id = 1;
+	string name = 2;
+	string description = 3;
+	int64 is_buildin = 4;
+	string created_at = 5;
+	string updated_at = 6;
+}
+
+
+message ListRuleInfoByGroup {
+	int64 id = 1;
+	string name = 2;
+	string description = 3;
+	int64 status = 4;
+	int64 risk_level = 5;
+	SeclangMod seclang_mod = 6;
+}
+// ######## 规则组 ##########
