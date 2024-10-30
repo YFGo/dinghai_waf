@@ -15,8 +15,9 @@ import (
 )
 
 func initApp() (func(), *wafHttp.WafHandleService) {
+	file := data.NewConfFile()
 	// 链接数据
-	dataDB, cleanup := data.NewData()
+	dataDB, cleanup := data.NewData(file)
 
 	// 初始化app
 	attackRepo := data.NewSaveAttackEventRepo(dataDB)
