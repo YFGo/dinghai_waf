@@ -24,6 +24,20 @@
 10. etcd
 11. clickhouse [什么是ClickHouse？ | ClickHouse Docs](https://clickhouse.com/docs/zh)
 
+## 接入方式
+### CNAME 接入
+修改DNS，让域名解析到反向代理服务器。所有流量经过反向代理进行检测，检测无问题之后再回源至真正的Web服务器。
+
++ 优点
+
+ - 隐藏真正的后端web服务地址
+
++ 缺点
+
+ - 权限过高,容易造成不可预计的风险
+
+![](https://cdn.nlark.com/yuque/0/2024/png/34606362/1726646816344-b20906a4-5387-4a4e-a5b1-bbd21616695b.png)
+
 # 项目结构
 ## 整体结构
 ![](https://cdn.nlark.com/yuque/0/2024/png/34606362/1730189896389-59aabf81-8acf-4017-ab97-454ed92a4450.png)
@@ -122,17 +136,36 @@
 ### 数据库ER图
 ![](https://cdn.nlark.com/yuque/0/2024/png/34606362/1730252770131-13ba0a2d-f4dc-4706-a1a3-45c75cf47122.png)
 
+# 安装方法
+## Windows
+> v1.0.0 
+>
+> mysql8.0版本以上 , redis推荐使用6版本以上
+>
+
+1. 下载DingHai.zip文件 , 解压缩
+2. 将上层用户服务 , 防护配置服务以及内核的配置文件中的配置信息修改为正确地址
+
+![](https://cdn.nlark.com/yuque/0/2024/png/34606362/1730266685966-d5dd3865-7e97-4723-a1c0-db4d981d5c15.png)
+
+3. 启动三个exe文件
+4. v1.0.0暂无UI界面 , 需要开发人员通过接口文档使用.将json文件导入apifox即可, wafCoraza会占用端口<font style="color:#DF2A3F;">8887</font>
+
+![](https://cdn.nlark.com/yuque/0/2024/png/34606362/1730267289446-d5e5632e-34b0-48bb-957c-16e9a9a5952b.png)
+
 # 项目更新日志
 > v1.0.0
 >
 
-1. 内核具有基础防护功能 , 支持动态更新策略 , 以及各个网站之间的waf实列隔离,简单的实现了反向代理,将请求转发至真正的后端地址支持coraza内置防护策略,<font style="color:rgb(31, 35, 40);">包括：SQL注入（SQLi），跨站点脚本（XSS），PHP和Java代码注入，HTTPoxy，Shellshock，脚本/扫描器/机器人检测&元数据和错误泄漏。同时也支持用户自定义防护策略,v1.0.0版本实现了用户自定义IP防护策略.可以根据不同策略的定义,对恶意请求作出是否拦截的处理.可以将攻击事件落地本地磁盘的csv文件.</font>
+1. 内核具有基础防护功能 , 支持动态更新策略 , 以及各个网站之间的waf实列隔离,简单的实现了反向代理,将请求转发至真正的后端地址支持coraza内置防护策略,<font style="color:rgb(31, 35, 40);">包括：SQL注入（SQLi），跨站点脚本（XSS），PHP和Java代码注入，HTTPoxy，Shellshock，脚本/扫描器/机器人检测&元数据和错误泄漏。可以将攻击事件落地本地磁盘的csv文件.</font>
 2. <font style="color:rgb(31, 35, 40);">上层服务,用户配置需要防护的网站,策略,规则组以及自定义规则. 目前内置规则不支持用户自定义.</font>
 
-> 部署说明:
+> 后续更新目标:
 >
 
-1 .  MySQL: 安装mysql8版本以上
+1. 无UI界面 , 不便于操作
+2. 用户自定义防护规则功能缺失
+3. 日志插件功能开发
 
 <font style="color:rgb(31, 35, 40);"></font>
 

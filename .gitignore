@@ -9,3 +9,4 @@ wafconsole/app/wafTop/configs/config_dev.yaml
 DingHai
 
 wafCoraza/conf/conf_dev.ini
+*.zip
