@@ -137,7 +137,8 @@
 ![](https://cdn.nlark.com/yuque/0/2024/png/34606362/1730252770131-13ba0a2d-f4dc-4706-a1a3-45c75cf47122.png)
 
 # 安装方法
-## Windows
+## 二进制部署
+### Windows
 > v1.0.0 
 >
 > mysql8.0版本以上 , redis推荐使用6版本以上
@@ -152,6 +153,9 @@
 4. v1.0.0暂无UI界面 , 需要开发人员通过接口文档使用.将json文件导入apifox即可, wafCoraza会占用端口<font style="color:#DF2A3F;">8887</font>
 
 ![](https://cdn.nlark.com/yuque/0/2024/png/34606362/1730267289446-d5e5632e-34b0-48bb-957c-16e9a9a5952b.png)
+
+### linux
+下载 DingHai_linux.zip文件,在linux系统上解压即可,其余步骤和上述操作系统
 
 # 项目更新日志
 > v1.0.0
