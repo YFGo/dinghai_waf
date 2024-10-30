@@ -41,6 +41,10 @@ message Data {
     google.protobuf.Duration read_timeout = 3;
     google.protobuf.Duration write_timeout = 4;
   }
+  message Etcd {
+    string host = 1;
+  }
   Mysql mysql = 1;
   Redis redis = 2;
+  Etcd etcd = 3;
 }

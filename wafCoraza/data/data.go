@@ -47,7 +47,7 @@ func newKafkaProducer() sarama.SyncProducer {
 	config.Producer.Partitioner = sarama.NewHashPartitioner // 根据hasH值选择分区
 	config.Producer.Return.Successes = true                 // 成功交付的消息将在success channel 返回
 	//链接kafka
-	kafkaProducer, err := sarama.NewSyncProducer([]string{"127.0.0.1:9092"}, config)
+	kafkaProducer, err := sarama.NewSyncProducer([]string{"152.136.50.60:9092"}, config)
 	if err != nil {
 		slog.Error("kafka client error: ", err)
 		return nil
@@ -62,7 +62,7 @@ func newTimeTask() *cron.Cron {
 
 func newETCD() *clientv3.Client {
 	etcdClient, err := clientv3.New(clientv3.Config{
-		Endpoints:   []string{"127.0.0.1:2379"},
+		Endpoints:   []string{"152.136.50.60:2379"},
 		DialTimeout: 5 * time.Second,
 	})
 	if err != nil {
