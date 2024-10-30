@@ -10,6 +10,7 @@ import (
 	"log/slog"
 	"time"
 	"wafconsole/app/wafTop/internal/conf"
+	"wafconsole/app/wafTop/internal/hooks"
 )
 
 // ProviderSet is data providers.
@@ -28,7 +29,7 @@ func NewData(s *conf.Server, bootstrap *conf.Bootstrap) (*Data, func(), error) {
 	if err != nil {
 		return nil, nil, err
 	}
-	etcd := newETCD()
+	etcd := newETCD(c.Etcd)
 	cleanup := func() {
 		if mysql != nil {
 			if db, err := mysql.DB(); err == nil && db != nil {
@@ -63,25 +64,19 @@ func newMysql(cfg *conf.Data_Mysql) (*gorm.DB, error) {
 	sqlDB.SetMaxIdleConns(int(cfg.MaxIdle))
 	sqlDB.SetMaxOpenConns(int(cfg.MaxOpen))
 	// 自动 建表
-	//db.AutoMigrate(model.AppWaf{})
-	//db.AutoMigrate(model.BuildinRule{})
-	//db.AutoMigrate(model.RuleGroup{})
-	//db.AutoMigrate(model.ServerStrategies{})
-	//db.AutoMigrate(model.ServerWaf{})
-	//db.AutoMigrate(model.Strategy{})
-	//db.AutoMigrate(model.StrategyConfig{})
-	//db.AutoMigrate(model.UserRule{})
+	hooks.CreateTable(db)
 	return db, nil
 }
 
-func newETCD() *clientv3.Client {
+func newETCD(cfg *conf.Data_Etcd) *clientv3.Client {
 	etcdClient, err := clientv3.New(clientv3.Config{
-		Endpoints:   []string{"127.0.0.1:2379"},
+		Endpoints:   []string{cfg.Host},
 		DialTimeout: 5 * time.Second,
 	})
 	if err != nil {
 		slog.Error("etcd client failed: ", err)
 		panic(err)
 	}
+	hooks.InitEtcd(etcdClient) // 初始化键值对
 	return etcdClient
 }
