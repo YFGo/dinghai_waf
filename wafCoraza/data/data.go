@@ -33,6 +33,7 @@ func NewData(c *ini.File) (*Data, func()) {
 	cleanup := func() {
 		//if kafkaProducer != nil {
 		//	slog.Info("close kafka producer")
+		//
 		//	kafkaProducer.Close()
 		//}
 		if timeTask != nil {
