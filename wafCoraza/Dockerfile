@@ -20,4 +20,4 @@ WORKDIR /app
 EXPOSE 8887
 VOLUME /data/conf
 
-CMD ["./server"]
+CMD ["./coraza"]
