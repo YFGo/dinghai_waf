@@ -93,6 +93,7 @@ func NewHTTPServer(c *conf.Server, userService *service.WafUserService, commonSe
 	var opts = []http.ServerOption{
 		http.Middleware(
 			recovery.Recovery(),
+			plugin.MiddlewareCors(),
 			protoValidate.ValidateUnaryServerInterceptor(), //参数校验
 			selector.Server(
 				plugin.JWTMiddleware(), //token验证
