@@ -18,6 +18,4 @@ data:
     addr: 192.168.10.4:6379
     read_timeout: 0.2s
     write_timeout: 0.2s
-  etcd:
-    host: 192.168.10.4:2379
 
