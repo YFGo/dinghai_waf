@@ -16,3 +16,8 @@ func TokenErr() error {
 func ServerErr() error {
 	return errors.New(ErrServer, "", "服务繁忙")
 }
+
+// 1000 ~ 2000 用户相关
+func UserNotFoundErr() error {
+	return errors.New(1000, "", "登录信息错误")
+}
