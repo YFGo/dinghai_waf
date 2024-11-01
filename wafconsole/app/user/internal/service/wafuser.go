@@ -2,10 +2,12 @@ package service
 
 import (
 	"context"
+	"google.golang.org/grpc/codes"
 	"log/slog"
 	"wafconsole/app/user/internal/biz"
 	"wafconsole/app/user/internal/data/model"
 	"wafconsole/app/user/internal/server/plugin"
+	"wafconsole/app/user/internal/utils"
 
 	pb "wafconsole/api/user/v1"
 )
@@ -62,6 +64,9 @@ func (s *WafUserService) Login(ctx context.Context, req *pb.LoginUserInfoRequest
 	}
 	accessToken, refreshToken, err := s.uc.LoginByEmailPassword(ctx, userInfo)
 	if err != nil {
+		if utils.StatusErr(err, codes.NotFound) {
+			return nil, plugin.UserNotFoundErr()
+		}
 		slog.ErrorContext(ctx, "LoginByEmailPassword err : %v", err)
 		return nil, plugin.ServerErr()
 	}
