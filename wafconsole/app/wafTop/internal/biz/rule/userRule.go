@@ -4,6 +4,8 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
+	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/status"
 	"gorm.io/gorm"
 	"log/slog"
 	"strconv"
@@ -14,12 +16,14 @@ import (
 )
 
 const (
-	IPSameMod = "SecRule REMOTE_ADDR \"METHOD IP_MOD\" \"id:1,block,msg:'IP address is not allowed.'\""
-	Same      = "等于"
-	NotSame   = "不等于"
-	Like      = "Like"
-
-	RulePrefix = "rule_"
+	IPSameMod      = `SecRule REMOTE_ADDR "METHOD IP_MOD" "id:RULE_ID,deny,msg:'IP address is not allowed.'"`
+	CookieMod      = `SecRule &COOKIE:COOKIE_NAME "METHOD COOKIE_VALUE" "id:RULE_ID,deny,status:403,msg:'Access denied .'"`
+	HeaderMod      = `SecRule &REQUEST_HEADERS:HEADER_NAME "METHOD HEADER_VALUE" "id:RULE_ID,deny,status:403,msg:'HEADER is not allowed.'"`
+	Same           = "等于"
+	SameSeclang    = "@eq"
+	NotSame        = "不等于"
+	NotSameSeclang = "!@eq"
+	RulePrefix     = "rule_"
 )
 
 type UserRuleRepo interface {
@@ -59,6 +63,7 @@ func (u *UserRuleUsecase) checkRuleGroupIsExist(ctx context.Context, groupId int
 	return true
 }
 
+// createRuleToEtcd 新增etcd规则信息
 func (u *UserRuleUsecase) createRuleToEtcd(ctx context.Context, ruleID int64, userRule model.UserRule) error {
 	userRuleInfo := dto.UserRuleInfo{
 		ID:        ruleID,
@@ -108,17 +113,22 @@ func (u *UserRuleUsecase) createRuleToEtcd(ctx context.Context, ruleID int64, us
 // CreateUserRule 创建用户自定义规则
 func (u *UserRuleUsecase) CreateUserRule(ctx context.Context, userRule model.UserRule) error {
 	if !u.checkUserRuleIsExist(ctx, 0, userRule.Name) {
-		return errors.New("用户自定义规则已经存在")
+		return status.Error(codes.AlreadyExists, "用户自定义规则已经存在")
 	}
 	if !u.checkRuleGroupIsExist(ctx, userRule.GroupId) {
-		return errors.New("规则组不存在")
+		return status.Error(codes.NotFound, "规则组不存在")
 	}
 	// 处理用户自定义规则
-	seclang := u.disposeUserRule(ctx, userRule.SeclangMod)
-	userRule.ModSecurity = seclang
 	userRuleID, err := u.repo.Create(ctx, userRule)
 	if err != nil {
 		slog.ErrorContext(ctx, "create user_rule is failed: ", err)
+		return err
+	}
+	seclang := u.disposeUserRule(ctx, userRule.SeclangMod, userRuleID)
+	userRule.ModSecurity = seclang
+	// 去修改存储的seclang 安全规则语言
+	if err := u.repo.Update(ctx, userRuleID, userRule); err != nil {
+		slog.ErrorContext(ctx, "update user_rule is failed: ", err)
 		return err
 	}
 	err = u.createRuleToEtcd(ctx, userRuleID, userRule)
@@ -137,7 +147,7 @@ func (u *UserRuleUsecase) UpdateUserRule(ctx context.Context, id int64, userRule
 	if !u.checkRuleGroupIsExist(ctx, userRule.GroupId) {
 		return errors.New("规则组不存在")
 	}
-	seclang := u.disposeUserRule(ctx, userRule.SeclangMod)
+	seclang := u.disposeUserRule(ctx, userRule.SeclangMod, id)
 	userRule.ModSecurity = seclang
 	if err := u.repo.Update(ctx, id, userRule); err != nil {
 		slog.ErrorContext(ctx, "update user_rule is failed: ", err)
@@ -207,7 +217,7 @@ func (u *UserRuleUsecase) DeleteUserRule(ctx context.Context, ids []int64) error
 	return nil
 }
 
-func (u *UserRuleUsecase) disposeUserRule(ctx context.Context, userRule model.SeclangMod) string {
+func (u *UserRuleUsecase) disposeUserRule(ctx context.Context, userRule model.SeclangMod, ruleID int64) string {
 	var (
 		res    string
 		method string
@@ -215,12 +225,33 @@ func (u *UserRuleUsecase) disposeUserRule(ctx context.Context, userRule model.Se
 	switch userRule.MatchGoal {
 	case "IP":
 		if userRule.MatchAction == Same {
-			method = "@eq"
-		} else if userRule.MatchAction == NotSame {
-			method = "!@eq"
+			method = SameSeclang
+		} else {
+			method = NotSameSeclang
 		}
 		res = strings.ReplaceAll(IPSameMod, "METHOD", method)
 		res = strings.ReplaceAll(res, "IP_MOD", userRule.MatchContent)
+	case "COOKIE":
+		if userRule.MatchAction == Same {
+			method = SameSeclang
+		} else {
+			method = NotSameSeclang
+		}
+		cookieInfo := strings.Split(userRule.MatchContent, "=")
+		res = strings.ReplaceAll(CookieMod, "METHOD", method)
+		res = strings.ReplaceAll(res, "COOKIE_NAME", cookieInfo[0])
+		res = strings.ReplaceAll(res, "COOKIE_VALUE", cookieInfo[1])
+	case "HEADER":
+		if userRule.MatchAction == Same {
+			method = SameSeclang
+		} else {
+			method = NotSameSeclang
+		}
+		headerInfo := strings.Split(userRule.MatchContent, "=")
+		res = strings.ReplaceAll(HeaderMod, "METHOD", method)
+		res = strings.ReplaceAll(res, "HEADER_NAME", headerInfo[0])
+		res = strings.ReplaceAll(res, "HEADER_VALUE", headerInfo[1])
 	}
+	res = strings.ReplaceAll(res, "RULE_ID", strconv.Itoa(int(ruleID)))
 	return res
 }

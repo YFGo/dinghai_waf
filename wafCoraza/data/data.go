@@ -1,19 +1,18 @@
 package data
 
 import (
+	"log/slog"
+	"time"
+
 	"github.com/IBM/sarama"
 	"github.com/robfig/cron/v3"
 	clientv3 "go.etcd.io/etcd/client/v3"
 	"gopkg.in/ini.v1"
-	"log/slog"
-	"os"
-	"time"
 )
 
 type Data struct {
 	kafkaProducer sarama.SyncProducer
 	timeTask      *cron.Cron
-	file          *os.File
 	etcdClient    *clientv3.Client
 }
 
