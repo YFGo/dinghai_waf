@@ -285,7 +285,7 @@ func (u *UserRuleUsecase) disposeUserRule(ctx context.Context, userRule model.Se
 		} else {
 			method = NotSameSeclang
 		}
-		cookieInfo := strings.Split(userRule.MatchContent, "=")
+		cookieInfo := strings.Split(userRule.MatchContent, "_")
 		res = strings.ReplaceAll(CookieMod, "METHOD", method)
 		res = strings.ReplaceAll(res, "COOKIE_NAME", cookieInfo[0])
 		res = strings.ReplaceAll(res, "COOKIE_VALUE", cookieInfo[1])
@@ -295,7 +295,7 @@ func (u *UserRuleUsecase) disposeUserRule(ctx context.Context, userRule model.Se
 		} else {
 			method = NotSameSeclang
 		}
-		headerInfo := strings.Split(userRule.MatchContent, "=")
+		headerInfo := strings.Split(userRule.MatchContent, "_")
 		res = strings.ReplaceAll(HeaderMod, "METHOD", method)
 		res = strings.ReplaceAll(res, "HEADER_NAME", headerInfo[0])
 		res = strings.ReplaceAll(res, "HEADER_VALUE", headerInfo[1])

@@ -120,7 +120,7 @@ func (w *WafHandleService) ProxyHandler() http.HandlerFunc {
 			}
 			badMessageByte, _ := json.Marshal(badMessage)
 			rw.Header().Set("Content-Type", "application/json")
-			http.Error(rw, string(badMessageByte), 200)
+			rw.Write(badMessageByte)
 		}
 	}
 }
