@@ -2,6 +2,7 @@ package biz
 
 import (
 	"encoding/json"
+	"fmt"
 	coreruleset "github.com/corazawaf/coraza-coreruleset/v4"
 	"github.com/corazawaf/coraza/v3"
 	"github.com/jcchavezs/mergefs"
@@ -262,6 +263,8 @@ func (w *WafConfigUsercase) wafConfig(wafStrategy []model.WAFStrategy) {
 		userRuleSeclang = w.disposeSeclang(userRuleSeclang)
 		cfg = cfg.WithDirectives(buildinRuleSeclang).WithRootFS(mergefs.Merge(coreruleset.FS, io.OSFS))
 		cfg = cfg.WithDirectives(userRuleSeclang)
+		fmt.Println(userRuleSeclang)
+		cfg = cfg.WithDirectives(`SecRule REMOTE_ADDR "127.0.0.1" "id:2, phase:1, block, log, logdata:'Request from localhost'"`)
 		waf, err := coraza.NewWAF(cfg)
 		if err != nil {
 			slog.Error("创建waf失败", err)

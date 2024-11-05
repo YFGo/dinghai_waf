@@ -11,3 +11,4 @@ DingHai_linux
 
 wafCoraza/conf/conf_dev.ini
 *.zip
+.vscode

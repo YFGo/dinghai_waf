@@ -1,8 +1,8 @@
 package wafHttp
 
 import (
+	"encoding/json"
 	"fmt"
-	"github.com/corazawaf/coraza/v3/types"
 	"io"
 	"log"
 	"log/slog"
@@ -14,6 +14,8 @@ import (
 	"strings"
 	"wafCoraza/biz"
 	constType "wafCoraza/data/types"
+
+	"github.com/corazawaf/coraza/v3/types"
 )
 
 type WafHandleService struct {
@@ -97,7 +99,7 @@ func (w *WafHandleService) ProxyHandler() http.HandlerFunc {
 				}
 			}
 		}
-		if isAllow { //允许放行
+		if isAllow && len(realAddr) != 0 { //允许放行
 			targetURL, err := url.Parse(fmt.Sprintf("http://%s", realAddr))
 			if err != nil {
 				http.Error(rw, err.Error(), http.StatusInternalServerError)
@@ -107,7 +109,18 @@ func (w *WafHandleService) ProxyHandler() http.HandlerFunc {
 			proxy := httputil.NewSingleHostReverseProxy(targetURL)
 			proxy.ServeHTTP(rw, req)
 		} else {
-			http.Error(rw, "非法访问", 403)
+			badMessage := struct {
+				Code    int    `json:"code"`
+				Message string `json:"message"`
+				Data    string `json:"data"`
+			}{
+				Code:    403,
+				Message: "Forbidden",
+				Data:    "",
+			}
+			badMessageByte, _ := json.Marshal(badMessage)
+			rw.Header().Set("Content-Type", "application/json")
+			http.Error(rw, string(badMessageByte), 200)
 		}
 	}
 }
@@ -151,6 +164,8 @@ func (w *WafHandleService) WafParseReqBody(tx types.Transaction, requestBody []b
 	if itReqBody != nil { //处理结果
 		switch itReqBody.Action {
 		case constType.WafDeny: //访问行为被禁止
+			return itReqBody, false
+		default:
 			return itReqBody, false
 		}
 	}

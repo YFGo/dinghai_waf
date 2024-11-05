@@ -10,7 +10,7 @@ const UserRuleTableName = "waf_user_rule"
 
 type UserRule struct {
 	*gorm.Model
-	Name        string     `json:"name"  gorm:"type:varchar(255);not null;unique;comment:'规则名称'"`
+	Name        string     `json:"name"  gorm:"type:varchar(255);not null;comment:'规则名称'"`
 	Description string     `json:"description" gorm:"type:varchar(255);comment:'规则描述'"`
 	RiskLevel   uint8      `json:"risk_level" gorm:"type:tinyint;not null;default:1;comment:'风险等级'"` //4个等级
 	GroupId     int64      `json:"group_id"  gorm:"type:bigint;not null;comment:'分组id'"`

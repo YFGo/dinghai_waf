@@ -20,7 +20,7 @@ message SeclangMod {
 			(buf.validate.field).cel = {
 				id: "match_action",
 				message: "请选择正确的匹配方式",
-				expression: "this in ['等于' , '模糊匹配' , '不等于']"
+				expression: "this in ['等于' , '不等于']"
 			}
 	];
 	string match_content = 3 [
