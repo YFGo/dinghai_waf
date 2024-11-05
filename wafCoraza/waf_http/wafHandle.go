@@ -188,8 +188,13 @@ func (w *WafHandleService) WafMatchRules(tx types.Transaction) []types.MatchedRu
 
 // WatchEtcdService 监听etcd键值对的变化
 func (w *WafHandleService) WatchEtcdService() {
-	w.wafConfigUc.WatchRuleGroup()
-	w.wafConfigUc.WatchRule()
-	w.wafConfigUc.WatchStrategy()
-
+	go func() {
+		w.wafConfigUc.WatchStrategy()
+	}()
+	go func() {
+		w.wafConfigUc.WatchRuleGroup()
+	}()
+	go func() {
+		w.wafConfigUc.WatchRule()
+	}()
 }
