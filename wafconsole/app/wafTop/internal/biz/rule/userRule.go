@@ -64,7 +64,7 @@ func (u *UserRuleUsecase) checkRuleGroupIsExist(ctx context.Context, groupId int
 }
 
 // createRuleToEtcd 新增etcd规则信息
-func (u *UserRuleUsecase) createRuleToEtcd(ctx context.Context, ruleID int64, userRule model.UserRule) error {
+func (u *UserRuleUsecase) createRuleToEtcd(ctx context.Context, ruleID int64, userRule model.UserRule, oldRuleGroupID int64) error {
 	userRuleInfo := dto.UserRuleInfo{
 		ID:        ruleID,
 		RiskLevel: userRule.RiskLevel,
@@ -75,6 +75,36 @@ func (u *UserRuleUsecase) createRuleToEtcd(ctx context.Context, ruleID int64, us
 	if err != nil {
 		slog.ErrorContext(ctx, "marshal user_rule_info is failed: ", err)
 		return err
+	}
+	if oldRuleGroupID != 0 && userRule.GroupId != oldRuleGroupID { //规则组信息发生改变
+		oldRUleGroupKey := "rule_group_" + strconv.Itoa(int(oldRuleGroupID))
+		oldRuleGroupInfo, err := u.ruleGroupRepo.GetRuleGroupEtcd(ctx, oldRUleGroupKey) //旧规则组信息
+		if err != nil {
+			slog.ErrorContext(ctx, "get rule_group_info from etcd is failed: ", err)
+			return err
+		}
+		var oldRuleGroupDto dto.RuleGroupEtcd
+		err = json.Unmarshal([]byte(oldRuleGroupInfo), &oldRuleGroupDto)
+		if err != nil {
+			slog.ErrorContext(ctx, "unmarshal rule_group_info is failed: ", err)
+			return err
+		}
+		var newRuleIDList []int64
+		for _, oldRuleID := range oldRuleGroupDto.RuleIdList {
+			if oldRuleID != ruleID {
+				newRuleIDList = append(newRuleIDList, oldRuleID) //去掉此规则id
+			}
+		}
+		oldRuleGroupDto.RuleIdList = newRuleIDList
+		newRuleInfoDto, err := json.Marshal(&oldRuleGroupDto)
+		if err != nil {
+			slog.ErrorContext(ctx, "marshal rule_group_info is failed: ", err)
+			return err
+		}
+		if err = u.ruleGroupRepo.CreateRuleGroupInfoToEtcd(ctx, oldRUleGroupKey, string(newRuleInfoDto)); err != nil { //旧规则组更新
+			slog.ErrorContext(ctx, "create rule_group_info to etcd is failed: ", err)
+			return err
+		}
 	}
 	ruleGroupKey := "rule_group_" + strconv.Itoa(int(userRule.GroupId))
 	//根据规则组id查询 规则组信息
@@ -91,7 +121,18 @@ func (u *UserRuleUsecase) createRuleToEtcd(ctx context.Context, ruleID int64, us
 		return err
 	}
 	// 将新的信息追加到此规则组中
-	ruleGroupDto.RuleIdList = append(ruleGroupDto.RuleIdList, ruleID)
+	isFlag := true //是否可以插入数据
+	for _, id := range ruleGroupDto.RuleIdList {
+		if id != ruleID {
+			isFlag = true //可以插入
+		} else {
+			isFlag = false //不可以插入
+			break
+		}
+	}
+	if isFlag {
+		ruleGroupDto.RuleIdList = append(ruleGroupDto.RuleIdList, ruleID)
+	}
 	newRuleInfoDto, err := json.Marshal(&ruleGroupDto)
 	if err != nil {
 		slog.ErrorContext(ctx, "marshal rule_group_info is failed: ", err)
@@ -131,7 +172,7 @@ func (u *UserRuleUsecase) CreateUserRule(ctx context.Context, userRule model.Use
 		slog.ErrorContext(ctx, "update user_rule is failed: ", err)
 		return err
 	}
-	err = u.createRuleToEtcd(ctx, userRuleID, userRule)
+	err = u.createRuleToEtcd(ctx, userRuleID, userRule, 0)
 	if err != nil {
 		slog.ErrorContext(ctx, "create rule_info to etcd is failed: ", err)
 		return err
@@ -147,6 +188,13 @@ func (u *UserRuleUsecase) UpdateUserRule(ctx context.Context, id int64, userRule
 	if !u.checkRuleGroupIsExist(ctx, userRule.GroupId) {
 		return errors.New("规则组不存在")
 	}
+	// 1. 先查询旧数据
+	oldUserRule, err := u.repo.Get(ctx, id)
+	if err != nil {
+		slog.ErrorContext(ctx, "get user_rule is failed: ", err)
+		return err
+	}
+
 	seclang := u.disposeUserRule(ctx, userRule.SeclangMod, id)
 	userRule.ModSecurity = seclang
 	if err := u.repo.Update(ctx, id, userRule); err != nil {
@@ -154,7 +202,7 @@ func (u *UserRuleUsecase) UpdateUserRule(ctx context.Context, id int64, userRule
 		return err
 	}
 	// 更新规则信息存入etcd
-	err := u.createRuleToEtcd(ctx, id, userRule)
+	err = u.createRuleToEtcd(ctx, id, userRule, oldUserRule.GroupId)
 	if err != nil {
 		slog.ErrorContext(ctx, "create rule_info to etcd is failed: ", err)
 		return err

@@ -2,7 +2,6 @@ package biz
 
 import (
 	"encoding/json"
-	"fmt"
 	coreruleset "github.com/corazawaf/coraza-coreruleset/v4"
 	"github.com/corazawaf/coraza/v3"
 	"github.com/jcchavezs/mergefs"
@@ -119,13 +118,14 @@ func (w *WafConfigUsercase) GetRealAddr(host string) (string, error) {
 func (w *WafConfigUsercase) WatchStrategy() {
 	watchChan := w.repo.AirUpdateStrategy()
 	for wresp := range watchChan {
-		slog.Info("watcher", "key", wresp.Header.Revision)
+		slog.Info("watcher", "strategy", wresp.Header.Revision)
 		for _, ev := range wresp.Events {
 			keyArr := strings.Split(string(ev.Kv.Key), types.CutOFF) //获取策略id
 			strategyTemp := model.WAFStrategy{
 				ID:           keyArr[1],
 				SeclangRules: string(ev.Kv.Value),
 			}
+			slog.Info("Key changed", "Key", ev.Kv.Key, "Value", ev.Kv.Value)
 			// 判断不同的情况 新增 , 修改 , 删除
 			wafValue, ok := w.waf[strategyTemp.ID]
 			if len(ev.Kv.Value) == 0 && !ok { // 避免一些因策略格式错误而创建失败的waf实列  在监听到删除操作时,错误的进入新增操作
@@ -150,11 +150,12 @@ func (w *WafConfigUsercase) WatchStrategy() {
 func (w *WafConfigUsercase) WatchRuleGroup() {
 	watchChan := w.repo.AirUpdateRuleGroup()
 	for wresp := range watchChan {
-		slog.Info("watcher", "key", wresp.Header.Revision)
+		slog.Info("watcher", "ruleGroup", wresp.Header.Revision)
 		for _, ev := range wresp.Events {
 			var ruleGroup model.RuleGroup
 			strategiesList := w.ruleGroupStrategyMap[int64(ruleGroup.ID)] // 查询此规则组绑定的策略
-			if len(ev.Kv.Value) == 0 {                                    //执行删除操作
+			slog.Info("Key changed", "Key", ev.Kv.Key, "Value", ev.Kv.Value)
+			if len(ev.Kv.Value) == 0 { //执行删除操作
 				delete(w.ruleGroupMap, ruleGroup.ID)
 				delete(w.ruleGroupStrategyMap, int64(ruleGroup.ID))
 			} else {
@@ -181,10 +182,11 @@ func (w *WafConfigUsercase) WatchRuleGroup() {
 func (w *WafConfigUsercase) WatchRule() {
 	watchChan := w.repo.AirUpdateRule()
 	for wresp := range watchChan {
-		slog.Info("watcher", "key", wresp.Header.Revision)
+		slog.Info("watcher", "rule", wresp.Header.Revision)
 		for _, ev := range wresp.Events {
 			var rule model.Rule
 			strategyIds := w.ruleStrategyMap[int64(rule.ID)]
+			slog.Info("Key changed", "Key", ev.Kv.Key, "Value", ev.Kv.Value)
 			if len(ev.Kv.Value) == 0 { //执行删除操作
 				delete(w.ruleMap, rule.ID)
 				delete(w.ruleStrategyMap, int64(rule.ID))
@@ -263,8 +265,6 @@ func (w *WafConfigUsercase) wafConfig(wafStrategy []model.WAFStrategy) {
 		userRuleSeclang = w.disposeSeclang(userRuleSeclang)
 		cfg = cfg.WithDirectives(buildinRuleSeclang).WithRootFS(mergefs.Merge(coreruleset.FS, io.OSFS))
 		cfg = cfg.WithDirectives(userRuleSeclang)
-		fmt.Println(userRuleSeclang)
-		cfg = cfg.WithDirectives(`SecRule REMOTE_ADDR "127.0.0.1" "id:2, phase:1, block, log, logdata:'Request from localhost'"`)
 		waf, err := coraza.NewWAF(cfg)
 		if err != nil {
 			slog.Error("创建waf失败", err)
