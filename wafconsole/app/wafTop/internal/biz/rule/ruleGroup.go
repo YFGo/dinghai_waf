@@ -22,7 +22,7 @@ type RuleGroupRepo interface {
 	GetStrategyEtcd(ctx context.Context, strategyKey string) (string, error)
 }
 
-const ruleGroupPrefix = "rule_group_"
+const ruleGroupPrefix = "group_"
 
 type RuleGroupUsecase struct {
 	repo            RuleGroupRepo
