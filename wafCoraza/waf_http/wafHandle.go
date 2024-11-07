@@ -84,6 +84,7 @@ func (w *WafHandleService) ProxyHandler() http.HandlerFunc {
 			if reqHeaderIsLegal && reqBodyIsLegal { // 此waf实列检测 请求头和请求体的检测均无问题
 				isAllow = true
 			} else {
+				slog.Info("reqHeaderIsLegal:", reqHeaderIsLegal, " reqBodyIsLegal:", reqBodyIsLegal)
 				if waf.Action == 1 { //仅仅记录 不拦截
 					isAllow = true
 				} else {
@@ -190,6 +191,7 @@ func (w *WafHandleService) WafMatchRules(tx types.Transaction) []types.MatchedRu
 func (w *WafHandleService) WatchEtcdService() {
 	go func() {
 		w.wafConfigUc.WatchStrategy()
+
 	}()
 	go func() {
 		w.wafConfigUc.WatchRuleGroup()

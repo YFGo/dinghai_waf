@@ -125,3 +125,14 @@ func (l loadWAFConfigRepo) GetStrategyListById(strategyKey string) ([]model.WAFS
 	}
 	return seclangRules, nil
 }
+
+func (l loadWAFConfigRepo) GetCommonByKey(key string) (string, error) {
+	commonResp, err := l.data.etcdClient.KV.Get(context.Background(), key)
+	if err != nil {
+		return "", err
+	}
+	for _, kv := range commonResp.Kvs {
+		return string(kv.Value), nil
+	}
+	return "", nil
+}

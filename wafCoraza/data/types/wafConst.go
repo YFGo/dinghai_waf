@@ -6,7 +6,7 @@ const (
 	BUILDIN         = 1
 	RealAddr        = CutOFF + "real"
 	SeclangCutOFF   = "<$>"
-	RuleGroupPrefix = "rule_group_"
+	RuleGroupPrefix = "group_"
 	RulePrefix      = "rule_"
 )
 

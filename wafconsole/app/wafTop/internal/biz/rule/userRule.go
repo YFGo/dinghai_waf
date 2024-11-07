@@ -16,14 +16,15 @@ import (
 )
 
 const (
-	IPSameMod      = `SecRule REMOTE_ADDR "METHOD IP_MOD" "id:RULE_ID,deny,msg:'IP address is not allowed.'"`
-	CookieMod      = `SecRule &COOKIE:COOKIE_NAME "METHOD COOKIE_VALUE" "id:RULE_ID,deny,status:403,msg:'Access denied .'"`
-	HeaderMod      = `SecRule &REQUEST_HEADERS:HEADER_NAME "METHOD HEADER_VALUE" "id:RULE_ID,deny,status:403,msg:'HEADER is not allowed.'"`
-	Same           = "等于"
-	SameSeclang    = "@eq"
-	NotSame        = "不等于"
-	NotSameSeclang = "!@eq"
-	RulePrefix     = "rule_"
+	IPSameMod       = `SecRule REMOTE_ADDR "METHOD IP_MOD" "id:RULE_ID,deny,phase:1,msg:'IP address is not allowed.'"`
+	CookieMod       = `SecRule &COOKIE:COOKIE_NAME "METHOD COOKIE_VALUE" "id:RULE_ID,deny,status:403,msg:'Access denied .'"`
+	HeaderMod       = `SecRule &REQUEST_HEADERS:HEADER_NAME "METHOD HEADER_VALUE" "id:RULE_ID,deny,status:403,msg:'HEADER is not allowed.'"`
+	Same            = "等于"
+	SameSeclang     = "@eq"
+	NotSame         = "不等于"
+	NotSameSeclang  = "!@eq"
+	RulePrefix      = "rule_"
+	RuleGroupPrefix = "group_"
 )
 
 type UserRuleRepo interface {
@@ -77,7 +78,7 @@ func (u *UserRuleUsecase) createRuleToEtcd(ctx context.Context, ruleID int64, us
 		return err
 	}
 	if oldRuleGroupID != 0 && userRule.GroupId != oldRuleGroupID { //规则组信息发生改变
-		oldRUleGroupKey := "rule_group_" + strconv.Itoa(int(oldRuleGroupID))
+		oldRUleGroupKey := RuleGroupPrefix + strconv.Itoa(int(oldRuleGroupID))
 		oldRuleGroupInfo, err := u.ruleGroupRepo.GetRuleGroupEtcd(ctx, oldRUleGroupKey) //旧规则组信息
 		if err != nil {
 			slog.ErrorContext(ctx, "get rule_group_info from etcd is failed: ", err)
@@ -106,7 +107,7 @@ func (u *UserRuleUsecase) createRuleToEtcd(ctx context.Context, ruleID int64, us
 			return err
 		}
 	}
-	ruleGroupKey := "rule_group_" + strconv.Itoa(int(userRule.GroupId))
+	ruleGroupKey := RuleGroupPrefix + strconv.Itoa(int(userRule.GroupId))
 	//根据规则组id查询 规则组信息
 	ruleGroup, err := u.ruleGroupRepo.GetRuleGroupEtcd(ctx, ruleGroupKey)
 	if err != nil {
@@ -224,7 +225,7 @@ func (u *UserRuleUsecase) DeleteUserRule(ctx context.Context, ids []int64) error
 			slog.ErrorContext(ctx, "get rule_group_id is failed: ", err)
 			return err
 		}
-		ruleGroupKey := "rule_group_" + strconv.Itoa(int(ruleGroupInfo.GroupId))
+		ruleGroupKey := RuleGroupPrefix + strconv.Itoa(int(ruleGroupInfo.GroupId))
 		// 获取规则组信息
 		ruleGroupInfoEtcd, err := u.ruleGroupRepo.GetRuleGroupEtcd(ctx, ruleGroupKey)
 		if err != nil {

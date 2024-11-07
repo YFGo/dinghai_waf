@@ -15,7 +15,7 @@ func InitEtcd(etcd *clientv3.Client) {
 	ctx := context.Background()
 
 	// 定义要插入的键值对
-	keys := []string{"rule_90001", "rule_90002", "rule_90003", "rule_group_1"}
+	keys := []string{"rule_90001", "rule_90002", "rule_90003", "group_1"}
 	values := []string{`{"id":90001,"risk_level":4,"seclang":"Include wafCoraza/ruleset/coraza.conf"}`, `{"id":90002,"risk_level":4,"seclang":"Include wafCoraza/ruleset/coreruleset/crs-setup.conf.example"}`, `{"id":90003,"risk_level":4,"seclang":"Include wafCoraza/ruleset/coreruleset/rules/*.conf"}`, `{"id":1,"is_buildin":1,"rule_id_list":[90001,90002,90003]}`}
 	// 遍历键值对
 	for i, key := range keys {
