@@ -13,7 +13,7 @@ message SeclangMod {
 			(buf.validate.field).cel = {
 				id: "match_goal",
 				message: "请选择正确的匹配目标",
-				expression: "this in ['IP' , 'COOKIE' , 'HEADER']"
+				expression: "this in ['IP']"
 			}
 	];
 	string match_action = 2 [
