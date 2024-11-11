@@ -1,0 +1,41 @@
+syntax = "proto3";
+
+package api.wafTop.v1;
+
+option go_package = "wafconsole/api/wafTop/v1;v1";
+option java_multiple_files = true;
+option java_package = "api.wafTop.v1";
+
+import "google/api/annotations.proto";
+import "api/wafTop/v1/message.proto";
+
+service AllowList {
+	rpc CreateAllowList (CreateAllowListRequest) returns (CreateAllowListReply) {
+		option (google.api.http) = {
+			post: "/app/wafTop/v1/allow"
+			body: "*"
+		};
+	};
+	rpc UpdateAllowList (UpdateAllowListRequest) returns (UpdateAllowListReply) {
+		option (google.api.http) = {
+			patch: "/app/wafTop/v1/allow"
+			body: "*"
+		};
+	};
+	rpc DeleteAllowList (DeleteAllowListRequest) returns (DeleteAllowListReply) {
+		option (google.api.http)  = {
+			delete: "/app/wafTop/v1/allow"
+		};
+	};
+	rpc GetAllowList (GetAllowListRequest) returns (GetAllowListReply) {
+		option (google.api.http) = {
+			get: "/app/wafTop/v1/allow"
+		};
+	};
+	rpc ListAllowList (ListAllowListRequest) returns (ListAllowListReply){
+		option (google.api.http) = {
+			get: "/app/wafTop/v1/allows"
+		};
+	};
+}
+

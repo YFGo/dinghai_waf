@@ -36,4 +36,7 @@ func CreateTable(db *gorm.DB) {
 	if !db.Migrator().HasTable(&model.UserRule{}) {
 		db.AutoMigrate(model.UserRule{})
 	}
+	if !db.Migrator().HasTable(&model.AllowList{}) {
+		db.AutoMigrate(model.AllowList{})
+	}
 }
