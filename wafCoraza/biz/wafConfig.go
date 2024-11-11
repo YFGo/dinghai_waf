@@ -265,7 +265,6 @@ func (w *WafConfigUsercase) wafConfig(wafStrategy []model.WAFStrategy) {
 		var (
 			userRuleSeclang    string
 			buildinRuleSeclang string
-			isFlag             bool // 是否使用了内置规则
 		)
 		for _, ruleGroupID := range wafConfigInfo.RuleGroupIdList { // 遍历此策略包含的规则组ID
 			w.ruleGroupStrategyMap[ruleGroupID] = append(w.ruleGroupStrategyMap[ruleGroupID], strategy.ID) //记录规则组id与策略id的关系 , 映射的map集合
@@ -282,7 +281,6 @@ func (w *WafConfigUsercase) wafConfig(wafStrategy []model.WAFStrategy) {
 					continue
 				}
 				if ruleGroup.IsBuildin == types.BUILDIN {
-					isFlag = true
 					buildinRuleSeclang = buildinRuleSeclang + types.SeclangCutOFF + rule.Seclang
 				} else {
 					userRuleSeclang = userRuleSeclang + types.SeclangCutOFF + rule.Seclang
@@ -293,9 +291,6 @@ func (w *WafConfigUsercase) wafConfig(wafStrategy []model.WAFStrategy) {
 		buildinRuleSeclang = w.disposeSeclang(buildinRuleSeclang)
 		userRuleSeclang = w.disposeSeclang(userRuleSeclang)
 		cfg = cfg.WithDirectives(buildinRuleSeclang).WithRootFS(mergefs.Merge(coreruleset.FS, io.OSFS))
-		if !isFlag {
-			cfg = cfg.WithDirectives(`Include wafCoraza/ruleset/coraza.conf`).WithRootFS(mergefs.Merge(coreruleset.FS, io.OSFS))
-		}
 		cfg = cfg.WithDirectives(userRuleSeclang)
 		waf, err := coraza.NewWAF(cfg)
 		if err != nil {
