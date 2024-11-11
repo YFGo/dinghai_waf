@@ -3,8 +3,233 @@
 
 openapi: 3.0.3
 info:
-    title: ""
+    title: AllowList API
     version: 0.0.1
-paths: {}
+paths:
+    /app/wafTop/v1/allow:
+        post:
+            tags:
+                - AllowList
+            operationId: AllowList_CreateAllowList
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/CreateAllowListRequest'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/CreateAllowListReply'
+                default:
+                    description: Default error response
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/Status'
+        delete:
+            tags:
+                - AllowList
+            operationId: AllowList_DeleteAllowList
+            parameters:
+                - name: ids
+                  in: query
+                  schema:
+                    type: array
+                    items:
+                        type: string
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/DeleteAllowListReply'
+                default:
+                    description: Default error response
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/Status'
+        patch:
+            tags:
+                - AllowList
+            operationId: AllowList_UpdateAllowList
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/UpdateAllowListRequest'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/UpdateAllowListReply'
+                default:
+                    description: Default error response
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/Status'
+    /app/wafTop/v1/allow/{id}:
+        get:
+            tags:
+                - AllowList
+            operationId: AllowList_GetAllowList
+            parameters:
+                - name: id
+                  in: path
+                  required: true
+                  schema:
+                    type: string
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/GetAllowListReply'
+                default:
+                    description: Default error response
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/Status'
+    /app/wafTop/v1/allows:
+        get:
+            tags:
+                - AllowList
+            operationId: AllowList_ListAllowList
+            parameters:
+                - name: name
+                  in: query
+                  schema:
+                    type: string
+                - name: pageNow
+                  in: query
+                  schema:
+                    type: string
+                - name: pageSize
+                  in: query
+                  schema:
+                    type: string
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/ListAllowListReply'
+                default:
+                    description: Default error response
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/Status'
 components:
-    schemas: {}
+    schemas:
+        AllowListInfo:
+            type: object
+            properties:
+                id:
+                    type: string
+                name:
+                    type: string
+                key:
+                    type: string
+                value:
+                    type: string
+                createdAt:
+                    type: string
+                updatedAt:
+                    type: string
+        CreateAllowListReply:
+            type: object
+            properties: {}
+        CreateAllowListRequest:
+            type: object
+            properties:
+                name:
+                    type: string
+                description:
+                    type: string
+                key:
+                    type: string
+                value:
+                    type: string
+            description: '######### 白名单 #########'
+        DeleteAllowListReply:
+            type: object
+            properties: {}
+        GetAllowListReply:
+            type: object
+            properties:
+                name:
+                    type: string
+                description:
+                    type: string
+                key:
+                    type: string
+                value:
+                    type: string
+                createdAt:
+                    type: string
+                updatedAt:
+                    type: string
+        GoogleProtobufAny:
+            type: object
+            properties:
+                '@type':
+                    type: string
+                    description: The type of the serialized message.
+            additionalProperties: true
+            description: Contains an arbitrary serialized message along with a @type that describes the type of the serialized message.
+        ListAllowListReply:
+            type: object
+            properties:
+                total:
+                    type: string
+                listAllowList:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/AllowListInfo'
+        Status:
+            type: object
+            properties:
+                code:
+                    type: integer
+                    description: The status code, which should be an enum value of [google.rpc.Code][google.rpc.Code].
+                    format: int32
+                message:
+                    type: string
+                    description: A developer-facing error message, which should be in English. Any user-facing error message should be localized and sent in the [google.rpc.Status.details][google.rpc.Status.details] field, or localized by the client.
+                details:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/GoogleProtobufAny'
+                    description: A list of messages that carry the error details.  There is a common set of message types for APIs to use.
+            description: 'The `Status` type defines a logical error model that is suitable for different programming environments, including REST APIs and RPC APIs. It is used by [gRPC](https://github.com/grpc). Each `Status` message contains three pieces of data: error code, error message, and error details. You can find out more about this error model and how to work with it in the [API Design Guide](https://cloud.google.com/apis/design/errors).'
+        UpdateAllowListReply:
+            type: object
+            properties: {}
+        UpdateAllowListRequest:
+            type: object
+            properties:
+                name:
+                    type: string
+                description:
+                    type: string
+                key:
+                    type: string
+                value:
+                    type: string
+                id:
+                    type: string
+tags:
+    - name: AllowList
