@@ -6,13 +6,14 @@ import (
 	"github.com/go-kratos/kratos/v2/transport/grpc"
 	v1 "wafconsole/api/wafTop/v1"
 	"wafconsole/app/wafTop/internal/conf"
+	allow "wafconsole/app/wafTop/internal/service/allow"
 	rule "wafconsole/app/wafTop/internal/service/rule"
 	site "wafconsole/app/wafTop/internal/service/site"
 	strategy "wafconsole/app/wafTop/internal/service/strategy"
 )
 
 // NewGRPCServer new a gRPC server.
-func NewGRPCServer(c *conf.Server, wafApp *site.WafAppService, serverWaf *site.ServerService, buildRule *rule.BuildRuleService, ruleGroup *rule.RuleGroupService, userRule *rule.UserRuleService, strategyGrpc *strategy.StrategyService, logger log.Logger) *grpc.Server {
+func NewGRPCServer(c *conf.Server, wafApp *site.WafAppService, serverWaf *site.ServerService, buildRule *rule.BuildRuleService, ruleGroup *rule.RuleGroupService, userRule *rule.UserRuleService, strategyGrpc *strategy.StrategyService, allow *allow.AllowListService, logger log.Logger) *grpc.Server {
 	var opts = []grpc.ServerOption{
 		grpc.Middleware(
 			recovery.Recovery(),

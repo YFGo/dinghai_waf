@@ -9,12 +9,14 @@ package main
 import (
 	"github.com/go-kratos/kratos/v2"
 	"github.com/go-kratos/kratos/v2/log"
+	"wafconsole/app/wafTop/internal/biz/allow"
 	"wafconsole/app/wafTop/internal/biz/rule"
 	"wafconsole/app/wafTop/internal/biz/site"
 	"wafconsole/app/wafTop/internal/biz/strategy"
 	"wafconsole/app/wafTop/internal/conf"
 	"wafconsole/app/wafTop/internal/data"
 	"wafconsole/app/wafTop/internal/server"
+	service4 "wafconsole/app/wafTop/internal/service/allow"
 	service2 "wafconsole/app/wafTop/internal/service/rule"
 	"wafconsole/app/wafTop/internal/service/site"
 	service3 "wafconsole/app/wafTop/internal/service/strategy"
@@ -52,8 +54,11 @@ func wireApp(confServer *conf.Server, bootstrap *conf.Bootstrap, logger log.Logg
 	wafStrategyRepo := data.NewWafStrategyRepo(dataData)
 	wafStrategyUsecase := strategyBiz.NewWafStrategyUsecase(wafStrategyRepo, ruleGroupRepo, buildRuleRepo, userRuleRepo)
 	strategyService := service3.NewStrategyService(wafStrategyUsecase)
-	grpcServer := server.NewGRPCServer(confServer, wafAppService, serverService, buildRuleService, ruleGroupService, userRuleService, strategyService, logger)
-	httpServer := server.NewHTTPServer(confServer, wafAppService, serverService, buildRuleService, ruleGroupService, userRuleService, strategyService, logger)
+	listAllowRepo := data.NewAllowListRepo(dataData)
+	listAllowUsecase := allow.NewListAllowUsecase(listAllowRepo)
+	allowListService := service4.NewAllowListService(listAllowUsecase)
+	grpcServer := server.NewGRPCServer(confServer, wafAppService, serverService, buildRuleService, ruleGroupService, userRuleService, strategyService, allowListService, logger)
+	httpServer := server.NewHTTPServer(confServer, wafAppService, serverService, buildRuleService, ruleGroupService, userRuleService, strategyService, allowListService, logger)
 	app := newApp(logger, grpcServer, httpServer)
 	return app, func() {
 		cleanup()

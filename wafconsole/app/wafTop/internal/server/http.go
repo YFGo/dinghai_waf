@@ -13,6 +13,7 @@ import (
 	v1 "wafconsole/api/wafTop/v1"
 	"wafconsole/app/wafTop/internal/conf"
 	"wafconsole/app/wafTop/internal/server/plugin"
+	allow "wafconsole/app/wafTop/internal/service/allow"
 	rule "wafconsole/app/wafTop/internal/service/rule"
 	site "wafconsole/app/wafTop/internal/service/site"
 	strategy "wafconsole/app/wafTop/internal/service/strategy"
@@ -68,7 +69,7 @@ func ErrorEncoder(w http.ResponseWriter, r *http.Request, err error) {
 }
 
 // NewHTTPServer new an HTTP server.
-func NewHTTPServer(c *conf.Server, appWafTop *site.WafAppService, serverWaf *site.ServerService, buildRule *rule.BuildRuleService, ruleGroup *rule.RuleGroupService, userRule *rule.UserRuleService, strategyHttp *strategy.StrategyService, logger log.Logger) *http.Server {
+func NewHTTPServer(c *conf.Server, appWafTop *site.WafAppService, serverWaf *site.ServerService, buildRule *rule.BuildRuleService, ruleGroup *rule.RuleGroupService, userRule *rule.UserRuleService, strategyHttp *strategy.StrategyService, allow *allow.AllowListService, logger log.Logger) *http.Server {
 	protoValidate, err := plugin.NewValidate()
 	if err != nil {
 		slog.Error("protoValidate", err)
@@ -101,5 +102,6 @@ func NewHTTPServer(c *conf.Server, appWafTop *site.WafAppService, serverWaf *sit
 	v1.RegisterRuleGroupHTTPServer(srv, ruleGroup)
 	v1.RegisterUserRuleHTTPServer(srv, userRule)
 	v1.RegisterStrategyHTTPServer(srv, strategyHttp)
+	v1.RegisterAllowListHTTPServer(srv, allow)
 	return srv
 }
