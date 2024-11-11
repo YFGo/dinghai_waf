@@ -34,7 +34,7 @@ message SeclangMod {
 
 // waf保护的应用程序
 message CreateWafAppRequest {
-	string name = 1 [0
+	string name = 1 [
 			(buf.validate.field).cel = {
 				id: "name",
 				message: "应用程序名称长度应为1~15",
@@ -847,7 +847,7 @@ message ListAllowListRequest {
 	];
 }
 
-message AllowList {
+message AllowListInfo {
 	int64 id = 1;
 	string name = 2;
 	string key = 3;
@@ -858,6 +858,6 @@ message AllowList {
 
 message ListAllowListReply {
 	int64 total = 1;
-	repeated AllowList list_allow_list = 2;
+	repeated AllowListInfo list_allow_list = 2;
 }
 // ######### 白名单 #########

@@ -29,7 +29,7 @@ service AllowList {
 	};
 	rpc GetAllowList (GetAllowListRequest) returns (GetAllowListReply) {
 		option (google.api.http) = {
-			get: "/app/wafTop/v1/allow"
+			get: "/app/wafTop/v1/allow/{id}"
 		};
 	};
 	rpc ListAllowList (ListAllowListRequest) returns (ListAllowListReply){
