@@ -17,7 +17,8 @@ type Domain interface {
 		model.ServerWaf |
 		model.Strategy |
 		model.StrategyConfig |
-		model.UserRule
+		model.UserRule |
+		model.AllowList
 }
 
 type BaseRepo[T Domain] interface {

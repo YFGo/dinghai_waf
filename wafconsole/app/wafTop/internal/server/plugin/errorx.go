@@ -5,8 +5,11 @@ import (
 )
 
 const (
-	ErrTokenIsFailed = 900 + iota
-	ErrServer
+	ErrTokenIsFailed = 900
+	ErrServer        = 901
+
+	// 8000~90000 白名单错误
+	ErrAllowExist = 80000
 )
 
 func TokenErr() error {
@@ -15,4 +18,8 @@ func TokenErr() error {
 
 func ServerErr() error {
 	return errors.New(ErrServer, "", "服务繁忙")
+}
+
+func AllowExistErr() error {
+	return errors.New(ErrAllowExist, "", "白名单已存在")
 }

@@ -2,6 +2,8 @@ package model
 
 import "gorm.io/gorm"
 
+const AllowListTableName = "waf_allow_list"
+
 type AllowList struct {
 	*gorm.Model
 	Name        string `json:"name"  gorm:"type:varchar(255);not null;comment:'白名单昵称'"`
@@ -11,5 +13,5 @@ type AllowList struct {
 }
 
 func (AllowList) TableName() string {
-	return "waf_allow_list"
+	return AppWafTableName
 }
