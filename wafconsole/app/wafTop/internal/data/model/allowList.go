@@ -13,5 +13,5 @@ type AllowList struct {
 }
 
 func (AllowList) TableName() string {
-	return AppWafTableName
+	return AllowListTableName
 }
