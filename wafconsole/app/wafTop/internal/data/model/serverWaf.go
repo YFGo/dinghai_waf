@@ -15,6 +15,7 @@ type ServerWaf struct {
 	Key           string  `json:"key" gorm:"type:varchar(255);comment:'TLS密钥'"`
 	ServerGroupID int64   `json:"server_group_id"  gorm:"type:bigint;not null;default:0;comment:'服务器组ID-预留字段'"`
 	StrategiesID  []int64 `json:"strategies_id" gorm:"-"` //关联的策略id
+	AllowListID   []int64 `json:"allow_list_id" gorm:"-"` //白名单id
 }
 
 func (ServerWaf) TableName() string {

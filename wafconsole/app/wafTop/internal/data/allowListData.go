@@ -67,3 +67,13 @@ func (a allowlistRepo) ListByWhere(ctx context.Context, limit, offset int64, opt
 	err := mysqlDB.Limit(int(limit)).Offset(int(offset)).Find(&allowLists).Error
 	return allowLists, err
 }
+
+func (a allowlistRepo) SaveAllowToEtcd(ctx context.Context, key, value string) error {
+	_, err := a.data.etcd.KV.Put(ctx, key, value)
+	return err
+}
+
+func (a allowlistRepo) DeleteAllowFromEtcd(ctx context.Context, key string) error {
+	_, err := a.data.etcd.KV.Delete(ctx, key)
+	return err
+}

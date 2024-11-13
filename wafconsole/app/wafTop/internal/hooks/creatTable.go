@@ -57,4 +57,9 @@ func CreateTable(db *gorm.DB) {
 			panic(err)
 		}
 	}
+	if !db.Migrator().HasTable(&model.ServerAllow{}) {
+		if err := db.AutoMigrate(&model.ServerAllow{}); err != nil {
+			panic(err)
+		}
+	}
 }

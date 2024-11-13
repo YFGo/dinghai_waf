@@ -2,9 +2,12 @@ package service
 
 import (
 	"context"
+	"google.golang.org/grpc/codes"
 	"log/slog"
 	siteBiz "wafconsole/app/wafTop/internal/biz/site"
 	"wafconsole/app/wafTop/internal/data/model"
+	"wafconsole/app/wafTop/internal/server/plugin"
+	"wafconsole/app/wafTop/internal/utils"
 
 	pb "wafconsole/api/wafTop/v1"
 )
@@ -28,11 +31,15 @@ func (s *ServerService) CreateServer(ctx context.Context, req *pb.CreateServerRe
 		IP:           req.Ip,
 		Port:         int(req.Port),
 		StrategiesID: req.StrategyIds,
+		AllowListID:  req.AllowIds,
 	}
 	err := s.uc.CreateServerSite(ctx, serverInfo)
 	if err != nil {
+		if utils.StatusErr(err, codes.AlreadyExists) {
+			return nil, plugin.ServerExistErr()
+		}
 		slog.ErrorContext(ctx, "create server_waf service error: ", err)
-		return nil, err
+		return nil, plugin.ServerErr()
 	}
 	return &pb.CreateServerReply{}, nil
 }
@@ -45,11 +52,18 @@ func (s *ServerService) UpdateServer(ctx context.Context, req *pb.UpdateServerRe
 		IP:           req.Ip,
 		Port:         int(req.Port),
 		StrategiesID: req.StrategyIds,
+		AllowListID:  req.AllowIds,
 	}
 	err := s.uc.UpdateServerSite(ctx, req.Id, serverInfo)
 	if err != nil {
+		if utils.StatusErr(err, codes.AlreadyExists) {
+			return nil, plugin.ServerExistErr()
+		}
+		if utils.StatusErr(err, codes.NotFound) {
+			return nil, plugin.ServerChooseErr(err)
+		}
 		slog.ErrorContext(ctx, "update server_waf service error: ", err)
-		return nil, err
+		return nil, plugin.ServerErr()
 	}
 	return &pb.UpdateServerReply{}, nil
 }
@@ -77,6 +91,7 @@ func (s *ServerService) GetServer(ctx context.Context, req *pb.GetServerRequest)
 		Host:         serverInfo.Host,
 		Port:         int64(serverInfo.Port),
 		StrategiesId: serverInfo.StrategiesID,
+		AllowIds:     serverInfo.AllowListID,
 	}
 	if appInfo != nil {
 		wafAppInfo := &pb.WafAppInfo{
