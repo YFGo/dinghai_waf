@@ -179,22 +179,23 @@ message UpdateServerRequest {
 			expression: "size(this) > 0"
 		}
 	];
-	int64 port = 4 [
+	string old_host = 4;
+	int64 port = 5 [
 		(buf.validate.field).cel = {
 			id: "port",
 			message: "端口选择在1~65535之间",
 			expression: "this >= 1 && this <= 65535"
 		}
 	];
-	int64 id = 5 [
+	int64 id = 6 [
 			(buf.validate.field).cel = {
 				id: "id",
 				message: "服务器不存在",
 				expression: "this > 0"
 			}
 	];
-	repeated int64 strategy_ids = 6;
-	repeated int64 allow_ids = 7;
+	repeated int64 strategy_ids = 7;
+	repeated int64 allow_ids = 8;
 }
 message UpdateServerReply {}
 
