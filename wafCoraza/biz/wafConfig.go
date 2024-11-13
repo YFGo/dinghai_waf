@@ -90,7 +90,7 @@ func (w *WafConfigUsercase) CreateWaf() {
 // GetAppWAF 根据域名和访问的端口 , 获取此web程序应用的策略的waf实列
 func (w *WafConfigUsercase) GetAppWAF(host string) []*model.CorazaWaf {
 	wafs := make([]*model.CorazaWaf, 0)
-	strategyIDs, err := w.repo.GetAppForStrategyIDs(host) //获取策略ID
+	strategyIDs, err := w.repo.GetAppForStrategyIDs(host + types.StrategySuffix) //获取策略ID
 	if err != nil || len(strategyIDs) == 0 {
 		slog.Error("get strategy failed: ", err, "strategyIDs: ", strategyIDs)
 		return nil

@@ -113,7 +113,7 @@ func (s *ServerUsecase) updateServerInfoEtcd(ctx context.Context, serverInfo mod
 			serverAllowValue += strconv.Itoa(int(serverInfo.AllowListID[i])) + cutOff
 		}
 	}
-	serverRealAddrKey := serverStrategiesKey + serverAddrKey // 站点真实地址
+	serverRealAddrKey := serverInfo.Host + serverAddrKey // 站点真实地址
 	serverRealAddrValue := serverInfo.IP + ":" + strconv.Itoa(serverInfo.Port)
 	if err := s.repo.SaveServerToEtcd(ctx, serverStrategiesKey, serverRealAddrKey, serverStrategies, serverRealAddrValue, serverAllowKey, serverAllowValue); err != nil { //存储站点对应的关系
 		slog.ErrorContext(ctx, "save server to etcd failed: ", err, "server_info", serverInfo)
@@ -148,7 +148,7 @@ func (s *ServerUsecase) CreateServerSite(ctx context.Context, serverInfo model.S
 }
 
 // UpdateServerSite 修改服务器站点
-func (s *ServerUsecase) UpdateServerSite(ctx context.Context, id int64, serverInfo model.ServerWaf) error {
+func (s *ServerUsecase) UpdateServerSite(ctx context.Context, id int64, serverInfo model.ServerWaf, oldHost string) error {
 	// 1. 检测服务器名称是否重复
 	if s.checkServerExist(ctx, serverInfo.Name, id) {
 		return status.Error(codes.AlreadyExists, "服务器已存在")
@@ -162,6 +162,12 @@ func (s *ServerUsecase) UpdateServerSite(ctx context.Context, id int64, serverIn
 	if err := s.repo.Update(ctx, id, serverInfo); err != nil {
 		slog.ErrorContext(ctx, "update server failed: ", err, "server_info", serverInfo)
 		return err
+	}
+	if len(oldHost) != 0 { //如果旧的oldHost不为空 , 删除此旧的oldHost
+		if err := s.repo.DeleteServerToEtcd(ctx, oldHost+serverStrategy, oldHost+serverAddrKey, oldHost+serverStrategy); err != nil { // 删除etcd中 旧站点应用的策略 , 真实地址 , 白名单
+			slog.ErrorContext(ctx, "delete server to etcd failed: ", err, "host", oldHost)
+			return err
+		}
 	}
 	// 3. 保存服务器到etcd
 	if err := s.updateServerInfoEtcd(ctx, serverInfo); err != nil {

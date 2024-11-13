@@ -54,7 +54,7 @@ func (s *ServerService) UpdateServer(ctx context.Context, req *pb.UpdateServerRe
 		StrategiesID: req.StrategyIds,
 		AllowListID:  req.AllowIds,
 	}
-	err := s.uc.UpdateServerSite(ctx, req.Id, serverInfo)
+	err := s.uc.UpdateServerSite(ctx, req.Id, serverInfo, req.OldHost)
 	if err != nil {
 		if utils.StatusErr(err, codes.AlreadyExists) {
 			return nil, plugin.ServerExistErr()

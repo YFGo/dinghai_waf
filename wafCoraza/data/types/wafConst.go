@@ -8,6 +8,11 @@ const (
 	SeclangCutOFF   = "<$>"
 	RuleGroupPrefix = "group_"
 	RulePrefix      = "rule_"
+	StrategySuffix  = "_strategy"
+	AllowPrefix     = "allow_"
+	AllowSuffix     = "_allow"
+	URI             = "URI"
+	IP              = "IP"
 )
 
 const (

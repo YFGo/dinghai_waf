@@ -25,10 +25,15 @@ func initApp() (func(), *wafHttp.WafHandleService) {
 	// waf
 	loadWafRepo := data.NewLoadWAFConfigRepo(dataDB)
 	wafConfigUsercase := biz.NewWafConfigUsercase(loadWafRepo)
+	// allow
+	wafAllowRepo := data.NewWafAllowListRepo(dataDB)
+	wafAllowUsercase := biz.NewWafAllowListUsecase(wafAllowRepo)
+	// 初始化定时任务
+	// 开启定时任务
 	//开启定时任务
 	//timeTask := attackUsercase.StartTimeTask()
 	//timeTask()
-	attackHttp := wafHttp.NewWafHandleService(attackUsercase, wafConfigUsercase)
+	attackHttp := wafHttp.NewWafHandleService(attackUsercase, wafConfigUsercase, wafAllowUsercase)
 
 	// 在服务启动之处 , 创建存储攻击日志的csv文件
 	return cleanup, attackHttp

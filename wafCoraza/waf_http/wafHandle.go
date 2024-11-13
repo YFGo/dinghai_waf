@@ -1,19 +1,16 @@
 package wafHttp
 
 import (
-	"encoding/json"
-	"fmt"
+	"context"
 	"io"
-	"log"
 	"log/slog"
 	"net"
 	"net/http"
-	"net/http/httputil"
-	"net/url"
 	"strconv"
 	"strings"
 	"wafCoraza/biz"
 	constType "wafCoraza/data/types"
+	"wafCoraza/waf_http/plugins"
 
 	"github.com/corazawaf/coraza/v3/types"
 )
@@ -21,18 +18,21 @@ import (
 type WafHandleService struct {
 	uc          *biz.AttackEventUsercase
 	wafConfigUc *biz.WafConfigUsercase
+	wafAllowUc  *biz.WafAllowListUsecase
 }
 
-func NewWafHandleService(uc *biz.AttackEventUsercase, wafConfigUc *biz.WafConfigUsercase) *WafHandleService {
+func NewWafHandleService(uc *biz.AttackEventUsercase, wafConfigUc *biz.WafConfigUsercase, wafAllowUc *biz.WafAllowListUsecase) *WafHandleService {
 	return &WafHandleService{
 		uc:          uc,
 		wafConfigUc: wafConfigUc,
+		wafAllowUc:  wafAllowUc,
 	}
 }
 
 // InitWAF 内核启动之初 , 初始化WAF
 func (w *WafHandleService) InitWAF() {
-	w.wafConfigUc.CreateWaf()
+	w.wafConfigUc.CreateWaf()                        // 初始化waf内核
+	w.wafAllowUc.InitAllowList(context.Background()) // 初始化白名单
 }
 
 // ProxyHandler 创建反向代理服务器
@@ -49,12 +49,10 @@ func (w *WafHandleService) ProxyHandler() http.HandlerFunc {
 			slog.Error("LogAttackEvent Error reading request body: ", err)
 			return
 		}
-		// 提取请求地址中的关键字段
-		hostBaseUrl := strings.Split(req.URL.Path, "/")
+		hostBaseUrl := strings.Split(req.URL.Path, "/")            // 提取请求地址中的关键字段
 		wafs := w.wafConfigUc.GetAppWAF(hostBaseUrl[1])            //根据访问的域名 获取收到保护的web程序所应用的策略 对应的WAF实列
 		realAddr, err := w.wafConfigUc.GetRealAddr(hostBaseUrl[1]) //  获取真实的后端地址
-		// 重构请求路径
-		newPath := strings.Join(hostBaseUrl[2:], "/")
+		newPath := strings.Join(hostBaseUrl[2:], "/")              // 重构请求路径
 		req.URL.Path = newPath
 		var tx types.Transaction
 		defer func() {
@@ -68,60 +66,47 @@ func (w *WafHandleService) ProxyHandler() http.HandlerFunc {
 		clientIP, clientPort, err := net.SplitHostPort(req.RemoteAddr)
 		serverIP, serverPortStr, err := net.SplitHostPort(realAddr)
 		if err != nil {
-			log.Printf("Error splitting RemoteAddr: %v", err)
+			slog.Error("Error splitting RemoteAddr: ", err)
 		}
+
 		serverPort, _ := strconv.Atoi(serverPortStr)
 		port, _ := strconv.Atoi(clientPort)
-		isAllow := true //  默认值为true , 当此程序无waf实列时 , 直接放行
-		//根据这些waf实列 , 校验请求是否可以放行 , 只要存在一个waf实列拦截了请求 , 就不再检测
-		for _, waf := range wafs {
-			tx = waf.WAF.NewTransaction()
-			tx.ProcessConnection(clientIP, port, serverIP, serverPort) // 模拟网络连接，使用请求的远程地址和端口
-			tx.ProcessURI(req.RequestURI, req.Method, req.Proto)       // Request URI was /some-url?with=args
-			_, reqHeaderIsLegal := w.WafParseHeader(tx, req, rw)
-			_, reqBodyIsLegal := w.WafParseReqBody(tx, requestBody)
-			attackMathRules := w.WafMatchRules(tx)  //处理命中的规则
-			if reqHeaderIsLegal && reqBodyIsLegal { // 此waf实列检测 请求头和请求体的检测均无问题
-				isAllow = true
-			} else {
-				slog.Info("reqHeaderIsLegal:", reqHeaderIsLegal, " reqBodyIsLegal:", reqBodyIsLegal)
-				if waf.Action == 1 { //仅仅记录 不拦截
-					isAllow = true
-				} else {
-					isAllow = false
-					break
-				}
-				w.uc.LogAttackEvent(attackMathRules, req, requestBody) //记录攻击日志
-				if waf.NextAction == 1 {                               //不再拦截
-					isAllow = true
-				} else {
-					isAllow = false
-					break
-				}
-			}
+		err, isAllow := plugins.AllowHandle(w.wafAllowUc, context.Background(), hostBaseUrl[1], newPath, clientIP) //百名单检测
+		if err != nil {
+			slog.Error("allow plugins is failed: ", err)
 		}
-		if isAllow && len(realAddr) != 0 { //允许放行
-			targetURL, err := url.Parse(fmt.Sprintf("http://%s", realAddr))
-			if err != nil {
-				http.Error(rw, err.Error(), http.StatusInternalServerError)
-				return
+		switch isAllow {
+		case true:
+			plugins.Proxy(true, realAddr, req, rw, requestBody) // 处理结果
+		case false: // 不存在于白名单中
+			//根据这些waf实列 , 校验请求是否可以放行 , 只要存在一个waf实列拦截了请求 , 就不再检测
+			for _, waf := range wafs {
+				tx = waf.WAF.NewTransaction()
+				tx.ProcessConnection(clientIP, port, serverIP, serverPort) // 模拟网络连接，使用请求的远程地址和端口
+				tx.ProcessURI(req.RequestURI, req.Method, req.Proto)       // Request URI was /some-url?with=args
+				_, reqHeaderIsLegal := w.WafParseHeader(tx, req, rw)
+				_, reqBodyIsLegal := w.WafParseReqBody(tx, requestBody)
+				attackMathRules := w.WafMatchRules(tx)  //处理命中的规则
+				if reqHeaderIsLegal && reqBodyIsLegal { // 此waf实列检测 请求头和请求体的检测均无问题
+					isAllow = true
+				} else {
+					slog.Info("reqHeaderIsLegal:", reqHeaderIsLegal, " reqBodyIsLegal:", reqBodyIsLegal)
+					if waf.Action == 1 { //仅仅记录 不拦截
+						isAllow = true
+					} else {
+						isAllow = false
+						break
+					}
+					w.uc.LogAttackEvent(attackMathRules, req, requestBody) //记录攻击日志
+					if waf.NextAction == 1 {                               //不再拦截
+						isAllow = true
+					} else {
+						isAllow = false
+						break
+					}
+				}
 			}
-			req.Body = io.NopCloser(strings.NewReader(string(requestBody))) /* 重置请求体 */
-			proxy := httputil.NewSingleHostReverseProxy(targetURL)
-			proxy.ServeHTTP(rw, req)
-		} else {
-			badMessage := struct {
-				Code    int    `json:"code"`
-				Message string `json:"message"`
-				Data    string `json:"data"`
-			}{
-				Code:    403,
-				Message: "Forbidden",
-				Data:    "",
-			}
-			badMessageByte, _ := json.Marshal(badMessage)
-			rw.Header().Set("Content-Type", "application/json")
-			rw.Write(badMessageByte)
+			plugins.Proxy(isAllow, realAddr, req, rw, requestBody) // 处理结果
 		}
 	}
 }
@@ -198,5 +183,8 @@ func (w *WafHandleService) WatchEtcdService() {
 	}()
 	go func() {
 		w.wafConfigUc.WatchRule()
+	}()
+	go func() {
+		w.wafAllowUc.WatchAllowChange(context.Background())
 	}()
 }
