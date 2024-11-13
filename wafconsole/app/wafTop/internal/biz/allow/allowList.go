@@ -2,17 +2,25 @@ package allow
 
 import (
 	"context"
+	"encoding/json"
 	"errors"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 	"gorm.io/gorm"
 	"log/slog"
+	"strconv"
 	"wafconsole/app/wafTop/internal/biz/iface"
 	"wafconsole/app/wafTop/internal/data/model"
 )
 
+const (
+	allowPrefix = "allow_"
+)
+
 type ListAllowRepo interface {
 	iface.BaseRepo[model.AllowList]
+	SaveAllowToEtcd(ctx context.Context, key, value string) error
+	DeleteAllowFromEtcd(ctx context.Context, key string) error
 }
 
 type ListAllowUsecase struct {
@@ -35,15 +43,44 @@ func (uc *ListAllowUsecase) checkAllowName(ctx context.Context, id int64, name s
 	return true
 }
 
+// saveAllowToEtcd 保存白名单到etcd
+func (uc *ListAllowUsecase) saveAllowToEtcd(ctx context.Context, id int64, allowInfo model.AllowList) error {
+	key := allowPrefix + strconv.Itoa(int(id))
+	etcdAllow := struct {
+		Key   string `json:"key"`
+		Value string `json:"value"`
+	}{
+		Key:   allowInfo.Key,
+		Value: allowInfo.Value,
+	}
+	value, err := json.Marshal(&etcdAllow)
+	if err != nil {
+		slog.ErrorContext(ctx, "save_allow_to_etcd json marshal is failed: ", err)
+		return err
+	}
+	err = uc.repo.SaveAllowToEtcd(ctx, key, string(value))
+	if err != nil {
+		slog.ErrorContext(ctx, "save_allow_to_etcd is failed", err)
+		return err
+	}
+	return nil
+}
+
 // CreateAllow 新增白名单
 func (uc *ListAllowUsecase) CreateAllow(ctx context.Context, allowInfo model.AllowList) error {
 	// 检查昵称是否重复
 	if uc.checkAllowName(ctx, 0, allowInfo.Name) {
 		return status.Error(codes.AlreadyExists, "昵称重复")
 	}
-	_, err := uc.repo.Create(ctx, allowInfo)
+	id, err := uc.repo.Create(ctx, allowInfo)
 	if err != nil {
 		slog.ErrorContext(ctx, "create_allow is failed", err)
+		return err
+	}
+	// 将信息保存到etcd
+	err = uc.saveAllowToEtcd(ctx, id, allowInfo)
+	if err != nil {
+		slog.ErrorContext(ctx, "CreateAllow save_allow_to_etcd is failed", err)
 		return err
 	}
 	return nil
@@ -60,6 +97,12 @@ func (uc *ListAllowUsecase) UpdateAllow(ctx context.Context, id int64, allowInfo
 		slog.ErrorContext(ctx, "update_allow is failed", err)
 		return err
 	}
+	// 将信息保存到etcd
+	err = uc.saveAllowToEtcd(ctx, id, allowInfo)
+	if err != nil {
+		slog.ErrorContext(ctx, "UpdateAllow save_allow_to_etcd is failed", err)
+		return err
+	}
 	return nil
 }
 
@@ -69,6 +112,15 @@ func (uc *ListAllowUsecase) DeleteAllow(ctx context.Context, ids []int64) error 
 	if err != nil {
 		slog.ErrorContext(ctx, "delete_allow is failed", err)
 		return err
+	}
+	// 删除etcd中的白名单信息
+	for _, id := range ids {
+		key := allowPrefix + strconv.Itoa(int(id))
+		err = uc.repo.DeleteAllowFromEtcd(ctx, key)
+		if err != nil {
+			slog.ErrorContext(ctx, "delete_allow_from_etcd is failed", err)
+			return err
+		}
 	}
 	return nil
 }
