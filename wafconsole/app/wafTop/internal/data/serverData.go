@@ -68,9 +68,11 @@ func (s serverRepo) Create(ctx context.Context, serverInfo model.ServerWaf) (int
 		if err != nil {
 			return err
 		}
-		err = tx.Create(&serverAllows).Error // 插入关联表数据 站点和白名单
-		if err != nil {
-			return err
+		if len(serverAllows) != 0 {
+			err = tx.Create(&serverAllows).Error // 插入关联表数据 站点和白名单
+			if err != nil {
+				return err
+			}
 		}
 		return nil
 	})
@@ -116,9 +118,11 @@ func (s serverRepo) Update(ctx context.Context, id int64, serverInfo model.Serve
 			}
 			serverAllows = append(serverAllows, serverAllowTemp)
 		}
-		err = tx.Create(&serverAllows).Error // 插入关联表数据 站点和白名单
-		if err != nil {
-			return err
+		if len(serverInfo.AllowListID) != 0 {
+			err = tx.Create(&serverAllows).Error // 插入关联表数据 站点和白名单
+			if err != nil {
+				return err
+			}
 		}
 		return nil
 	})
@@ -184,7 +188,9 @@ func (s serverRepo) SaveServerToEtcd(ctx context.Context, serverStrategiesKey, s
 	if err != nil {
 		return err
 	}
-	_, err = s.data.etcd.KV.Put(ctx, serverAllowKey, serverAllowValue)
+	if len(serverAllowValue) != 0 {
+		_, err = s.data.etcd.KV.Put(ctx, serverAllowKey, serverAllowValue)
+	}
 	return err
 }
 
