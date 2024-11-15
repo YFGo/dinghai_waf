@@ -31,7 +31,7 @@ func NewWafHandleService(uc *biz.AttackEventUsercase, wafConfigUc *biz.WafConfig
 
 // InitWAF 内核启动之初 , 初始化WAF
 func (w *WafHandleService) InitWAF() {
-	w.wafConfigUc.CreateWaf()                        // 初始化waf内核
+	w.wafConfigUc.InitWAF()                          // 初始化waf内核
 	w.wafAllowUc.InitAllowList(context.Background()) // 初始化白名单
 }
 

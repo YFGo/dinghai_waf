@@ -30,23 +30,19 @@ type WafConfigRepo interface {
 }
 
 type WafConfigUsercase struct {
-	repo                 WafConfigRepo
-	waf                  map[string]*model.CorazaWaf
-	ruleGroupMap         map[int]model.RuleGroup
-	ruleMap              map[int]model.Rule
-	ruleGroupStrategyMap map[int64][]string //key为规则组id , value为策略id
-	ruleToGroupMap       map[int64]int64    //key为规则id , value为规则组id
-	mu                   sync.Mutex
+	repo         WafConfigRepo
+	waf          map[string]*model.CorazaWaf
+	ruleGroupMap map[int]model.RuleGroup
+	ruleMap      map[int]model.Rule
+	mu           sync.Mutex
 }
 
 func NewWafConfigUsercase(repo WafConfigRepo) *WafConfigUsercase {
 	return &WafConfigUsercase{
-		repo:                 repo,
-		waf:                  make(map[string]*model.CorazaWaf),
-		ruleGroupMap:         make(map[int]model.RuleGroup),
-		ruleMap:              make(map[int]model.Rule),
-		ruleGroupStrategyMap: make(map[int64][]string),
-		ruleToGroupMap:       make(map[int64]int64),
+		repo:         repo,
+		waf:          make(map[string]*model.CorazaWaf),
+		ruleGroupMap: make(map[int]model.RuleGroup),
+		ruleMap:      make(map[int]model.Rule),
 	}
 }
 
@@ -64,8 +60,8 @@ func (w *WafConfigUsercase) disposeSeclang(seclang string) string {
 	return formattedSeclang.String()
 }
 
-// CreateWaf 内核服务启动之初 , 根据策略创建waf实列 , 后续通过etcd通知 修改waf实列
-func (w *WafConfigUsercase) CreateWaf() {
+// InitWAF 内核服务启动之初 , 根据策略创建waf实列 , 后续通过etcd通知 修改waf实列
+func (w *WafConfigUsercase) InitWAF() {
 	wafStrategy, err := w.repo.GetAllSeclangRules() // 获取策略信息
 	if err != nil {
 		slog.Error("w.repo.GetAllSeclangRules failed : ", err)
@@ -85,6 +81,20 @@ func (w *WafConfigUsercase) CreateWaf() {
 	w.wafRule(ruleList)
 	w.wafRuleGroup(ruleGroupList)
 	w.wafConfig(wafStrategy)
+}
+
+// wafRuleGroup 处理规则组信息
+func (w *WafConfigUsercase) wafRuleGroup(ruleGroupList []model.RuleGroup) {
+	for _, ruleGroup := range ruleGroupList {
+		w.ruleGroupMap[ruleGroup.ID] = ruleGroup
+	}
+}
+
+// 处理规则信息
+func (w *WafConfigUsercase) wafRule(ruleList []model.Rule) {
+	for _, rule := range ruleList {
+		w.ruleMap[rule.ID] = rule
+	}
 }
 
 // GetAppWAF 根据域名和访问的端口 , 获取此web程序应用的策略的waf实列
@@ -119,82 +129,51 @@ func (w *WafConfigUsercase) GetRealAddr(host string) (string, error) {
 // WatchStrategy 监视策略
 func (w *WafConfigUsercase) WatchStrategy() {
 	watchChan := w.repo.AirUpdateStrategy()
-	for wresp := range watchChan {
-		for _, ev := range wresp.Events {
-			keyArr := strings.Split(string(ev.Kv.Key), types.CutOFF) //获取策略id
-			strategyTemp := model.WAFStrategy{
-				ID:           keyArr[1],
-				SeclangRules: string(ev.Kv.Value),
-			}
-			slog.Info("Key changed", "Key", ev.Kv.Key, "Value", ev.Kv.Value)
-			// 判断不同的情况 新增 , 修改 , 删除
-			wafValue, ok := w.waf[strategyTemp.ID]
-			if len(ev.Kv.Value) == 0 && !ok { // 避免一些因策略格式错误而创建失败的waf实列  在监听到删除操作时,错误的进入新增操作
-				continue
-			}
-			if ok && wafValue != nil { //如果key存在 , 并且 waf实列不为空 根据 value判断是修改   还是删除
-				switch len(strategyTemp.SeclangRules) {
-				case 0: //删除
-					w.mu.Lock()
-					delete(w.waf, strategyTemp.ID)
-					w.mu.Unlock()
-				default: //修改
+	for {
+		select {
+		case watchResp := <-watchChan:
+			for _, event := range watchResp.Events {
+				keyArr := strings.Split(string(event.Kv.Key), types.CutOFF) //获取策略id
+				switch event.Type {                                         //判断此次更新是什么类型的操作
+				case clientv3.EventTypePut:
+					strategyTemp := model.WAFStrategy{
+						ID:           keyArr[1],
+						SeclangRules: string(event.Kv.Value),
+					}
 					w.wafConfig([]model.WAFStrategy{strategyTemp})
+				case clientv3.EventTypeDelete:
+					delete(w.waf, keyArr[1])
 				}
-			} else { //如果key不存在 , 新增
-				w.wafConfig([]model.WAFStrategy{strategyTemp})
 			}
 		}
 	}
 }
 
+// WatchRuleGroup 监视规则组
 func (w *WafConfigUsercase) WatchRuleGroup() {
 	watchChan := w.repo.AirUpdateRuleGroup()
-	for wresp := range watchChan {
-		for _, ev := range wresp.Events {
-			var ruleGroup model.RuleGroup
-			ruleGroupKeyArr := strings.Split(string(ev.Kv.Key), types.CutOFF)
-			ruleGroup.ID, _ = strconv.Atoi(ruleGroupKeyArr[1]) //
-			strategyListId, ok := w.ruleGroupStrategyMap[int64(ruleGroup.ID)]
-			if !ok { //新增规则组的操作
-
-			}
-			if len(ev.Kv.Value) == 0 { //执行删除操作
-				delete(w.ruleGroupMap, ruleGroup.ID)
-				delete(w.ruleGroupStrategyMap, int64(ruleGroup.ID))
-			} else {
-				err := json.Unmarshal(ev.Kv.Value, &ruleGroup)
+	for {
+		select {
+		case watchResp := <-watchChan:
+			for _, event := range watchResp.Events {
+				keyArr := strings.Split(string(event.Kv.Key), types.CutOFF) //获取规则组id
+				groupID, err := strconv.Atoi(keyArr[1])
 				if err != nil {
-					slog.Error("ruleGroup json unmarshal is failed: ", err)
+					slog.Error("strconv group_id is failed: ", err)
 					continue
 				}
-				w.ruleGroupMap[ruleGroup.ID] = ruleGroup //更新规则组信息
-				//更新相应的规则信息
-				for _, ruleID := range ruleGroup.RuleIDList {
-					if _, ok := w.ruleMap[int(ruleID)]; !ok { //此规则是新增的规则
-						ruleValue, err := w.repo.GetCommonByKey(types.RulePrefix + strconv.Itoa(int(ruleID)))
-						if err != nil {
-							slog.Error("rule is not exist: ", ruleID)
-							continue
-						}
-						var rule model.Rule
-						err = json.Unmarshal([]byte(ruleValue), &rule)
-						if err != nil {
-							slog.Error(" WatchRuleGroup rule json unmarshal is failed: ", err)
-							continue
-						}
-						w.ruleMap[rule.ID] = rule //更新规则信息
+				switch event.Type { //判断此次更新是什么类型的操作
+				case clientv3.EventTypePut:
+					var ruleGroup model.RuleGroup
+					err = json.Unmarshal(event.Kv.Value, &ruleGroup)
+					if err != nil {
+						slog.Error("ruleGroup json unmarshal is failed: ", err)
+						continue
 					}
+					w.ruleGroupMap[ruleGroup.ID] = ruleGroup //更新规则组信息
+				case clientv3.EventTypeDelete:
+					delete(w.ruleGroupMap, groupID)
 				}
-			}
-			for _, strategyId := range strategyListId {
-				//获取这些策略信息
-				strategyList, err := w.repo.GetStrategyListById(types.StrategyKey + strategyId)
-				if err != nil {
-					slog.Error("GetStrategyListById is failed: ", err)
-					continue
-				}
-				w.wafConfig(strategyList)
 			}
 		}
 	}
@@ -202,58 +181,36 @@ func (w *WafConfigUsercase) WatchRuleGroup() {
 
 func (w *WafConfigUsercase) WatchRule() {
 	watchChan := w.repo.AirUpdateRule()
-	for wresp := range watchChan {
-		for _, ev := range wresp.Events {
-			var rule model.Rule
-			ruleKeyArr := strings.Split(string(ev.Kv.Key), types.CutOFF)
-			rule.ID, _ = strconv.Atoi(ruleKeyArr[1]) // 获取到规则ID
-			groupID, ok := w.ruleToGroupMap[int64(rule.ID)]
-			if len(ev.Kv.Value) == 0 { //执行删除操作
-				delete(w.ruleMap, rule.ID)
-				delete(w.ruleToGroupMap, int64(rule.ID))
-			} else {
-				err := json.Unmarshal(ev.Kv.Value, &rule)
+	for {
+		select {
+		case watchResp := <-watchChan:
+			for _, event := range watchResp.Events {
+				keyArr := strings.Split(string(event.Kv.Key), types.CutOFF) //获取规则id
+				ruleID, err := strconv.Atoi(keyArr[1])
 				if err != nil {
-					slog.Error("rule json unmarshal is failed: ", err)
+					slog.Error("strconv rule_id is failed: ", err)
 					continue
 				}
-				w.ruleMap[rule.ID] = rule //更新规则信息
-			}
-			//根据groupID , 获取 策略id列表
-			strategyListId, ok := w.ruleGroupStrategyMap[groupID]
-			if !ok { //如果不存在 , 表示当前操作为新增操作
-				// 查询此规则绑定的规则组
-			}
-			for _, strategyId := range strategyListId {
-				//获取这些策略信息
-				strategyList, err := w.repo.GetStrategyListById(types.StrategyKey + strategyId)
-				if err != nil {
-					slog.Error("GetStrategyListById is failed: ", err)
-					continue
+				switch event.Type { //判断此次更新是什么类型的操作
+				case clientv3.EventTypePut:
+					var rule model.Rule
+					err = json.Unmarshal(event.Kv.Value, &rule)
+					if err != nil {
+						slog.Error("rule json unmarshal is failed: ", err)
+						continue
+					}
+					w.ruleMap[rule.ID] = rule //更新规则信息
+				case clientv3.EventTypeDelete:
+					delete(w.ruleMap, ruleID)
 				}
-				w.wafConfig(strategyList)
 			}
 		}
 	}
 }
 
-// wafRuleGroup 处理规则组信息
-func (w *WafConfigUsercase) wafRuleGroup(ruleGroupList []model.RuleGroup) {
-	for _, ruleGroup := range ruleGroupList {
-		w.ruleGroupMap[ruleGroup.ID] = ruleGroup
-	}
-}
-
-// 处理规则信息
-func (w *WafConfigUsercase) wafRule(ruleList []model.Rule) {
-	for _, rule := range ruleList {
-		w.ruleMap[rule.ID] = rule
-	}
-}
-
 func (w *WafConfigUsercase) wafConfig(wafStrategy []model.WAFStrategy) {
+	w.mu.Lock()
 	for _, strategy := range wafStrategy {
-		w.mu.Lock()
 		cfg := coraza.NewWAFConfig()
 		seclang := strategy.SeclangRules
 		var wafConfigInfo model.WafConfig
@@ -267,15 +224,13 @@ func (w *WafConfigUsercase) wafConfig(wafStrategy []model.WAFStrategy) {
 			buildinRuleSeclang string
 		)
 		for _, ruleGroupID := range wafConfigInfo.RuleGroupIdList { // 遍历此策略包含的规则组ID
-			w.ruleGroupStrategyMap[ruleGroupID] = append(w.ruleGroupStrategyMap[ruleGroupID], strategy.ID) //记录规则组id与策略id的关系 , 映射的map集合
-			ruleGroup, ok := w.ruleGroupMap[int(ruleGroupID)]                                              //根据规则组id查询规则组信息
+			ruleGroup, ok := w.ruleGroupMap[int(ruleGroupID)] //根据规则组id查询规则组信息
 			if !ok {
 				slog.Error("ruleGroup is not exist: ", ruleGroupID)
 				continue
 			}
 			for _, ruleID := range ruleGroup.RuleIDList {
-				rule, ok := w.ruleMap[int(ruleID)]     //根据规则id查询规则信息
-				w.ruleToGroupMap[ruleID] = ruleGroupID //映射规则和规则组的关系 , 一个规则只能属于一个规则组
+				rule, ok := w.ruleMap[int(ruleID)] //根据规则id查询规则信息
 				if !ok {
 					slog.Error("rule is not exist: ", ruleID)
 					continue
@@ -304,6 +259,6 @@ func (w *WafConfigUsercase) wafConfig(wafStrategy []model.WAFStrategy) {
 			Name:        wafConfigInfo.Name,
 			Description: wafConfigInfo.Description,
 		}
-		w.mu.Unlock()
 	}
+	w.mu.Unlock()
 }
