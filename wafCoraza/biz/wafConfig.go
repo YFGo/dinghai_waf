@@ -25,24 +25,27 @@ type WafConfigRepo interface {
 	GetAllRule() ([]model.Rule, error)
 	AirUpdateRuleGroup() clientv3.WatchChan
 	AirUpdateRule() clientv3.WatchChan
-	GetStrategyListById(strategyKey string) ([]model.WAFStrategy, error)
 	GetCommonByKey(key string) (string, error)
 }
 
 type WafConfigUsercase struct {
-	repo         WafConfigRepo
-	waf          map[string]*model.CorazaWaf
-	ruleGroupMap map[int]model.RuleGroup
-	ruleMap      map[int]model.Rule
-	mu           sync.Mutex
+	repo               WafConfigRepo
+	waf                map[string]*model.CorazaWaf
+	ruleGroupMap       map[int]model.RuleGroup
+	ruleMap            map[int]model.Rule
+	mu                 sync.Mutex
+	groupToStrategyMap map[int64][]string //规则组映射策略
+	ruleToGroupMap     map[int64][]int64  //规则映射规则组
 }
 
 func NewWafConfigUsercase(repo WafConfigRepo) *WafConfigUsercase {
 	return &WafConfigUsercase{
-		repo:         repo,
-		waf:          make(map[string]*model.CorazaWaf),
-		ruleGroupMap: make(map[int]model.RuleGroup),
-		ruleMap:      make(map[int]model.Rule),
+		repo:               repo,
+		waf:                make(map[string]*model.CorazaWaf),
+		ruleGroupMap:       make(map[int]model.RuleGroup),
+		ruleMap:            make(map[int]model.Rule),
+		groupToStrategyMap: make(map[int64][]string),
+		ruleToGroupMap:     make(map[int64][]int64),
 	}
 }
 
@@ -136,11 +139,7 @@ func (w *WafConfigUsercase) WatchStrategy() {
 				keyArr := strings.Split(string(event.Kv.Key), types.CutOFF) //获取策略id
 				switch event.Type {                                         //判断此次更新是什么类型的操作
 				case clientv3.EventTypePut:
-					strategyTemp := model.WAFStrategy{
-						ID:           keyArr[1],
-						SeclangRules: string(event.Kv.Value),
-					}
-					w.wafConfig([]model.WAFStrategy{strategyTemp})
+					w.updateWafConfig(keyArr[1])
 				case clientv3.EventTypeDelete:
 					delete(w.waf, keyArr[1])
 				}
@@ -171,6 +170,10 @@ func (w *WafConfigUsercase) WatchRuleGroup() {
 						continue
 					}
 					w.ruleGroupMap[ruleGroup.ID] = ruleGroup //更新规则组信息
+					for _, strategyID := range w.groupToStrategyMap[int64(groupID)] {
+						// 根据获取的策略id , 更新对应的waf实列
+						w.updateWafConfig(strategyID)
+					}
 				case clientv3.EventTypeDelete:
 					delete(w.ruleGroupMap, groupID)
 				}
@@ -200,6 +203,14 @@ func (w *WafConfigUsercase) WatchRule() {
 						continue
 					}
 					w.ruleMap[rule.ID] = rule //更新规则信息
+					//根据规则ID , 获取映射的规则组id -> 策略id
+					for _, ruleGroupID := range w.ruleToGroupMap[int64(ruleID)] {
+						for _, strategyID := range w.groupToStrategyMap[ruleGroupID] {
+							// 根据获取的策略id , 更新对应的waf实列
+							w.updateWafConfig(strategyID)
+						}
+					}
+
 				case clientv3.EventTypeDelete:
 					delete(w.ruleMap, ruleID)
 				}
@@ -208,8 +219,51 @@ func (w *WafConfigUsercase) WatchRule() {
 	}
 }
 
+// updateWafConfig 更新waf配置
+func (w *WafConfigUsercase) updateWafConfig(strategyID string) {
+	w.mu.Lock()
+	defer w.mu.Unlock()
+	strategy, err := w.repo.GetCommonByKey(types.StrategyKey + strategyID)
+	if err != nil {
+		slog.Error("GetStrategyListById is failed: ", err)
+		return
+	}
+	wafConfigInfo := model.WafConfig{}
+	err = json.Unmarshal([]byte(strategy), &wafConfigInfo) // 解析策略信息
+	if err != nil {
+		slog.Error("waf_config json unmarshal is failed: ", err)
+		return
+	}
+	var (
+		userRuleSeclang    string
+		buildinRuleSeclang string
+	)
+	for _, ruleGroupID := range wafConfigInfo.RuleGroupIdList { // 遍历此策略包含的规则组ID
+		ruleGroup, ok := w.ruleGroupMap[int(ruleGroupID)] //根据规则组id查询规则组信息
+		if !ok {
+			slog.Error("ruleGroup is not exist: ", ruleGroupID)
+			continue
+		}
+		for _, ruleID := range ruleGroup.RuleIDList {
+			rule, ok := w.ruleMap[int(ruleID)] //根据规则id查询规则信息
+			if !ok {
+				slog.Error("rule is not exist: ", ruleID)
+				continue
+			}
+			if ruleGroup.IsBuildin == types.BUILDIN {
+				buildinRuleSeclang = buildinRuleSeclang + types.SeclangCutOFF + rule.Seclang
+			} else {
+				userRuleSeclang = userRuleSeclang + types.SeclangCutOFF + rule.Seclang
+			}
+		}
+	}
+	w.initANDUpdateCommon(buildinRuleSeclang, userRuleSeclang, strategyID, coraza.NewWAFConfig(), wafConfigInfo) //更新此waf实列
+}
+
+// wafConfig 初始化时waf配置
 func (w *WafConfigUsercase) wafConfig(wafStrategy []model.WAFStrategy) {
 	w.mu.Lock()
+	defer w.mu.Unlock()
 	for _, strategy := range wafStrategy {
 		cfg := coraza.NewWAFConfig()
 		seclang := strategy.SeclangRules
@@ -224,13 +278,15 @@ func (w *WafConfigUsercase) wafConfig(wafStrategy []model.WAFStrategy) {
 			buildinRuleSeclang string
 		)
 		for _, ruleGroupID := range wafConfigInfo.RuleGroupIdList { // 遍历此策略包含的规则组ID
-			ruleGroup, ok := w.ruleGroupMap[int(ruleGroupID)] //根据规则组id查询规则组信息
+			w.groupToStrategyMap[ruleGroupID] = append(w.groupToStrategyMap[ruleGroupID], strategy.ID) // 规则组映射策略
+			ruleGroup, ok := w.ruleGroupMap[int(ruleGroupID)]                                          //根据规则组id查询规则组信息
 			if !ok {
 				slog.Error("ruleGroup is not exist: ", ruleGroupID)
 				continue
 			}
 			for _, ruleID := range ruleGroup.RuleIDList {
-				rule, ok := w.ruleMap[int(ruleID)] //根据规则id查询规则信息
+				w.ruleToGroupMap[ruleID] = append(w.ruleToGroupMap[ruleID], ruleGroupID) //规则和规则组的映射
+				rule, ok := w.ruleMap[int(ruleID)]                                       //根据规则id查询规则信息
 				if !ok {
 					slog.Error("rule is not exist: ", ruleID)
 					continue
@@ -241,24 +297,26 @@ func (w *WafConfigUsercase) wafConfig(wafStrategy []model.WAFStrategy) {
 					userRuleSeclang = userRuleSeclang + types.SeclangCutOFF + rule.Seclang
 				}
 			}
-
 		}
-		buildinRuleSeclang = w.disposeSeclang(buildinRuleSeclang)
-		userRuleSeclang = w.disposeSeclang(userRuleSeclang)
-		cfg = cfg.WithDirectives(buildinRuleSeclang).WithRootFS(mergefs.Merge(coreruleset.FS, io.OSFS))
-		cfg = cfg.WithDirectives(userRuleSeclang)
-		waf, err := coraza.NewWAF(cfg)
-		if err != nil {
-			slog.Error("创建waf失败", err, "user_rule_seclang: ", userRuleSeclang)
-			return
-		}
-		w.waf[strategy.ID] = &model.CorazaWaf{ //每个策略均对应一个waf实列
-			WAF:         waf,
-			Action:      wafConfigInfo.Action,
-			NextAction:  wafConfigInfo.NextAction,
-			Name:        wafConfigInfo.Name,
-			Description: wafConfigInfo.Description,
-		}
+		w.initANDUpdateCommon(buildinRuleSeclang, userRuleSeclang, strategy.ID, cfg, wafConfigInfo) // 初始化waf实列
 	}
-	w.mu.Unlock()
+}
+
+func (w *WafConfigUsercase) initANDUpdateCommon(buildSeclang, userSeclang, strategyID string, cfg coraza.WAFConfig, wafConfigInfo model.WafConfig) {
+	buildinRuleSeclang := w.disposeSeclang(buildSeclang)
+	userRuleSeclang := w.disposeSeclang(userSeclang)
+	cfg = cfg.WithDirectives(buildinRuleSeclang).WithRootFS(mergefs.Merge(coreruleset.FS, io.OSFS))
+	cfg = cfg.WithDirectives(userRuleSeclang)
+	waf, err := coraza.NewWAF(cfg)
+	if err != nil {
+		slog.Error("创建waf失败", err, "user_rule_seclang: ", userRuleSeclang)
+		return
+	}
+	w.waf[strategyID] = &model.CorazaWaf{ //每个策略均对应一个waf实列
+		WAF:         waf,
+		Action:      wafConfigInfo.Action,
+		NextAction:  wafConfigInfo.NextAction,
+		Name:        wafConfigInfo.Name,
+		Description: wafConfigInfo.Description,
+	}
 }

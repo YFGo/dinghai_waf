@@ -109,23 +109,6 @@ func (l loadWAFConfigRepo) GetAllRule() ([]model.Rule, error) {
 	return rules, nil
 }
 
-func (l loadWAFConfigRepo) GetStrategyListById(strategyKey string) ([]model.WAFStrategy, error) {
-	strategyInfoResp, err := l.data.etcdClient.KV.Get(context.Background(), strategyKey)
-	if err != nil {
-		return nil, err
-	}
-	var seclangRules []model.WAFStrategy
-	for _, kv := range strategyInfoResp.Kvs {
-		keyLoad := strings.Split(string(kv.Key), types.CutOFF)
-		seclangRule := model.WAFStrategy{
-			ID:           keyLoad[1],
-			SeclangRules: string(kv.Value),
-		}
-		seclangRules = append(seclangRules, seclangRule)
-	}
-	return seclangRules, nil
-}
-
 func (l loadWAFConfigRepo) GetCommonByKey(key string) (string, error) {
 	commonResp, err := l.data.etcdClient.KV.Get(context.Background(), key)
 	if err != nil {

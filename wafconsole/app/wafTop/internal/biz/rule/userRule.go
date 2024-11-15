@@ -16,15 +16,12 @@ import (
 )
 
 const (
-	IPSameMod       = `SecRule REMOTE_ADDR "METHOD IP_MOD" "id:RULE_ID,deny,phase:1,msg:'IP address is not allowed.'"`
-	CookieMod       = `SecRule &COOKIE:COOKIE_NAME "METHOD COOKIE_VALUE" "id:RULE_ID,deny,status:403,msg:'Access denied .'"`
-	HeaderMod       = `SecRule &REQUEST_HEADERS:HEADER_NAME "METHOD HEADER_VALUE" "id:RULE_ID,deny,status:403,msg:'HEADER is not allowed.'"`
-	Same            = "等于"
-	SameSeclang     = "@eq"
-	NotSame         = "不等于"
-	NotSameSeclang  = "!@eq"
-	RulePrefix      = "rule_"
-	RuleGroupPrefix = "group_"
+	IpMod            = `SecRule REMOTE_ADDR "METHOD IP_MOD" "id:RULE_ID,phase:1,deny"`
+	Same             = "等于"
+	IPSameSeclang    = "@ipMatch"
+	IPNotSameSeclang = "!@ipMatch"
+	RulePrefix       = "rule_"
+	RuleGroupPrefix  = "group_"
 )
 
 type UserRuleRepo interface {
@@ -274,32 +271,12 @@ func (u *UserRuleUsecase) disposeUserRule(ctx context.Context, userRule model.Se
 	switch userRule.MatchGoal {
 	case "IP":
 		if userRule.MatchAction == Same {
-			method = SameSeclang
+			method = IPSameSeclang
 		} else {
-			method = NotSameSeclang
+			method = IPNotSameSeclang
 		}
-		res = strings.ReplaceAll(IPSameMod, "METHOD", method)
+		res = strings.ReplaceAll(IpMod, "METHOD", method)
 		res = strings.ReplaceAll(res, "IP_MOD", userRule.MatchContent)
-	case "COOKIE":
-		if userRule.MatchAction == Same {
-			method = SameSeclang
-		} else {
-			method = NotSameSeclang
-		}
-		cookieInfo := strings.Split(userRule.MatchContent, "_")
-		res = strings.ReplaceAll(CookieMod, "METHOD", method)
-		res = strings.ReplaceAll(res, "COOKIE_NAME", cookieInfo[0])
-		res = strings.ReplaceAll(res, "COOKIE_VALUE", cookieInfo[1])
-	case "HEADER":
-		if userRule.MatchAction == Same {
-			method = SameSeclang
-		} else {
-			method = NotSameSeclang
-		}
-		headerInfo := strings.Split(userRule.MatchContent, "_")
-		res = strings.ReplaceAll(HeaderMod, "METHOD", method)
-		res = strings.ReplaceAll(res, "HEADER_NAME", headerInfo[0])
-		res = strings.ReplaceAll(res, "HEADER_VALUE", headerInfo[1])
 	}
 	res = strings.ReplaceAll(res, "RULE_ID", strconv.Itoa(int(ruleID)))
 	return res

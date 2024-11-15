@@ -81,29 +81,19 @@ func (w *WafHandleService) ProxyHandler() http.HandlerFunc {
 		case false: // 不存在于白名单中
 			//根据这些waf实列 , 校验请求是否可以放行 , 只要存在一个waf实列拦截了请求 , 就不再检测
 			for _, waf := range wafs {
+				isAllow = true
 				tx = waf.WAF.NewTransaction()
 				tx.ProcessConnection(clientIP, port, serverIP, serverPort) // 模拟网络连接，使用请求的远程地址和端口
 				tx.ProcessURI(req.RequestURI, req.Method, req.Proto)       // Request URI was /some-url?with=args
 				_, reqHeaderIsLegal := w.WafParseHeader(tx, req, rw)
+				if !reqHeaderIsLegal {
+					isAllow = w.commonRes(waf.Action, waf.NextAction, tx, req, requestBody)
+					break
+				}
 				_, reqBodyIsLegal := w.WafParseReqBody(tx, requestBody)
-				attackMathRules := w.WafMatchRules(tx)  //处理命中的规则
-				if reqHeaderIsLegal && reqBodyIsLegal { // 此waf实列检测 请求头和请求体的检测均无问题
-					isAllow = true
-				} else {
-					slog.Info("reqHeaderIsLegal:", reqHeaderIsLegal, " reqBodyIsLegal:", reqBodyIsLegal)
-					if waf.Action == 1 { //仅仅记录 不拦截
-						isAllow = true
-					} else {
-						isAllow = false
-						break
-					}
-					w.uc.LogAttackEvent(attackMathRules, req, requestBody) //记录攻击日志
-					if waf.NextAction == 1 {                               //不再拦截
-						isAllow = true
-					} else {
-						isAllow = false
-						break
-					}
+				if !reqBodyIsLegal {
+					isAllow = w.commonRes(waf.Action, waf.NextAction, tx, req, requestBody)
+					break
 				}
 			}
 			plugins.Proxy(isAllow, realAddr, req, rw, requestBody) // 处理结果
@@ -122,6 +112,7 @@ func (w *WafHandleService) WafParseHeader(tx types.Transaction, req *http.Reques
 	// 处理请求头
 	itParse1 := tx.ProcessRequestHeaders()
 	if itParse1 != nil {
+		slog.Info("Error processing request headers: ", itParse1.Action)
 		switch itParse1.Action {
 		case constType.WafDeny: //访问行为被禁止
 			return itParse1, false
@@ -148,6 +139,7 @@ func (w *WafHandleService) WafParseReqBody(tx types.Transaction, requestBody []b
 		return itReqBody, false
 	}
 	if itReqBody != nil { //处理结果
+		slog.Info("Error processing request body: ", itReqBody.Action)
 		switch itReqBody.Action {
 		case constType.WafDeny: //访问行为被禁止
 			return itReqBody, false
@@ -187,4 +179,21 @@ func (w *WafHandleService) WatchEtcdService() {
 	go func() {
 		w.wafAllowUc.WatchAllowChange(context.Background())
 	}()
+}
+
+func (w *WafHandleService) commonRes(action, nextAction uint8, tx types.Transaction, req *http.Request, requestBody []byte) bool {
+	attackMathRules := w.WafMatchRules(tx) //处理命中的规则
+	var res bool
+	if action == 1 { //仅仅记录 不拦截
+		res = true
+	} else {
+		res = false
+	}
+	w.uc.LogAttackEvent(attackMathRules, req, requestBody) //记录攻击日志
+	if nextAction == 1 {                                   //不再拦截
+		res = true
+	} else {
+		res = false
+	}
+	return res
 }
