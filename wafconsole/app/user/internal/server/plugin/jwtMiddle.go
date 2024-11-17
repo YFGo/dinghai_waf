@@ -25,7 +25,7 @@ func JWTMiddleware() middleware.Middleware {
 					return nil, TokenErr()
 				}
 				parts := strings.Split(authHeader, " ")
-				if !(len(parts) == 2) && parts[0] == "Bearer" {
+				if len(parts) != 2 && parts[0] != "Bearer" {
 					slog.ErrorContext(ctx, "parts is empty")
 					return nil, TokenErr()
 				}

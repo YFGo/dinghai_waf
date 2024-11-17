@@ -47,7 +47,7 @@ func (r ruleGroupRepo) Update(ctx context.Context, id int64, ruleGroup model.Rul
 
 // Delete 删除规则组信息
 func (r ruleGroupRepo) Delete(ctx context.Context, ids []int64) (int64, error) {
-	res := r.data.db.Where("id in (?)", ids).Delete(&model.RuleGroup{})
+	res := r.data.db.Where("id in (?)", ids).Unscoped().Delete(&model.RuleGroup{})
 	return res.RowsAffected, res.Error
 }
 
