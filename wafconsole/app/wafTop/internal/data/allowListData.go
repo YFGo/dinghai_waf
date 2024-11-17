@@ -44,7 +44,7 @@ func (a allowlistRepo) Update(ctx context.Context, id int64, allowList model.All
 }
 
 func (a allowlistRepo) Delete(ctx context.Context, ids []int64) (int64, error) {
-	affectRows := a.data.db.Where("id IN (?)", ids).Delete(&model.AllowList{}).RowsAffected
+	affectRows := a.data.db.Where("id IN (?)", ids).Unscoped().Delete(&model.AllowList{}).RowsAffected
 	return affectRows, nil
 }
 

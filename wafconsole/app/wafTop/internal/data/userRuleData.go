@@ -45,7 +45,7 @@ func (u userRuleRepo) Update(ctx context.Context, id int64, userRule model.UserR
 }
 
 func (u userRuleRepo) Delete(ctx context.Context, int64s []int64) (int64, error) {
-	affectRow := u.data.db.Where("id in (?)", int64s).Delete(&model.UserRule{}).RowsAffected
+	affectRow := u.data.db.Where("id in (?)", int64s).Unscoped().Delete(&model.UserRule{}).RowsAffected
 	return affectRow, nil
 }
 

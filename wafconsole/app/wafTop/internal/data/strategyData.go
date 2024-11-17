@@ -104,7 +104,7 @@ func (w wafStrategyRepo) Delete(ctx context.Context, ids []int64) (int64, error)
 		if err := tx.Where("strategy_id in (?)", ids).Unscoped().Delete(&model.StrategyConfig{}).Error; err != nil { //中间表的数据物理删除
 			return err
 		}
-		if err := tx.Where("id in (?)", ids).Delete(&model.Strategy{}).Error; err != nil {
+		if err := tx.Where("id in (?)", ids).Unscoped().Delete(&model.Strategy{}).Error; err != nil {
 			return err
 		}
 		return nil
