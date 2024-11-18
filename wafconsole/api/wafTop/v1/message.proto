@@ -658,17 +658,23 @@ message UpdateRuleGroupRequest {
 }
 message UpdateRuleGroupReply {}
 
-message DeleteRuleGroupRequest {
-	repeated int64 ids = 1[
+message DeleteRuleGroupInfo {
+	int64 id = 1;
+	int64 is_buildin = 2 [
 			(buf.validate.field).cel = {
-				id: "ids",
-				message: "请选择规则组",
+				id: "is_buildin"
+				message: "内置规则禁止删除",
+				expression: "this == 2"
+			}
+	];
+}
+
+message DeleteRuleGroupRequest {
+	repeated DeleteRuleGroupInfo delete_rule_group_infos = 1 [
+			(buf.validate.field).cel = {
+				id: "delete_rule_group_infos",
+				message: "选择需要删除的对象",
 				expression: "size(this) > 0"
-			},
-			(buf.validate.field).repeated.items.cel = {
-				id: "ids",
-				message: "规则组选择错误",
-				expression: "this > 0"
 			}
 	];
 }

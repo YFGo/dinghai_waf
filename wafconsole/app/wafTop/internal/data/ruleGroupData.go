@@ -2,6 +2,7 @@ package data
 
 import (
 	"context"
+	"gorm.io/gorm"
 	"wafconsole/app/wafTop/internal/biz/iface"
 	ruleBiz "wafconsole/app/wafTop/internal/biz/rule"
 	"wafconsole/app/wafTop/internal/data/model"
@@ -47,8 +48,18 @@ func (r ruleGroupRepo) Update(ctx context.Context, id int64, ruleGroup model.Rul
 
 // Delete 删除规则组信息
 func (r ruleGroupRepo) Delete(ctx context.Context, ids []int64) (int64, error) {
-	res := r.data.db.Where("id in (?)", ids).Unscoped().Delete(&model.RuleGroup{})
-	return res.RowsAffected, res.Error
+	err := r.data.db.Transaction(func(tx *gorm.DB) error {
+		res := tx.Where("id in (?)", ids).Unscoped().Delete(&model.RuleGroup{})
+		if res.Error != nil {
+			return res.Error
+		}
+		res = tx.Where("rule_group_id in (?)", ids).Unscoped().Delete(&model.StrategyConfig{})
+		if res.Error != nil {
+			return res.Error
+		}
+		return nil
+	})
+	return 0, err
 }
 
 // Count 统计符合条件的数据数量
