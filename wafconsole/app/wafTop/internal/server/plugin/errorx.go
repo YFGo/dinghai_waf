@@ -8,6 +8,10 @@ const (
 	ErrTokenIsFailed = 900
 	ErrServer        = 901
 
+	// 6500 ~ 7000 规则错误
+	ErrRuleGroupIsExist = 6500
+	ErrRuleGroupIsUsing = 6501
+
 	// 7000 ~ 7500 策略错误
 	ErrStrategyNotFound = 7000
 
@@ -38,4 +42,12 @@ func ServerExistErr() error {
 
 func ServerChooseErr(err error) error {
 	return errors.New(ErrServerChoose, "", err.Error())
+}
+
+func RuleGroupIsExistErr() error {
+	return errors.New(ErrRuleGroupIsExist, "", "规则组已存在")
+}
+
+func RuleGroupIsUsingErr() error {
+	return errors.New(ErrRuleGroupIsUsing, "", "规则组下存在未被删除的规则")
 }

@@ -2,10 +2,13 @@ package service
 
 import (
 	"context"
+	"google.golang.org/grpc/codes"
 	"log/slog"
 	"time"
 	ruleBiz "wafconsole/app/wafTop/internal/biz/rule"
 	"wafconsole/app/wafTop/internal/data/model"
+	"wafconsole/app/wafTop/internal/server/plugin"
+	"wafconsole/app/wafTop/internal/utils"
 
 	pb "wafconsole/api/wafTop/v1"
 )
@@ -32,6 +35,9 @@ func (s *RuleGroupService) CreateRuleGroup(ctx context.Context, req *pb.CreateRu
 		IsBuildin:   uint8(req.IsBuildin),
 	}
 	if err := s.uc.CreateRuleGroup(ctx, ruleGroup); err != nil {
+		if utils.StatusErr(err, codes.AlreadyExists) {
+			return nil, plugin.RuleGroupIsExistErr()
+		}
 		slog.ErrorContext(ctx, "create rule_group is error: ", err)
 		return nil, err
 	}
@@ -58,7 +64,14 @@ func (s *RuleGroupService) DeleteRuleGroup(ctx context.Context, req *pb.DeleteRu
 		slog.ErrorContext(ctx, "delete rule_group req is nil")
 		return nil, nil
 	}
-	if err := s.uc.DeleteRuleGroup(ctx, req.Ids); err != nil {
+	var ids []int64
+	for _, ruleGroupInfo := range req.DeleteRuleGroupInfos {
+		ids = append(ids, ruleGroupInfo.Id)
+	}
+	if err := s.uc.DeleteRuleGroup(ctx, ids); err != nil {
+		if utils.StatusErr(err, codes.FailedPrecondition) {
+			return nil, plugin.RuleGroupIsUsingErr()
+		}
 		slog.ErrorContext(ctx, "delete rule_group is error: ", err)
 		return nil, err
 	}
