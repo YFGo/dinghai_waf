@@ -619,7 +619,7 @@ message CreateRuleGroupRequest {
 	int64 is_buildin = 3 [
 			(buf.validate.field).cel = {
 				id: "is_buildin",
-				message: "请选择是否是默认规则",
+				message: "禁止添加内置规则组",
 				expression: "this in [2]"
 			}
 	];
@@ -651,7 +651,7 @@ message UpdateRuleGroupRequest {
 	int64 is_buildin = 4 [
 		(buf.validate.field).cel = {
 			id: "is_buildin",
-			message: "请选择是否是默认规则",
+			message: "禁止添加内置规则组",
 			expression: "this in [2]"
 		}
 	];
