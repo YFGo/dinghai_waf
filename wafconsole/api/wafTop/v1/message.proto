@@ -620,7 +620,7 @@ message CreateRuleGroupRequest {
 			(buf.validate.field).cel = {
 				id: "is_buildin",
 				message: "请选择是否是默认规则",
-				expression: "this in [1 , 2]"
+				expression: "this in [2]"
 			}
 	];
 }
@@ -652,7 +652,7 @@ message UpdateRuleGroupRequest {
 		(buf.validate.field).cel = {
 			id: "is_buildin",
 			message: "请选择是否是默认规则",
-			expression: "this in [1 , 2]"
+			expression: "this in [2]"
 		}
 	];
 }
