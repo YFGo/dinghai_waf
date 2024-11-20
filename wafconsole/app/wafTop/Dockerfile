@@ -3,7 +3,7 @@ FROM golang:1.23 AS builder
 COPY . /src
 WORKDIR /src
 
-RUN GOPROXY=https://goproxy.cn make build
+RUN GOPROXY=https://goproxy.cn go build -o server
 
 FROM debian:stable-slim
 

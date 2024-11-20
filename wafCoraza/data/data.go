@@ -26,15 +26,15 @@ func NewConfFile() *ini.File {
 }
 
 func NewData(c *ini.File) (*Data, func()) {
-	//kafkaProducer := newKafkaProducer()
+	kafkaProducer := newKafkaProducer(c.Section("kafka").Key("address").String())
 	timeTask := newTimeTask()
 	etcdClient := newETCD(c.Section("etcd").Key("address").String())
 	cleanup := func() {
-		//if kafkaProducer != nil {
-		//	slog.Info("close kafka producer")
-		//
-		//	kafkaProducer.Close()
-		//}
+		if kafkaProducer != nil {
+			slog.Info("close kafka producer")
+
+			kafkaProducer.Close()
+		}
 		if timeTask != nil {
 			slog.Info("close time task")
 			timeTask.Stop()
