@@ -5,6 +5,7 @@ wafCoraza/waf_log
 wafconsole/app/dashBorad/configs/config_dev.yaml
 wafconsole/app/user/configs/config_dev.yaml
 wafconsole/app/wafTop/configs/config_dev.yaml
+analyse/configs/config_dev.yaml
 
 DingHai
 DingHai_linux

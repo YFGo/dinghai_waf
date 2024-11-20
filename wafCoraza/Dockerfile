@@ -17,7 +17,5 @@ COPY --from=builder /src/bin /app
 
 WORKDIR /app
 
-EXPOSE 8887
-VOLUME /data/conf
 
 CMD ["./coraza"]
