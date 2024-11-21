@@ -45,9 +45,9 @@ func NewData(c *ini.File) (*Data, func()) {
 		}
 	}
 	return &Data{
-		//kafkaProducer: kafkaProducer,
-		timeTask:   timeTask,
-		etcdClient: etcdClient,
+		kafkaProducer: kafkaProducer,
+		timeTask:      timeTask,
+		etcdClient:    etcdClient,
 	}, cleanup
 }
 
