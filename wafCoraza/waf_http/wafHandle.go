@@ -168,7 +168,6 @@ func (w *WafHandleService) WafMatchRules(tx types.Transaction) []types.MatchedRu
 func (w *WafHandleService) WatchEtcdService() {
 	go func() {
 		w.wafConfigUc.WatchStrategy()
-
 	}()
 	go func() {
 		w.wafConfigUc.WatchRuleGroup()
