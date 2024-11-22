@@ -12,3 +12,6 @@ data:
     group_id: group1
     addr: 127.0.0.1:9092
     assignor: range
+  redis:
+    addr: 127.0.0.1:6379
+    db: 0

@@ -8,6 +8,7 @@ import (
 	"github.com/IBM/sarama"
 	"gorm.io/gorm"
 	"log/slog"
+	"strconv"
 	"sync"
 )
 
@@ -22,6 +23,8 @@ func NewAttackLogRepo(data *Data) attack_log.AttackLogRepo {
 		ready: make(chan bool),
 	}
 }
+
+const attackRedisOffsetKey = "attack_offset"
 
 var (
 	AttackMap       = new(sync.Map) //当map中存储的消息达到指定长度 , 将其写入到clickhouse
@@ -59,8 +62,20 @@ func (a *attackLogRepo) Consumer() func() {
 
 // Setup 在新的会话开始时运行
 func (a *attackLogRepo) Setup(session sarama.ConsumerGroupSession) error {
-	slog.Info("SetUp")
-	session.ResetOffset(model.AttackEventsTopic, 0, 13, "")
+	// 获取最新的偏移量
+	var offset int
+	offsetStr, err := a.data.rdb.Get(context.Background(), attackRedisOffsetKey).Result()
+	if err != nil {
+		slog.Error("set_up redis get error: ", err)
+		offset = 0
+	} else {
+		offset, err = strconv.Atoi(offsetStr)
+		if err != nil {
+			slog.Error("set_up strconv_atoi error: ", err)
+			return err
+		}
+	}
+	session.ResetOffset(model.AttackEventsTopic, 0, int64(offset), "")
 	close(a.ready)
 	return nil
 }
@@ -113,11 +128,13 @@ func (a *attackLogRepo) ConsumeClaim(session sarama.ConsumerGroupSession, claim 
 			AttackMap.Store(attackEvent.ID, attackRule)
 		}
 		AttackMapLength++
-		if AttackMapLength >= 20000 {
+		if AttackMapLength >= 18 {
 			a.Save(AttackMap, session) //保存到clickhouse中
 			AttackMapLength = 0
 		}
 		session.MarkMessage(message, "")
+		a.data.rdb.Set(context.Background(), attackRedisOffsetKey, message.Offset, 0) // 获取当前消费消息的偏移量 并存入redis
+		session.Commit()                                                              // 手动提交
 	}
 	return nil
 }
@@ -133,15 +150,7 @@ func (a *attackLogRepo) Save(secLog *sync.Map, session sarama.ConsumerGroupSessi
 				// 如果类型不匹配，处理错误
 				return false
 			}
-			// 遍历secLogSlice 将其保存到clickhouse中 , 使用原生sql语句
-			for _, secLog := range secLogSlice {
-				errClickhouse = tx.Exec("INSERT INTO sec_log (log_id, ctime, uri, protocol, request, request_method, client_ip, client_port, rule_name, rule_desc, action, next_action , rule_id) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ? , ?)",
-					secLog.LogID, secLog.Ctime, secLog.URI, secLog.Protocol, secLog.Request, secLog.RequestMethod, secLog.ClientIP, secLog.ClientPort, secLog.RuleName, secLog.RuleDesc, secLog.Action, secLog.NextAction, secLog.RuleID).Error
-				if errClickhouse != nil {
-					slog.Error("clickhouse start save data error", errClickhouse)
-					return false
-				}
-			}
+			a.data.clickhouseDB.CreateInBatches(secLogSlice, len(secLogSlice))
 			//删除map中的消息
 			secLog.Delete(key)
 			return true
