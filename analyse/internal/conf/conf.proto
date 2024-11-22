@@ -30,12 +30,6 @@ message Data {
     string driver = 1;
     string source = 2;
   }
-  message Redis {
-    string network = 1;
-    string addr = 2;
-    google.protobuf.Duration read_timeout = 3;
-    google.protobuf.Duration write_timeout = 4;
-  }
   message ClickHouse {
     string dsn = 1;
   }
@@ -43,6 +37,11 @@ message Data {
     string group_id = 1;
     string addr = 2 ;
     string assignor = 3;
+  }
+  message Redis{
+    string addr = 1;
+    int64 db = 2;
+    string password = 3;
   }
   Database database = 1;
   Redis redis = 2;

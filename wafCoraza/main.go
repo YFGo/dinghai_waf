@@ -32,8 +32,8 @@ func initApp() (func(), *wafHttp.WafHandleService, *ini.File) {
 	// 初始化定时任务
 	// 开启定时任务
 	//开启定时任务
-	//timeTask := attackUsercase.StartTimeTask()
-	//timeTask()
+	timeTask := attackUsercase.StartTimeTask()
+	timeTask()
 	attackHttp := wafHttp.NewWafHandleService(attackUsercase, wafConfigUsercase, wafAllowUsercase)
 
 	// 在服务启动之处 , 创建存储攻击日志的csv文件
