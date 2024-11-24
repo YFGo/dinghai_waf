@@ -13,23 +13,20 @@ import (
 )
 
 type attackLogRepo struct {
-	data  *Data
-	ready chan bool
+	data       *Data
+	ready      chan bool
+	secLogList []model.SecLog
 }
 
 func NewAttackLogRepo(data *Data) attack_log.AttackLogRepo {
 	return &attackLogRepo{
-		data:  data,
-		ready: make(chan bool),
+		data:       data,
+		ready:      make(chan bool),
+		secLogList: make([]model.SecLog, 0),
 	}
 }
 
 const attackRedisOffsetKey = "attack_offset"
-
-var (
-	AttackMap       = new(sync.Map) //当map中存储的消息达到指定长度 , 将其写入到clickhouse
-	AttackMapLength int
-)
 
 // Consumer 消费kafka中 的消息 , 当达到指定长度 , 存入clickhouse中
 func (a *attackLogRepo) Consumer() func() {
@@ -66,7 +63,7 @@ func (a *attackLogRepo) Setup(session sarama.ConsumerGroupSession) error {
 	var offset int
 	offsetStr, err := a.data.rdb.Get(context.Background(), attackRedisOffsetKey).Result()
 	if err != nil {
-		slog.Error("set_up redis get error: ", err)
+		slog.Warn("set_up redis get error: ", err)
 		offset = 0
 	} else {
 		offset, err = strconv.Atoi(offsetStr)
@@ -109,58 +106,28 @@ func (a *attackLogRepo) ConsumeClaim(session sarama.ConsumerGroupSession, claim 
 			Action:        attackEvent.Action,
 			NextAction:    attackEvent.NextAction,
 		}
-		//将此消息写入到全局map中
-		var attackRule interface{}
-		attackRule, ok := AttackMap.Load(attackEvent.ID)
-		if ok {
-			attackRuleSlice, ok := attackRule.([]model.SecLog)
-			if !ok {
-				// 如果类型不匹配，处理错误
-				return err
-			}
-			// 追加新元素
-			attackRuleSlice = append(attackRuleSlice, secLog)
-			// 重新存储
-			AttackMap.Store(attackEvent.ID, attackRuleSlice)
-		} else {
-			// 如果不存在，则初始化为空切片
-			attackRule = []model.SecLog{secLog}
-			AttackMap.Store(attackEvent.ID, attackRule)
-		}
-		AttackMapLength++
-		if AttackMapLength >= 18 {
-			a.Save(AttackMap, session) //保存到clickhouse中
-			AttackMapLength = 0
-		}
-		session.MarkMessage(message, "")
+		session.MarkMessage(message, "")                                              // 标记
 		a.data.rdb.Set(context.Background(), attackRedisOffsetKey, message.Offset, 0) // 获取当前消费消息的偏移量 并存入redis
-		session.Commit()                                                              // 手动提交
+		a.secLogList = append(a.secLogList, secLog)
+		if len(a.secLogList) >= 20 {
+			a.Save(a.secLogList, session)
+		}
+		session.Commit()
 	}
 	return nil
 }
 
 // Save 将消息队列中的消息保存到 clickhouse中
-func (a *attackLogRepo) Save(secLog *sync.Map, session sarama.ConsumerGroupSession) {
+func (a *attackLogRepo) Save(secLogList []model.SecLog, session sarama.ConsumerGroupSession) {
 	err := a.data.clickhouseDB.Transaction(func(tx *gorm.DB) error {
-		var errClickhouse error
-		// 遍历map中的所有消息
-		secLog.Range(func(key, value interface{}) bool {
-			secLogSlice, ok := value.([]model.SecLog)
-			if !ok {
-				// 如果类型不匹配，处理错误
-				return false
-			}
-			a.data.clickhouseDB.CreateInBatches(secLogSlice, len(secLogSlice))
-			//删除map中的消息
-			secLog.Delete(key)
-			return true
-		})
-		if errClickhouse != nil {
-			return errClickhouse
+		if err := a.data.clickhouseDB.CreateInBatches(secLogList, len(secLogList)).Error; err != nil {
+			return err
 		}
 		return nil
 	})
 	if err != nil {
 		slog.Error("clickhouse start save data error", err)
+		return
 	}
+	a.secLogList = make([]model.SecLog, 0)
 }

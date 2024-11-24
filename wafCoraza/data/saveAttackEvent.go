@@ -7,12 +7,14 @@ import (
 	"log/slog"
 	"os"
 	"strconv"
+	"sync"
 	"wafCoraza/biz"
 	"wafCoraza/data/model"
 )
 
 type saveAttackEventRepo struct {
 	data *Data
+	mu   sync.Mutex
 }
 
 func NewSaveAttackEventRepo(data *Data) biz.AttackEventRepo {
@@ -39,10 +41,9 @@ func (s saveAttackEventRepo) ReadAttackEvent() []model.AttackEvent {
 func (s saveAttackEventRepo) AppendToFile(attackEvent []model.AttackEvent) {
 	path := "wafCoraza/waf_log/attack_events.csv"
 	var file *os.File
-
 	//判断此文件是否存在
 	if _, err := os.Stat(path); os.IsNotExist(err) {
-		file, err = os.OpenFile("wafCoraza/waf_log/attack_events.csv", os.O_CREATE|os.O_WRONLY, 0644) //文件不存在 , 需要创建文件
+		file, err = os.OpenFile(path, os.O_CREATE|os.O_WRONLY, 0644) //文件不存在 , 需要创建文件
 		defer func(file *os.File) {
 			if err := file.Close(); err != nil {
 				slog.Error("Error closing file: ", err)
@@ -76,7 +77,6 @@ func (s saveAttackEventRepo) AppendToFile(attackEvent []model.AttackEvent) {
 			return
 		}
 	}
-
 }
 
 // CollectionAttackEvent 将数据写入kafka
