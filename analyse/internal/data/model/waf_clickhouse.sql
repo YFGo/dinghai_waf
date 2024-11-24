@@ -1,0 +1,26 @@
+CREATE TABLE sec_log (
+                         LogID String,
+                         URI String,
+                         TransactionID String,
+                         Ctime DateTime,
+                         Protocol String,
+                         Request String,
+                         RequestMethod String,
+                         Response String,
+                         ClientIP String,
+                         RuleName String,
+                         RuleDesc String,
+                         RuleGroupName String,
+                         ServerGroupName String,
+                         ServerName String,
+                         AppName String,
+                         Strategy String,
+                         Action String,
+                         NextAction String,
+                         ClientPort Int32,
+                         AlertLevel Int32,
+                         ServerGroupID Int32,
+                         RuleGroupID Int32,
+                         RuleID Int32
+) ENGINE = MergeTree()
+      ORDER BY (LogID, Ctime);

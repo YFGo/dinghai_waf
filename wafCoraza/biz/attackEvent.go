@@ -7,7 +7,6 @@ import (
 	"net"
 	"net/http"
 	"strconv"
-	"sync"
 	"time"
 	"wafCoraza/data/model"
 )
@@ -21,7 +20,6 @@ type AttackEventRepo interface {
 
 type AttackEventUsercase struct {
 	repo AttackEventRepo
-	mu   sync.Mutex
 }
 
 func NewAttackEventUsercase(repo AttackEventRepo) *AttackEventUsercase {
@@ -31,7 +29,7 @@ func NewAttackEventUsercase(repo AttackEventRepo) *AttackEventUsercase {
 }
 
 // LogAttackEvent 记录每次的攻击事件到JSON文件
-func (uc *AttackEventUsercase) LogAttackEvent(matchRules []types.MatchedRule, req *http.Request, requestBody []byte) {
+func (uc *AttackEventUsercase) LogAttackEvent(matchRules []types.MatchedRule, req *http.Request, requestBody []byte, action, nextAction uint8) {
 	// 获取真实的客户端 IP 地址和端口
 	_, clientPort, err := net.SplitHostPort(req.RemoteAddr)
 	if err != nil {
@@ -43,42 +41,26 @@ func (uc *AttackEventUsercase) LogAttackEvent(matchRules []types.MatchedRule, re
 		slog.Error("LogAttackEvent Error converting port to int: ", err)
 		return
 	}
-	uc.mu.Lock()
-	defer func() {
-		uc.mu.Unlock()
-		if err := recover(); err != nil {
-			slog.Error("LogAttackEvent recover: ", err)
-		}
-	}()
-	//生成攻击事件的唯一id
-	var attackEvents []model.AttackEvent
-	attackId := uuid.NewV4()
-	for i := 0; i < len(matchRules); i++ {
-		rule := matchRules[i]
-		var nextAction string
-		if i+1 < len(matchRules) {
-			nextAction = matchRules[i+1].Rule().Raw()
-		}
-		event := model.AttackEvent{
-			RuleId:        rule.Rule().ID(),
-			Port:          port,
-			Timestamp:     time.Now(),
-			IP:            rule.ClientIPAddress(),
-			ID:            attackId.String(),
-			RequestMethod: req.Method,
-			RequestURI:    rule.URI(),
-			Message:       rule.Message(),
-			Protocol:      req.Proto,
-			RuleName:      rule.Message(),
-			RuleDesc:      rule.Data(),
-			Request:       string(requestBody),
-			Action:        rule.Rule().Raw(),
-			NextAction:    nextAction,
-		}
-		attackEvents = append(attackEvents, event)
+	endRuleInfo := matchRules[len(matchRules)-1] // 获取生效的最后一条规则信息
+	attackId := uuid.NewV4()                     //生成攻击事件的唯一id
+	event := model.AttackEvent{
+		RuleId:        endRuleInfo.Rule().ID(),
+		Port:          port,
+		Timestamp:     time.Now(),
+		IP:            endRuleInfo.ClientIPAddress(),
+		ID:            attackId.String(),
+		RequestMethod: req.Method,
+		RequestURI:    req.RequestURI,
+		Action:        strconv.Itoa(int(action)),
+		NextAction:    strconv.Itoa(int(nextAction)),
+		Message:       endRuleInfo.Message(),
+		Protocol:      req.Proto,
+		RuleName:      endRuleInfo.Message(),
+		RuleDesc:      endRuleInfo.Data(),
+		Request:       string(requestBody),
 	}
-	// 写入csv文件
-	uc.repo.AppendToFile(attackEvents)
+	eventCsv := []model.AttackEvent{event} // csv格式数据正确处理
+	uc.repo.AppendToFile(eventCsv)
 }
 
 // StartTimeTask 开启定时任务

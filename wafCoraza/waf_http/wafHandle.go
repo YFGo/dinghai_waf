@@ -112,7 +112,6 @@ func (w *WafHandleService) WafParseHeader(tx types.Transaction, req *http.Reques
 	// 处理请求头
 	itParse1 := tx.ProcessRequestHeaders()
 	if itParse1 != nil {
-		slog.Info("Error processing request headers: ", itParse1.Action)
 		switch itParse1.Action {
 		case constType.WafDeny: //访问行为被禁止
 			return itParse1, false
@@ -139,7 +138,6 @@ func (w *WafHandleService) WafParseReqBody(tx types.Transaction, requestBody []b
 		return itReqBody, false
 	}
 	if itReqBody != nil { //处理结果
-		slog.Info("Error processing request body: ", itReqBody.Action)
 		switch itReqBody.Action {
 		case constType.WafDeny: //访问行为被禁止
 			return itReqBody, false
@@ -183,13 +181,8 @@ func (w *WafHandleService) WatchEtcdService() {
 func (w *WafHandleService) commonRes(action, nextAction uint8, tx types.Transaction, req *http.Request, requestBody []byte) bool {
 	attackMathRules := w.WafMatchRules(tx) //处理命中的规则
 	var res bool
-	if action == 1 { //仅仅记录 不拦截
-		res = true
-	} else {
-		res = false
-	}
-	w.uc.LogAttackEvent(attackMathRules, req, requestBody) //记录攻击日志
-	if nextAction == 1 {                                   //不再拦截
+	w.uc.LogAttackEvent(attackMathRules, req, requestBody, action, nextAction) //记录攻击日志
+	if nextAction == 1 {                                                       //不再拦截
 		res = true
 	} else {
 		res = false

@@ -65,6 +65,7 @@ func newKafkaConsumer(c *conf.Data) (sarama.ConsumerGroup, error) {
 	config.Consumer.Offsets.Initial = sarama.OffsetNewest
 	config.ChannelBufferSize = 100
 	config.Consumer.Offsets.AutoCommit.Enable = false // 禁用自动提交
+
 	client, err := sarama.NewClient([]string{c.Kafka.Addr}, config)
 	if err != nil {
 		slog.Error("failed to connect kafka", err)
