@@ -217,6 +217,6 @@ func (s serverRepo) ListHostByIds(ctx context.Context, ids []int64) ([]string, e
 // GetServerAllowIDList 根据策略id 获取应用的白名单id
 func (s serverRepo) GetServerAllowIDList(ctx context.Context, id int64) ([]int64, error) {
 	var allowListIds []int64
-	err := s.data.db.Table(model.ServerAllowTableName).Select("allow_id").Where("server_id = ?", id).First(&allowListIds).Error
+	err := s.data.db.Table(model.ServerAllowTableName).Select("allow_id").Where("server_id = ?", id).Scan(&allowListIds).Error
 	return allowListIds, err
 }
