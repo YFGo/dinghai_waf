@@ -1,0 +1,30 @@
+syntax = "proto3";
+
+package api.dashBorad.v1;
+
+option go_package = "wafconsole/api/dashBorad/v1;v1";
+option java_multiple_files = true;
+option java_package = "api.dashBorad.v1";
+
+service Message {
+	rpc CreateMessage (CreateMessageRequest) returns (CreateMessageReply);
+	rpc UpdateMessage (UpdateMessageRequest) returns (UpdateMessageReply);
+	rpc DeleteMessage (DeleteMessageRequest) returns (DeleteMessageReply);
+	rpc GetMessage (GetMessageRequest) returns (GetMessageReply);
+	rpc ListMessage (ListMessageRequest) returns (ListMessageReply);
+}
+
+message CreateMessageRequest {}
+message CreateMessageReply {}
+
+message UpdateMessageRequest {}
+message UpdateMessageReply {}
+
+message DeleteMessageRequest {}
+message DeleteMessageReply {}
+
+message GetMessageRequest {}
+message GetMessageReply {}
+
+message ListMessageRequest {}
+message ListMessageReply {}

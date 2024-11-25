@@ -36,6 +36,8 @@ RUN --mount=type=cache,target=/go/pkg/mod/ \
 
 # Copy the configuration file to the container
 COPY /conf/ /src/wafCoraza/conf/
+COPY /ruleset/ /src/wafCoraza/ruleset/
+COPY /waf_log/ /src/wafCoraza/waf_log/
 
 ################################################################################
 # Create a new stage for running the application that contains the minimal
@@ -59,6 +61,7 @@ RUN --mount=type=cache,target=/var/cache/apk \
         && \
         update-ca-certificates
 
+
 # Create a non-privileged user that the app will run under.
 # See https://docs.docker.com/go/dockerfile-user-best-practices/
 ARG UID=10001
@@ -70,13 +73,21 @@ RUN adduser \
     --no-create-home \
     --uid "${UID}" \
     appuser
+
+# Create directories and set permissions
+RUN mkdir -p /wafCoraza/waf_log /wafCoraza/conf && \
+    chown -R appuser /wafCoraza
+
 USER appuser
+
 
 # Copy the executable from the "build" stage.
 COPY --from=build /bin/server /bin/
 
 # Copy the configuration file to the final stage
 COPY --from=build /src/wafCoraza/conf/ /wafCoraza/conf/
+COPY --from=build /src/wafCoraza/ruleset/ /wafCoraza/ruleset/
+COPY --from=build /src/wafCoraza/waf_log /wafCoraza/waf_log/
 
 # Expose the port that the application listens on.
 EXPOSE 8887
