@@ -1,0 +1,27 @@
+syntax = "proto3";
+
+package api.dashBorad.v1;
+
+option go_package = "wafconsole/api/dashBorad/v1;v1";
+option java_multiple_files = true;
+option java_package = "api.dashBorad.v1";
+
+// #### 获取今日攻击信息 攻击数 异常IP数 , 较昨日增长数据
+message GetAttackInfoFromDayRequest{}
+
+message GetAttackInfoFromDayReply{}
+
+// #### 获取指定日志内的攻击数据 指定时间内的攻击数 , 以及异常IP数据的变化
+message GetAttackInfoByTimeRequest{}
+
+message GetAttackInfoByTimeReply{}
+
+// #### 分类获取各个应用被攻击的信息 获取应用被攻击的信息
+message GetAttackInfoFromServerRequest{}
+
+message GetAttackInfoFromServerReply{}
+
+// ##### 获取异常IP来源地区
+message GetAttackIpFromAddrRequest{}
+
+message GetAttackIpFromAddrReply{}
