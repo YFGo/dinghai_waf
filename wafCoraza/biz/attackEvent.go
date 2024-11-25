@@ -60,7 +60,7 @@ func (uc *AttackEventUsercase) LogAttackEvent(matchRules []types.MatchedRule, re
 		Request:       string(requestBody),
 	}
 	eventCsv := []model.AttackEvent{event} // csv格式数据正确处理
-	uc.repo.AppendToFile(eventCsv)
+	uc.repo.AppendToFile(eventCsv)         // 写入文件
 }
 
 // StartTimeTask 开启定时任务
