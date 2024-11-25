@@ -1,0 +1,30 @@
+syntax = "proto3";
+
+package api.dashBorad.v1;
+
+option go_package = "/api/dashBorad/v1;v1";
+option java_multiple_files = true;
+option java_package = "api.dashBorad.v1";
+
+service DataView {
+	rpc CreateDataView (CreateDataViewRequest) returns (CreateDataViewReply);
+	rpc UpdateDataView (UpdateDataViewRequest) returns (UpdateDataViewReply);
+	rpc DeleteDataView (DeleteDataViewRequest) returns (DeleteDataViewReply);
+	rpc GetDataView (GetDataViewRequest) returns (GetDataViewReply);
+	rpc ListDataView (ListDataViewRequest) returns (ListDataViewReply);
+}
+
+message CreateDataViewRequest {}
+message CreateDataViewReply {}
+
+message UpdateDataViewRequest {}
+message UpdateDataViewReply {}
+
+message DeleteDataViewRequest {}
+message DeleteDataViewReply {}
+
+message GetDataViewRequest {}
+message GetDataViewReply {}
+
+message ListDataViewRequest {}
+message ListDataViewReply {}
