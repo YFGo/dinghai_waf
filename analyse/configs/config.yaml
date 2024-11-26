@@ -15,4 +15,4 @@ data:
   redis:
     addr: 192.168.10.4:6379
     db: 0
-    password: 123456
+    password: '123456'
