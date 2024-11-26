@@ -18,3 +18,5 @@ data:
     addr: 127.0.0.1:6379
     read_timeout: 0.2s
     write_timeout: 0.2s
+  clickhouse:
+    dsn: tcp://192.168.10.4:9000/waf?username=default&dial_timeout=10s&read_timeout=20s

@@ -4,8 +4,10 @@ import (
 	"fmt"
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/google/wire"
+	"gorm.io/driver/clickhouse"
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
+	"log/slog"
 	"wafconsole/app/dashBorad/internal/conf"
 )
 
@@ -14,24 +16,37 @@ var ProviderSet = wire.NewSet(NewData, NewDataViewRepo)
 
 // Data .
 type Data struct {
-	db *gorm.DB
+	db           *gorm.DB
+	clickhouseDB *gorm.DB
 }
 
 // NewData .
 func NewData(s *conf.Server, bootstrap *conf.Bootstrap) (*Data, func(), error) {
 	c := bootstrap.Data
-	mysql, err := newMysql(c.Mysql)
+	mysqlDB, err := newMysql(c.Mysql)
+	if err != nil {
+		return nil, nil, err
+	}
+	clickhouseDB, err := newClickhouse(c)
 	if err != nil {
 		return nil, nil, err
 	}
 	cleanup := func() {
-		if mysql != nil {
-			if db, err := mysql.DB(); err == nil && db != nil {
+		if mysqlDB != nil {
+			if db, err := mysqlDB.DB(); err == nil && db != nil {
+				db.Close()
+			}
+		}
+		if clickhouseDB != nil {
+			if db, err := clickhouseDB.DB(); err == nil && db != nil {
 				db.Close()
 			}
 		}
 	}
-	return &Data{}, cleanup, nil
+	return &Data{
+		db:           mysqlDB,
+		clickhouseDB: clickhouseDB,
+	}, cleanup, nil
 }
 
 func newMysql(cfg *conf.Data_Mysql) (*gorm.DB, error) {
@@ -52,4 +67,13 @@ func newMysql(cfg *conf.Data_Mysql) (*gorm.DB, error) {
 	sqlDB.SetMaxIdleConns(int(cfg.MaxIdle))
 	sqlDB.SetMaxOpenConns(int(cfg.MaxOpen))
 	return db, nil
+}
+
+func newClickhouse(c *conf.Data) (*gorm.DB, error) {
+	clickhouseDB, err := gorm.Open(clickhouse.Open(c.Clickhouse.Dsn), &gorm.Config{})
+	if err != nil {
+		slog.Error("failed to connect clickhouse", err)
+		return nil, err
+	}
+	return clickhouseDB, nil
 }
