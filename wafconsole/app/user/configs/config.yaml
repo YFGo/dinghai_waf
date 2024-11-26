@@ -16,6 +16,6 @@ data:
     max_open: 100
   redis:
     addr: 192.168.10.4:6379
-    read_timeout: 0.2s
-    write_timeout: 0.2s
+    db: 0
+    password: 123456
 
