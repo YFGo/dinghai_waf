@@ -30,4 +30,9 @@ service DataView {
 			get: "app/dashBorad/v1/attack/IPAddr"
 		};
 	};
+	rpc GetAttackDetail(GetAttackDetailRequest) returns (GetAttackDetailReply) {
+		option (google.api.http) = {
+			get: "/app/dashBorad/v1/attack/detail"
+		};
+	};
 }
