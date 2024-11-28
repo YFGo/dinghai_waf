@@ -23,6 +23,7 @@ const (
 	DataView_GetAttackInfoByTime_FullMethodName     = "/api.dashBorad.v1.DataView/GetAttackInfoByTime"
 	DataView_GetAttackInfoFromServer_FullMethodName = "/api.dashBorad.v1.DataView/GetAttackInfoFromServer"
 	DataView_GetAttackIpFromAddr_FullMethodName     = "/api.dashBorad.v1.DataView/GetAttackIpFromAddr"
+	DataView_GetAttackDetail_FullMethodName         = "/api.dashBorad.v1.DataView/GetAttackDetail"
 )
 
 // DataViewClient is the client API for DataView service.
@@ -33,6 +34,7 @@ type DataViewClient interface {
 	GetAttackInfoByTime(ctx context.Context, in *GetAttackInfoByTimeRequest, opts ...grpc.CallOption) (*GetAttackInfoByTimeReply, error)
 	GetAttackInfoFromServer(ctx context.Context, in *GetAttackInfoFromServerRequest, opts ...grpc.CallOption) (*GetAttackInfoFromServerReply, error)
 	GetAttackIpFromAddr(ctx context.Context, in *GetAttackIpFromAddrRequest, opts ...grpc.CallOption) (*GetAttackIpFromAddrReply, error)
+	GetAttackDetail(ctx context.Context, in *GetAttackDetailRequest, opts ...grpc.CallOption) (*GetAttackDetailReply, error)
 }
 
 type dataViewClient struct {
@@ -83,6 +85,16 @@ func (c *dataViewClient) GetAttackIpFromAddr(ctx context.Context, in *GetAttackI
 	return out, nil
 }
 
+func (c *dataViewClient) GetAttackDetail(ctx context.Context, in *GetAttackDetailRequest, opts ...grpc.CallOption) (*GetAttackDetailReply, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(GetAttackDetailReply)
+	err := c.cc.Invoke(ctx, DataView_GetAttackDetail_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // DataViewServer is the server API for DataView service.
 // All implementations must embed UnimplementedDataViewServer
 // for forward compatibility.
@@ -91,6 +103,7 @@ type DataViewServer interface {
 	GetAttackInfoByTime(context.Context, *GetAttackInfoByTimeRequest) (*GetAttackInfoByTimeReply, error)
 	GetAttackInfoFromServer(context.Context, *GetAttackInfoFromServerRequest) (*GetAttackInfoFromServerReply, error)
 	GetAttackIpFromAddr(context.Context, *GetAttackIpFromAddrRequest) (*GetAttackIpFromAddrReply, error)
+	GetAttackDetail(context.Context, *GetAttackDetailRequest) (*GetAttackDetailReply, error)
 	mustEmbedUnimplementedDataViewServer()
 }
 
@@ -112,6 +125,9 @@ func (UnimplementedDataViewServer) GetAttackInfoFromServer(context.Context, *Get
 }
 func (UnimplementedDataViewServer) GetAttackIpFromAddr(context.Context, *GetAttackIpFromAddrRequest) (*GetAttackIpFromAddrReply, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetAttackIpFromAddr not implemented")
+}
+func (UnimplementedDataViewServer) GetAttackDetail(context.Context, *GetAttackDetailRequest) (*GetAttackDetailReply, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetAttackDetail not implemented")
 }
 func (UnimplementedDataViewServer) mustEmbedUnimplementedDataViewServer() {}
 func (UnimplementedDataViewServer) testEmbeddedByValue()                  {}
@@ -206,6 +222,24 @@ func _DataView_GetAttackIpFromAddr_Handler(srv interface{}, ctx context.Context,
 	return interceptor(ctx, in, info, handler)
 }
 
+func _DataView_GetAttackDetail_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetAttackDetailRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(DataViewServer).GetAttackDetail(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: DataView_GetAttackDetail_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(DataViewServer).GetAttackDetail(ctx, req.(*GetAttackDetailRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // DataView_ServiceDesc is the grpc.ServiceDesc for DataView service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -228,6 +262,10 @@ var DataView_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "GetAttackIpFromAddr",
 			Handler:    _DataView_GetAttackIpFromAddr_Handler,
+		},
+		{
+			MethodName: "GetAttackDetail",
+			Handler:    _DataView_GetAttackDetail_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

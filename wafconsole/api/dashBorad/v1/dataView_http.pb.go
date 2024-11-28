@@ -19,12 +19,14 @@ var _ = binding.EncodeURL
 
 const _ = http.SupportPackageIsVersion1
 
+const OperationDataViewGetAttackDetail = "/api.dashBorad.v1.DataView/GetAttackDetail"
 const OperationDataViewGetAttackInfoByTime = "/api.dashBorad.v1.DataView/GetAttackInfoByTime"
 const OperationDataViewGetAttackInfoFromDay = "/api.dashBorad.v1.DataView/GetAttackInfoFromDay"
 const OperationDataViewGetAttackInfoFromServer = "/api.dashBorad.v1.DataView/GetAttackInfoFromServer"
 const OperationDataViewGetAttackIpFromAddr = "/api.dashBorad.v1.DataView/GetAttackIpFromAddr"
 
 type DataViewHTTPServer interface {
+	GetAttackDetail(context.Context, *GetAttackDetailRequest) (*GetAttackDetailReply, error)
 	GetAttackInfoByTime(context.Context, *GetAttackInfoByTimeRequest) (*GetAttackInfoByTimeReply, error)
 	GetAttackInfoFromDay(context.Context, *GetAttackInfoFromDayRequest) (*GetAttackInfoFromDayReply, error)
 	GetAttackInfoFromServer(context.Context, *GetAttackInfoFromServerRequest) (*GetAttackInfoFromServerReply, error)
@@ -36,7 +38,8 @@ func RegisterDataViewHTTPServer(s *http.Server, srv DataViewHTTPServer) {
 	r.GET("/app/dashBorad/v1/attack/dataView", _DataView_GetAttackInfoFromDay0_HTTP_Handler(srv))
 	r.GET("app/dashBorad/v1/attack/dataViews", _DataView_GetAttackInfoByTime0_HTTP_Handler(srv))
 	r.GET("app/dashBorad/v1/attack/servers", _DataView_GetAttackInfoFromServer0_HTTP_Handler(srv))
-	r.GET("app/dashBorad/v1/attack/IpAddr", _DataView_GetAttackIpFromAddr0_HTTP_Handler(srv))
+	r.GET("app/dashBorad/v1/attack/IPAddr", _DataView_GetAttackIpFromAddr0_HTTP_Handler(srv))
+	r.GET("/app/dashBorad/v1/attack/detail", _DataView_GetAttackDetail0_HTTP_Handler(srv))
 }
 
 func _DataView_GetAttackInfoFromDay0_HTTP_Handler(srv DataViewHTTPServer) func(ctx http.Context) error {
@@ -115,7 +118,27 @@ func _DataView_GetAttackIpFromAddr0_HTTP_Handler(srv DataViewHTTPServer) func(ct
 	}
 }
 
+func _DataView_GetAttackDetail0_HTTP_Handler(srv DataViewHTTPServer) func(ctx http.Context) error {
+	return func(ctx http.Context) error {
+		var in GetAttackDetailRequest
+		if err := ctx.BindQuery(&in); err != nil {
+			return err
+		}
+		http.SetOperation(ctx, OperationDataViewGetAttackDetail)
+		h := ctx.Middleware(func(ctx context.Context, req interface{}) (interface{}, error) {
+			return srv.GetAttackDetail(ctx, req.(*GetAttackDetailRequest))
+		})
+		out, err := h(ctx, &in)
+		if err != nil {
+			return err
+		}
+		reply := out.(*GetAttackDetailReply)
+		return ctx.Result(200, reply)
+	}
+}
+
 type DataViewHTTPClient interface {
+	GetAttackDetail(ctx context.Context, req *GetAttackDetailRequest, opts ...http.CallOption) (rsp *GetAttackDetailReply, err error)
 	GetAttackInfoByTime(ctx context.Context, req *GetAttackInfoByTimeRequest, opts ...http.CallOption) (rsp *GetAttackInfoByTimeReply, err error)
 	GetAttackInfoFromDay(ctx context.Context, req *GetAttackInfoFromDayRequest, opts ...http.CallOption) (rsp *GetAttackInfoFromDayReply, err error)
 	GetAttackInfoFromServer(ctx context.Context, req *GetAttackInfoFromServerRequest, opts ...http.CallOption) (rsp *GetAttackInfoFromServerReply, err error)
@@ -128,6 +151,19 @@ type DataViewHTTPClientImpl struct {
 
 func NewDataViewHTTPClient(client *http.Client) DataViewHTTPClient {
 	return &DataViewHTTPClientImpl{client}
+}
+
+func (c *DataViewHTTPClientImpl) GetAttackDetail(ctx context.Context, in *GetAttackDetailRequest, opts ...http.CallOption) (*GetAttackDetailReply, error) {
+	var out GetAttackDetailReply
+	pattern := "/app/dashBorad/v1/attack/detail"
+	path := binding.EncodeURL(pattern, in, true)
+	opts = append(opts, http.Operation(OperationDataViewGetAttackDetail))
+	opts = append(opts, http.PathTemplate(pattern))
+	err := c.cc.Invoke(ctx, "GET", path, nil, &out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return &out, nil
 }
 
 func (c *DataViewHTTPClientImpl) GetAttackInfoByTime(ctx context.Context, in *GetAttackInfoByTimeRequest, opts ...http.CallOption) (*GetAttackInfoByTimeReply, error) {
@@ -171,7 +207,7 @@ func (c *DataViewHTTPClientImpl) GetAttackInfoFromServer(ctx context.Context, in
 
 func (c *DataViewHTTPClientImpl) GetAttackIpFromAddr(ctx context.Context, in *GetAttackIpFromAddrRequest, opts ...http.CallOption) (*GetAttackIpFromAddrReply, error) {
 	var out GetAttackIpFromAddrReply
-	pattern := "app/dashBorad/v1/attack/IpAddr"
+	pattern := "app/dashBorad/v1/attack/IPAddr"
 	path := binding.EncodeURL(pattern, in, true)
 	opts = append(opts, http.Operation(OperationDataViewGetAttackIpFromAddr))
 	opts = append(opts, http.PathTemplate(pattern))

@@ -2,7 +2,10 @@ package model
 
 import "time"
 
-const AttackEventsTopic = "attack_events"
+const (
+	AttackEventsTopic = "attack_events" //kafka主题
+	SecLogTableName   = "sec_log"
+)
 
 type SecLog struct {
 	LogID           string    `db:"log_id"`            // 日志唯一id
@@ -31,5 +34,5 @@ type SecLog struct {
 }
 
 func (SecLog) TableName() string {
-	return `sec_log`
+	return SecLogTableName
 }
