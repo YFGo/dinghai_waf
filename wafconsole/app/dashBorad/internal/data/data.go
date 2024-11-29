@@ -4,6 +4,7 @@ import (
 	"fmt"
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/google/wire"
+	"github.com/lionsoul2014/ip2region/binding/golang/xdb"
 	"gorm.io/driver/clickhouse"
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
@@ -18,6 +19,7 @@ var ProviderSet = wire.NewSet(NewData, NewDataViewRepo)
 type Data struct {
 	db           *gorm.DB
 	clickhouseDB *gorm.DB
+	ipDB         *xdb.Searcher
 }
 
 // NewData .
@@ -31,6 +33,11 @@ func NewData(s *conf.Server, bootstrap *conf.Bootstrap) (*Data, func(), error) {
 	if err != nil {
 		return nil, nil, err
 	}
+	ip2DB, err := newIp2Region(c)
+	if err != nil {
+		return nil, nil, err
+	}
+	// TODO: 关闭数据库连接
 	cleanup := func() {
 		if mysqlDB != nil {
 			if db, err := mysqlDB.DB(); err == nil && db != nil {
@@ -42,10 +49,14 @@ func NewData(s *conf.Server, bootstrap *conf.Bootstrap) (*Data, func(), error) {
 				db.Close()
 			}
 		}
+		if ip2DB != nil {
+			ip2DB.Close()
+		}
 	}
 	return &Data{
 		db:           mysqlDB,
 		clickhouseDB: clickhouseDB,
+		ipDB:         ip2DB,
 	}, cleanup, nil
 }
 
@@ -76,4 +87,13 @@ func newClickhouse(c *conf.Data) (*gorm.DB, error) {
 		return nil, err
 	}
 	return clickhouseDB, nil
+}
+
+func newIp2Region(c *conf.Data) (*xdb.Searcher, error) {
+	searcher, err := xdb.NewWithFileOnly(c.Ip2.Path)
+	if err != nil {
+		slog.Error("failed to connect clickhouse", err)
+		return nil, err
+	}
+	return searcher, nil
 }

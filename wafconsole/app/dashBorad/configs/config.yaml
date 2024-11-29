@@ -20,3 +20,5 @@ data:
     write_timeout: 0.2s
   clickhouse:
     dsn: tcp://192.168.10.4:9000/waf?username=default&dial_timeout=10s&read_timeout=20s
+  ip2:
+    path: wafconsole/app/dashBorad/internal/data/model/ip2region.xdb

@@ -12,6 +12,8 @@ import (
 type DataViewRepo interface {
 	GetDayAttackCount(ctx context.Context, today string, yesterday string) (dto.AttackDayCount, error)
 	GetAttackCountByTime(ctx context.Context, startTime, endTime string) ([]dto.AttackCountByTime, error)
+	ListIpAddr(ctx context.Context, startTime, endTime string) ([]dto.AttackIp, error)
+	GetIPToAddress(ctx context.Context, ip string) (string, error)
 	iface.BaseRepo[model.SecLog]
 }
 
@@ -70,4 +72,27 @@ func (d *DataViewUsecase) GetAttackLogDetail(ctx context.Context, logId string) 
 		return model.SecLog{}, err
 	}
 	return attackLog, nil
+}
+
+// ListIpToAddress 获取IP地址信息
+func (d *DataViewUsecase) ListIpToAddress(ctx context.Context, startTime, endTime string) ([]dto.IPToAddress, error) {
+	ipList, err := d.repo.ListIpAddr(ctx, startTime, endTime)
+	if err != nil {
+		slog.ErrorContext(ctx, "list_ip_to_address is failed", err)
+		return nil, err
+	}
+	var ipToAddress []dto.IPToAddress
+	for _, ip := range ipList {
+		address, err := d.repo.GetIPToAddress(ctx, ip.ClientIp)
+		if err != nil {
+			slog.ErrorContext(ctx, "get_ip_to_address is failed", err)
+			return nil, err
+		}
+		tempArr := dto.IPToAddress{
+			Addr:  address,
+			Count: ip.Count,
+		}
+		ipToAddress = append(ipToAddress, tempArr)
+	}
+	return ipToAddress, nil
 }
