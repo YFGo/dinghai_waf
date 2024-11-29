@@ -91,9 +91,31 @@ message GetAttackInfoFromServerReply{
 }
 
 // ##### 获取异常IP来源地区
-message GetAttackIpFromAddrRequest{}
+message GetAttackIpFromAddrRequest{
+    string start_time = 1[
+            (buf.validate.field).cel = {
+                id: "start_time",
+                message: "选择正确的时间",
+                expression: "size(this)  == 10"
+            }
+    ];
+    string end_time = 2 [
+            (buf.validate.field).cel = {
+                id: "end_time",
+                message: "选择正确的时间",
+                expression: "size(this) == 10"
+            }
+    ];
+}
 
-message GetAttackIpFromAddrReply{}
+message IpFromAddrCount{
+    string addr = 1;
+    string count = 2;
+}
+
+message GetAttackIpFromAddrReply{
+    repeated IpFromAddrCount ip_from_addr_counts = 1;
+}
 
 // ### 获取指定的攻击日志详情
 message GetAttackDetailRequest{

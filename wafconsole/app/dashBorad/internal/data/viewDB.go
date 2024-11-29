@@ -69,3 +69,16 @@ func (d *dataViewRepo) GetSecLog(ctx context.Context, logId string) (model.SecLo
 	err := d.data.clickhouseDB.Where("log_id = ?", logId).First(&ans).Error
 	return ans, err
 }
+
+// ListIpAddr 获取指定时间内的攻击IP
+func (d *dataViewRepo) ListIpAddr(ctx context.Context, startTime, endTime string) ([]dto.AttackIp, error) {
+	var ans []dto.AttackIp
+	err := d.data.clickhouseDB.Model(&model.SecLog{}).Select("client_ip , count(client_ip) as count").Where("date(ctime) >= ? and date(ctime) <= ?", startTime, endTime).Group("client_ip").Find(&ans).Error
+	return ans, err
+}
+
+// GetIPToAddress 获取IP对应的地址
+func (d *dataViewRepo) GetIPToAddress(ctx context.Context, ip string) (string, error) {
+	region, err := d.data.ipDB.SearchByStr(ip)
+	return region, err
+}

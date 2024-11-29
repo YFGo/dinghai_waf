@@ -3,6 +3,7 @@ package view
 import (
 	"context"
 	"log/slog"
+	"strconv"
 	"time"
 	"wafconsole/app/dashBorad/internal/biz/viewLogic"
 	"wafconsole/app/dashBorad/internal/server/plugin"
@@ -91,7 +92,22 @@ func (s *DataViewService) GetAttackInfoFromServer(ctx context.Context, req *pb.G
 	}, nil
 }
 func (s *DataViewService) GetAttackIpFromAddr(ctx context.Context, req *pb.GetAttackIpFromAddrRequest) (*pb.GetAttackIpFromAddrReply, error) {
-	return &pb.GetAttackIpFromAddrReply{}, nil
+	attackIPAddrList, err := s.uc.ListIpToAddress(ctx, req.StartTime, req.EndTime)
+	if err != nil {
+		slog.ErrorContext(ctx, "ListIpToAddress err : %v", err)
+		return nil, plugin.ServerErr()
+	}
+	res := make([]*pb.IpFromAddrCount, 0, len(attackIPAddrList))
+	for _, attackIPAddr := range attackIPAddrList {
+		temp := &pb.IpFromAddrCount{
+			Addr:  attackIPAddr.Addr,
+			Count: strconv.Itoa(attackIPAddr.Count),
+		}
+		res = append(res, temp)
+	}
+	return &pb.GetAttackIpFromAddrReply{
+		IpFromAddrCounts: res,
+	}, nil
 }
 
 func (s *DataViewService) GetAttackDetail(ctx context.Context, req *pb.GetAttackDetailRequest) (*pb.GetAttackDetailReply, error) {

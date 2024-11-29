@@ -44,7 +44,11 @@ message Data {
   message Clickhouse {
     string dsn = 1;
   }
+  message Ip2 {
+    string path = 1;
+  }
   Mysql mysql = 1;
   Redis redis = 2;
   Clickhouse clickhouse = 3;
+  Ip2 ip2 = 4;
 }
