@@ -37,7 +37,6 @@ func (a *attackLogRepo) Consumer() func() {
 		defer wg.Done()
 		for {
 			if err := a.data.kafkaConsumerGroup.Consume(ctx, []string{model.AttackEventsTopic}, a); err != nil {
-				//当Setup失败时 , error返回在这里
 				slog.ErrorContext(ctx, "consume error", err)
 				return
 			}
@@ -78,6 +77,8 @@ func (a *attackLogRepo) Setup(session sarama.ConsumerGroupSession) error {
 }
 
 func (a *attackLogRepo) Cleanup(session sarama.ConsumerGroupSession) error {
+	a.Save(a.secLogList) // kafka链接断开时 , 将剩余的异常请求全部写入clickhouse
+	slog.Info("close channel data: ")
 	return nil
 }
 
@@ -110,7 +111,7 @@ func (a *attackLogRepo) ConsumeClaim(session sarama.ConsumerGroupSession, claim 
 		a.data.rdb.Set(context.Background(), attackRedisOffsetKey, message.Offset, 0) // 获取当前消费消息的偏移量 并存入redis
 		a.secLogList = append(a.secLogList, secLog)
 		if len(a.secLogList) >= 20 {
-			a.Save(a.secLogList, session)
+			a.Save(a.secLogList)
 		}
 		session.Commit()
 	}
@@ -118,7 +119,7 @@ func (a *attackLogRepo) ConsumeClaim(session sarama.ConsumerGroupSession, claim 
 }
 
 // Save 将消息队列中的消息保存到 clickhouse中
-func (a *attackLogRepo) Save(secLogList []model.SecLog, session sarama.ConsumerGroupSession) {
+func (a *attackLogRepo) Save(secLogList []model.SecLog) {
 	err := a.data.clickhouseDB.Transaction(func(tx *gorm.DB) error {
 		if err := a.data.clickhouseDB.CreateInBatches(secLogList, len(secLogList)).Error; err != nil {
 			return err
