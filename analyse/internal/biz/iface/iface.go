@@ -2,7 +2,6 @@ package iface
 
 import (
 	"analyse/internal/data/model"
-	"github.com/IBM/sarama"
 	"gorm.io/gorm"
 )
 
@@ -14,5 +13,5 @@ type Domain interface {
 
 type BaseRepo[T Domain] interface {
 	Consumer() func()
-	Save(secLogList []T, session sarama.ConsumerGroupSession)
+	Save(secLogList []T)
 }

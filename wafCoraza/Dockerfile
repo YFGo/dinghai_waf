@@ -19,7 +19,7 @@ WORKDIR /src
 RUN --mount=type=cache,target=/go/pkg/mod/ \
     --mount=type=bind,source=go.sum,target=go.sum \
     --mount=type=bind,source=go.mod,target=go.mod \
-    GOPROXY=https://goproxy.cn  \
+    GOPROXY=https://goproxy.cn   \
     go mod download -x
 
 # This is the architecture you're building for, which is passed in by the builder.
@@ -61,25 +61,8 @@ RUN --mount=type=cache,target=/var/cache/apk \
         && \
         update-ca-certificates
 
-
-# Create a non-privileged user that the app will run under.
-# See https://docs.docker.com/go/dockerfile-user-best-practices/
-ARG UID=10001
-RUN adduser \
-    --disabled-password \
-    --gecos "" \
-    --home "/nonexistent" \
-    --shell "/sbin/nologin" \
-    --no-create-home \
-    --uid "${UID}" \
-    appuser
-
 # Create directories and set permissions
-RUN mkdir -p /wafCoraza/waf_log /wafCoraza/conf && \
-    chown -R appuser /wafCoraza
-
-USER appuser
-
+RUN mkdir -p /wafCoraza/waf_log /wafCoraza/conf /wafCoraza/ruleset
 
 # Copy the executable from the "build" stage.
 COPY --from=build /bin/server /bin/
@@ -93,4 +76,5 @@ COPY --from=build /src/wafCoraza/waf_log /wafCoraza/waf_log/
 EXPOSE 8887
 
 # What the container should run when it is started.
+USER root
 ENTRYPOINT [ "/bin/server" ]
