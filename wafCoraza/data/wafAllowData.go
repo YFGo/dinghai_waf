@@ -52,3 +52,9 @@ func (w wafAllowListRepo) GetAllowListByPrefix(ctx context.Context, prefix strin
 func (w wafAllowListRepo) WatchAllowList(ctx context.Context, prefix string) clientv3.WatchChan {
 	return w.data.etcdClient.Watch(ctx, prefix, clientv3.WithPrefix())
 }
+
+// SaveServerAllow 保存白名单和站点的映射关系
+func (w wafAllowListRepo) SaveServerAllow(ctx context.Context, key string, value string) error {
+	_, err := w.data.etcdClient.KV.Put(ctx, key, value)
+	return err
+}

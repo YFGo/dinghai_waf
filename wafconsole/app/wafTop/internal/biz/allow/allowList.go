@@ -31,6 +31,8 @@ func NewListAllowUsecase(repo ListAllowRepo) *ListAllowUsecase {
 	return &ListAllowUsecase{repo: repo}
 }
 
+// 根据白名单id 获取到应用的服务器id
+
 // checkAllowName 检查白名单昵称是否存在
 func (uc *ListAllowUsecase) checkAllowName(ctx context.Context, id int64, name string) bool {
 	_, err := uc.repo.GetByNameAndID(ctx, name, id)

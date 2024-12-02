@@ -14,6 +14,7 @@ type WafAllowListRepo interface {
 	GetValueInfoByKey(ctx context.Context, key string) (string, error)
 	GetAllowListByPrefix(ctx context.Context, prefix string) ([]model.AllowAction, error)
 	WatchAllowList(ctx context.Context, prefix string) clientv3.WatchChan
+	SaveServerAllow(ctx context.Context, key string, value string) error
 }
 
 type WafAllowListUsecase struct {
@@ -58,12 +59,29 @@ func (w *WafAllowListUsecase) GetAllowInfo(ctx context.Context, host string) ([]
 }
 
 // GetAllowsDetail 根据id 在map集合中查询白名单详细信息
-func (w *WafAllowListUsecase) GetAllowsDetail(ctx context.Context, allowIdList []string) []model.Allow {
+func (w *WafAllowListUsecase) GetAllowsDetail(ctx context.Context, allowIdList []string, host string) []model.Allow {
 	var allowList []model.Allow
+	var (
+		newServerAllow string // 新的站点和白名单之间的关联关系
+		isChange       bool
+	)
 	for _, allowId := range allowIdList {
 		allow, ok := w.allowListMap[allowId]
 		if ok {
 			allowList = append(allowList, allow)
+			newServerAllow = newServerAllow + allowId + types.CutOFF
+		} else {
+			// 说明此白名单在上层服务中已经被删除了 , 将此信息删除
+			isChange = true
+		}
+	}
+	if isChange { //如果需要修改关联关系
+		newServerAllow = newServerAllow[:len(newServerAllow)-1]
+		// 将新的白名单 和 站点映射关系更新
+		hostAllowKey := host + types.AllowSuffix
+		if err := w.repo.SaveServerAllow(ctx, hostAllowKey, newServerAllow); err != nil {
+			slog.ErrorContext(ctx, "save server_allow is failed: ", err)
+			return allowList
 		}
 	}
 	return allowList

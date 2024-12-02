@@ -2,6 +2,7 @@ package data
 
 import (
 	"context"
+	"gorm.io/gorm"
 	"wafconsole/app/wafTop/internal/biz/allow"
 	"wafconsole/app/wafTop/internal/biz/iface"
 	"wafconsole/app/wafTop/internal/data/model"
@@ -44,8 +45,17 @@ func (a allowlistRepo) Update(ctx context.Context, id int64, allowList model.All
 }
 
 func (a allowlistRepo) Delete(ctx context.Context, ids []int64) (int64, error) {
-	affectRows := a.data.db.Where("id IN (?)", ids).Unscoped().Delete(&model.AllowList{}).RowsAffected
-	return affectRows, nil
+	err := a.data.db.Transaction(func(tx *gorm.DB) error {
+		if err := tx.Where("id IN (?)", ids).Unscoped().Delete(&model.AllowList{}).Error; err != nil {
+			return err
+		}
+		// 删除关联表中的数据
+		if err := tx.Where("allow_id IN (?)", ids).Unscoped().Delete(&model.ServerAllow{}).Error; err != nil {
+			return err
+		}
+		return nil
+	})
+	return 0, err
 }
 
 func (a allowlistRepo) Count(ctx context.Context, withReturn ...iface.WhereOptionWithReturn) (int64, error) {

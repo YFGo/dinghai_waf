@@ -14,7 +14,7 @@ func AllowHandle(allowUc *biz.WafAllowListUsecase, ctx context.Context, host str
 		slog.ErrorContext(ctx, "allow_handle get_allow_info is failed", err)
 		return err, false
 	}
-	allowDetails := allowUc.GetAllowsDetail(ctx, allowIdList) //根据白名单id 获取白名单信息
+	allowDetails := allowUc.GetAllowsDetail(ctx, allowIdList, host) //根据白名单id 获取白名单信息
 	for _, allowInfo := range allowDetails {
 		switch allowInfo.Key {
 		case types.URI:
