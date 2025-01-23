@@ -52,7 +52,10 @@ func (w *WafHandleService) ProxyHandler() http.HandlerFunc {
 		hostBaseUrl := strings.Split(req.URL.Path, "/")            // 提取请求地址中的关键字段
 		wafs := w.wafConfigUc.GetAppWAF(hostBaseUrl[1])            //根据访问的域名 获取收到保护的web程序所应用的策略 对应的WAF实列
 		realAddr, err := w.wafConfigUc.GetRealAddr(hostBaseUrl[1]) //  获取真实的后端地址
-		newPath := strings.Join(hostBaseUrl[2:], "/")              // 重构请求路径
+		if err != nil {
+			slog.Error("get realAddr error", err, "hostBaseUrl", hostBaseUrl[1])
+		}
+		newPath := strings.Join(hostBaseUrl[2:], "/") // 重构请求路径
 		req.URL.Path = newPath
 		var tx types.Transaction
 		defer func() {
@@ -64,9 +67,12 @@ func (w *WafHandleService) ProxyHandler() http.HandlerFunc {
 			}
 		}()
 		clientIP, clientPort, err := net.SplitHostPort(req.RemoteAddr)
+		if err != nil {
+			slog.Error("Error parsing remote address: ", err, "remote_addr : ", req.RemoteAddr)
+		}
 		serverIP, serverPortStr, err := net.SplitHostPort(realAddr)
 		if err != nil {
-			slog.Error("Error splitting RemoteAddr: ", err)
+			slog.Error("get server_ip , server_port is failed: ", err, "real_addr", realAddr, "req_path", req.URL.Path)
 		}
 
 		serverPort, _ := strconv.Atoi(serverPortStr)
