@@ -7,7 +7,7 @@ server:
     timeout: 1s
 data:
   mysql:
-    host: 127.0.0.1
+    host: 8.154.36.180
     port: 3306
     user: root
     password: 123456
@@ -15,7 +15,7 @@ data:
     max_idle: 10
     max_open: 100
   redis:
-    addr: 127.0.0.1:6379
+    addr: 8.154.36.180:6379
     read_timeout: 0.2s
     write_timeout: 0.2s
   clickhouse:

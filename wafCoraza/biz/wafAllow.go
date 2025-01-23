@@ -71,11 +71,11 @@ func (w *WafAllowListUsecase) GetAllowsDetail(ctx context.Context, allowIdList [
 			allowList = append(allowList, allow)
 			newServerAllow = newServerAllow + allowId + types.CutOFF
 		} else {
-			// 说明此白名单在上层服务中已经被删除了 , 将此信息删除
+			// 说明此白名单在上层服务中已经被删除了   , 白名单和站点关联关系需要修改
 			isChange = true
 		}
 	}
-	if isChange { //如果需要修改关联关系
+	if isChange && len(newServerAllow) > 0 { //如果需要修改关联关系
 		newServerAllow = newServerAllow[:len(newServerAllow)-1]
 		// 将新的白名单 和 站点映射关系更新
 		hostAllowKey := host + types.AllowSuffix

@@ -105,7 +105,7 @@ func (w *WafConfigUsercase) GetAppWAF(host string) []*model.CorazaWaf {
 	wafs := make([]*model.CorazaWaf, 0)
 	strategyIDs, err := w.repo.GetAppForStrategyIDs(host + types.StrategySuffix) //获取策略ID
 	if err != nil || len(strategyIDs) == 0 {
-		slog.Error("get strategy failed: ", err, "strategyIDs: ", strategyIDs)
+		slog.Error("get strategy failed: ", err, "strategyIDs: ", strategyIDs, "host: ", host)
 		return nil
 	}
 	//目前只有单节点etcd , 直接获取即可
