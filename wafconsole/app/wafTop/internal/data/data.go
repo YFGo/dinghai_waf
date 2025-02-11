@@ -1,6 +1,7 @@
 package data
 
 import (
+	"context"
 	"fmt"
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/google/wire"
@@ -11,6 +12,7 @@ import (
 	"time"
 	"wafconsole/app/wafTop/internal/conf"
 	"wafconsole/app/wafTop/internal/hooks"
+	utils "wafconsole/utils/context"
 )
 
 // ProviderSet is data providers.
@@ -71,12 +73,13 @@ func newMysql(cfg *conf.Data_Mysql) (*gorm.DB, error) {
 func newETCD(cfg *conf.Data_Etcd) *clientv3.Client {
 	etcdClient, err := clientv3.New(clientv3.Config{
 		Endpoints:   []string{cfg.Host},
-		DialTimeout: 5 * time.Second,
+		DialTimeout: 2 * time.Second,
 	})
 	if err != nil {
 		slog.Error("etcd client failed: ", err)
 		panic(err)
 	}
-	hooks.InitEtcd(etcdClient) // 初始化键值对
+	appCtx := utils.GetAppCtx(context.Background())
+	hooks.InitEtcd(etcdClient, appCtx) // 初始化键值对
 	return etcdClient
 }

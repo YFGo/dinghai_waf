@@ -7,12 +7,10 @@ import (
 )
 
 // InitEtcd 在每一次平台服务启动时 , 初始化etcd中的值
-func InitEtcd(etcd *clientv3.Client) {
+func InitEtcd(etcd *clientv3.Client, ctx context.Context) {
 	if etcd == nil {
 		return
 	}
-	// 定义上下文
-	ctx := context.Background()
 
 	// 定义要插入的键值对
 	keys := []string{"rule_90001", "rule_90002", "rule_90003", "group_1"}
