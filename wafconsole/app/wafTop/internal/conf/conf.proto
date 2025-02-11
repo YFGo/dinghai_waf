@@ -43,6 +43,7 @@ message Data {
   }
   message Etcd {
     string host = 1;
+    string username = 2;
   }
   Mysql mysql = 1;
   Redis redis = 2;

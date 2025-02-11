@@ -28,7 +28,7 @@ func NewConfFile() *ini.File {
 func NewData(c *ini.File) (*Data, func()) {
 	kafkaProducer := newKafkaProducer(c.Section("kafka").Key("address").String())
 	timeTask := newTimeTask()
-	etcdClient := newETCD(c.Section("etcd").Key("address").String())
+	etcdClient := newETCD(c.Section("etcd").Key("username").String(), c.Section("etcd").Key("address").String())
 	cleanup := func() {
 		if kafkaProducer != nil {
 			slog.Info("close kafka producer")
@@ -70,8 +70,9 @@ func newTimeTask() *cron.Cron {
 	return c
 }
 
-func newETCD(address string) *clientv3.Client {
+func newETCD(username, address string) *clientv3.Client {
 	etcdClient, err := clientv3.New(clientv3.Config{
+		Username:    username,
 		Endpoints:   []string{address},
 		DialTimeout: 5 * time.Second,
 	})
