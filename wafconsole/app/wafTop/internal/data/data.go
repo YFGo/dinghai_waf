@@ -12,6 +12,7 @@ import (
 	"time"
 	"wafconsole/app/wafTop/internal/conf"
 	"wafconsole/app/wafTop/internal/hooks"
+	utils "wafconsole/utils/context"
 )
 
 // ProviderSet is data providers.
@@ -26,14 +27,15 @@ type Data struct {
 // NewData .
 func NewData(s *conf.Server, bootstrap *conf.Bootstrap) (*Data, func(), error) {
 	c := bootstrap.Data
-	mysql, err := newMysql(c.Mysql)
+	appCtx := utils.NewAppCtx(context.Background())
+	dbMysql, err := newMysql(c.Mysql, appCtx)
 	if err != nil {
 		return nil, nil, err
 	}
-	etcd := newETCD(c.Etcd)
+	etcd := newETCD(c.Etcd, appCtx)
 	cleanup := func() {
-		if mysql != nil {
-			if db, err := mysql.DB(); err == nil && db != nil {
+		if dbMysql != nil {
+			if db, err := dbMysql.DB(); err == nil && db != nil {
 				db.Close()
 			}
 		}
@@ -41,13 +43,14 @@ func NewData(s *conf.Server, bootstrap *conf.Bootstrap) (*Data, func(), error) {
 			etcd.Close()
 		}
 	}
+
 	return &Data{
-		db:   mysql,
+		db:   dbMysql,
 		etcd: etcd,
 	}, cleanup, nil
 }
 
-func newMysql(cfg *conf.Data_Mysql) (*gorm.DB, error) {
+func newMysql(cfg *conf.Data_Mysql, ctx *utils.CustomContext) (*gorm.DB, error) {
 	dsn := fmt.Sprintf("%s:%s@tcp(%s:%d)/%s?parseTime=true&loc=Local", cfg.User, cfg.Password, cfg.Host, cfg.Port, cfg.Db)
 	mysqlConfig := mysql.Config{
 		DSN:                       dsn,   // DSN data source name
@@ -69,7 +72,7 @@ func newMysql(cfg *conf.Data_Mysql) (*gorm.DB, error) {
 	return db, nil
 }
 
-func newETCD(cfg *conf.Data_Etcd) *clientv3.Client {
+func newETCD(cfg *conf.Data_Etcd, ctx *utils.CustomContext) *clientv3.Client {
 	etcdClient, err := clientv3.New(clientv3.Config{
 		Endpoints:   []string{cfg.Host},
 		DialTimeout: 2 * time.Second,
@@ -78,7 +81,7 @@ func newETCD(cfg *conf.Data_Etcd) *clientv3.Client {
 		slog.Error("etcd client failed: ", err)
 		panic(err)
 	}
-	//appCtx := utils.GetAppCtx(context.Background())
-	hooks.InitEtcd(etcdClient, context.Background()) // 初始化键值对
+	// 设置超时时间
+	hooks.InitEtcd(etcdClient, ctx) // 初始化键值对
 	return etcdClient
 }
