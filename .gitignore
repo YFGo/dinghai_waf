@@ -14,4 +14,4 @@ wafcoraza/conf/conf_dev.ini
 *.zip
 .vscode
 
-data
+exe
