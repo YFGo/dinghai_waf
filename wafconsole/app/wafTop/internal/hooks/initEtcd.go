@@ -3,7 +3,7 @@ package hooks
 import (
 	clientv3 "go.etcd.io/etcd/client/v3"
 
-	utils "wafconsole/utils/context"
+	"wafconsole/utils/context"
 )
 
 // InitEtcd 在每一次平台服务启动时 , 初始化etcd中的值

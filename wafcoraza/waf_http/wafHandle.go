@@ -49,13 +49,13 @@ func (w *WafHandleService) ProxyHandler() http.HandlerFunc {
 			slog.Error("LogAttackEvent Error reading request body: ", err)
 			return
 		}
-		hostBaseUrl := strings.Split(req.URL.Path, "/")            // 提取请求地址中的关键字段
-		wafs := w.wafConfigUc.GetAppWAF(hostBaseUrl[1])            //根据访问的域名 获取收到保护的web程序所应用的策略 对应的WAF实列
-		realAddr, err := w.wafConfigUc.GetRealAddr(hostBaseUrl[1]) //  获取真实的后端地址
+		baseURIKey := strings.Split(req.URL.Path, "/")            // 提取请求地址中的关键字段
+		wafs := w.wafConfigUc.GetAppWAF(baseURIKey[1])            //根据访问的域名 获取收到保护的web程序所应用的策略 对应的WAF实列
+		realAddr, err := w.wafConfigUc.GetRealAddr(baseURIKey[1]) //  获取真实的后端地址
 		if err != nil {
-			slog.Error("get realAddr error", err, "hostBaseUrl", hostBaseUrl[1])
+			slog.Error("get realAddr error", err, "hostBaseUrl", baseURIKey[1])
 		}
-		newPath := strings.Join(hostBaseUrl[2:], "/") // 重构请求路径
+		newPath := strings.Join(baseURIKey[2:], "/") // 重构请求路径
 		req.URL.Path = newPath
 		var tx types.Transaction
 		defer func() {
@@ -77,7 +77,7 @@ func (w *WafHandleService) ProxyHandler() http.HandlerFunc {
 
 		serverPort, _ := strconv.Atoi(serverPortStr)
 		port, _ := strconv.Atoi(clientPort)
-		err, isAllow := plugins.AllowHandle(w.wafAllowUc, context.Background(), hostBaseUrl[1], newPath, clientIP) //百名单检测
+		err, isAllow := plugins.AllowHandle(w.wafAllowUc, context.Background(), baseURIKey[1], newPath, clientIP) //百名单检测
 		if err != nil {
 			slog.Error("allow plugins is failed: ", err)
 		}

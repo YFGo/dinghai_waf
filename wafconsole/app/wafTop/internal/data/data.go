@@ -12,7 +12,7 @@ import (
 	"time"
 	"wafconsole/app/wafTop/internal/conf"
 	"wafconsole/app/wafTop/internal/hooks"
-	utils "wafconsole/utils/context"
+	"wafconsole/utils/context"
 )
 
 // ProviderSet is data providers.

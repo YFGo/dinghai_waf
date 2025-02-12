@@ -11,6 +11,7 @@ require (
 	github.com/golang-jwt/jwt/v4 v4.5.0
 	github.com/google/wire v0.6.0
 	github.com/lionsoul2014/ip2region/binding/golang v0.0.0-20240510055607-89e20ab7b6c6
+	github.com/robfig/cron/v3 v3.0.1
 	go.etcd.io/etcd/client/v3 v3.5.16
 	go.uber.org/automaxprocs v1.5.1
 	google.golang.org/genproto/googleapis/api v0.0.0-20240528184218-531527333157
