@@ -120,8 +120,8 @@ func (w *WafConfigUsercase) GetAppWAF(host string) []*model.CorazaWaf {
 }
 
 // GetRealAddr 根据请求地址 , 获取真正的后端请求地址
-func (w *WafConfigUsercase) GetRealAddr(host string) (string, error) {
-	realAddr, err := w.repo.GetRealAddr(host)
+func (w *WafConfigUsercase) GetRealAddr(uriKey string) (string, error) {
+	realAddr, err := w.repo.GetRealAddr(uriKey)
 	if err != nil {
 		slog.Error("GetRealAddr is failed: ", err)
 		return realAddr, nil
