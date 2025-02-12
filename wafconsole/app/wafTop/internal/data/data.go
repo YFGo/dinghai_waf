@@ -12,7 +12,6 @@ import (
 	"time"
 	"wafconsole/app/wafTop/internal/conf"
 	"wafconsole/app/wafTop/internal/hooks"
-	utils "wafconsole/utils/context"
 )
 
 // ProviderSet is data providers.
@@ -79,7 +78,7 @@ func newETCD(cfg *conf.Data_Etcd) *clientv3.Client {
 		slog.Error("etcd client failed: ", err)
 		panic(err)
 	}
-	appCtx := utils.GetAppCtx(context.Background())
-	hooks.InitEtcd(etcdClient, appCtx) // 初始化键值对
+	//appCtx := utils.GetAppCtx(context.Background())
+	hooks.InitEtcd(etcdClient, context.Background()) // 初始化键值对
 	return etcdClient
 }

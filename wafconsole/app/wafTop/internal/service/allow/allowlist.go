@@ -7,8 +7,7 @@ import (
 	"time"
 	"wafconsole/app/wafTop/internal/biz/allow"
 	"wafconsole/app/wafTop/internal/data/model"
-	"wafconsole/app/wafTop/internal/server/plugin"
-	"wafconsole/app/wafTop/internal/utils"
+	up "wafconsole/utils/plugin"
 
 	pb "wafconsole/api/wafTop/v1"
 )
@@ -33,8 +32,8 @@ func (s *AllowListService) CreateAllowList(ctx context.Context, req *pb.CreateAl
 	}
 	err := s.uc.CreateAllow(ctx, allowInfo)
 	if err != nil {
-		if utils.StatusErr(err, codes.AlreadyExists) {
-			return nil, plugin.AllowExistErr()
+		if up.StatusErr(err, codes.AlreadyExists) {
+			return nil, up.AllowExistErr()
 		}
 		slog.ErrorContext(ctx, "create allowlist error : ", err)
 		return nil, err
@@ -50,8 +49,8 @@ func (s *AllowListService) UpdateAllowList(ctx context.Context, req *pb.UpdateAl
 	}
 	err := s.uc.UpdateAllow(ctx, req.Id, allowInfo)
 	if err != nil {
-		if utils.StatusErr(err, codes.AlreadyExists) {
-			return nil, plugin.AllowExistErr()
+		if up.StatusErr(err, codes.AlreadyExists) {
+			return nil, up.AllowExistErr()
 		}
 		slog.ErrorContext(ctx, "update allowlist error : ", err)
 		return nil, err
@@ -70,7 +69,7 @@ func (s *AllowListService) GetAllowList(ctx context.Context, req *pb.GetAllowLis
 	allowDetail, err := s.uc.GetAllowDetail(ctx, req.Id)
 	if err != nil {
 		slog.ErrorContext(ctx, "get allowlist error : ", err)
-		return nil, plugin.ServerErr()
+		return nil, up.ServerErr()
 	}
 	return &pb.GetAllowListReply{
 		Name:        allowDetail.Name,
@@ -87,7 +86,7 @@ func (s *AllowListService) ListAllowList(ctx context.Context, req *pb.ListAllowL
 	total, listAllow, err := s.uc.ListAllow(ctx, limit, offset, req.Name)
 	if err != nil {
 		slog.ErrorContext(ctx, "list allowlist error : ", err)
-		return nil, plugin.ServerErr()
+		return nil, up.ServerErr()
 	}
 	listAllowReply := make([]*pb.AllowListInfo, 0)
 	for _, allowInfo := range listAllow {

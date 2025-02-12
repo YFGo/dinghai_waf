@@ -6,8 +6,7 @@ import (
 	"log/slog"
 	siteBiz "wafconsole/app/wafTop/internal/biz/site"
 	"wafconsole/app/wafTop/internal/data/model"
-	"wafconsole/app/wafTop/internal/server/plugin"
-	"wafconsole/app/wafTop/internal/utils"
+	up "wafconsole/utils/plugin"
 
 	pb "wafconsole/api/wafTop/v1"
 )
@@ -35,11 +34,11 @@ func (s *ServerService) CreateServer(ctx context.Context, req *pb.CreateServerRe
 	}
 	err := s.uc.CreateServerSite(ctx, serverInfo)
 	if err != nil {
-		if utils.StatusErr(err, codes.AlreadyExists) {
-			return nil, plugin.ServerExistErr()
+		if up.StatusErr(err, codes.AlreadyExists) {
+			return nil, up.ServerExistErr()
 		}
 		slog.ErrorContext(ctx, "create server_waf service error: ", err)
-		return nil, plugin.ServerErr()
+		return nil, up.ServerErr()
 	}
 	return &pb.CreateServerReply{}, nil
 }
@@ -56,14 +55,14 @@ func (s *ServerService) UpdateServer(ctx context.Context, req *pb.UpdateServerRe
 	}
 	err := s.uc.UpdateServerSite(ctx, req.Id, serverInfo, req.OldHost)
 	if err != nil {
-		if utils.StatusErr(err, codes.AlreadyExists) {
-			return nil, plugin.ServerExistErr()
+		if up.StatusErr(err, codes.AlreadyExists) {
+			return nil, up.ServerExistErr()
 		}
-		if utils.StatusErr(err, codes.NotFound) {
-			return nil, plugin.ServerChooseErr(err)
+		if up.StatusErr(err, codes.NotFound) {
+			return nil, up.ServerChooseErr(err)
 		}
 		slog.ErrorContext(ctx, "update server_waf service error: ", err)
-		return nil, plugin.ServerErr()
+		return nil, up.ServerErr()
 	}
 	return &pb.UpdateServerReply{}, nil
 }

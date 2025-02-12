@@ -7,8 +7,7 @@ import (
 	"time"
 	ruleBiz "wafconsole/app/wafTop/internal/biz/rule"
 	"wafconsole/app/wafTop/internal/data/model"
-	"wafconsole/app/wafTop/internal/server/plugin"
-	"wafconsole/app/wafTop/internal/utils"
+	up "wafconsole/utils/plugin"
 
 	pb "wafconsole/api/wafTop/v1"
 )
@@ -35,8 +34,8 @@ func (s *RuleGroupService) CreateRuleGroup(ctx context.Context, req *pb.CreateRu
 		IsBuildin:   uint8(req.IsBuildin),
 	}
 	if err := s.uc.CreateRuleGroup(ctx, ruleGroup); err != nil {
-		if utils.StatusErr(err, codes.AlreadyExists) {
-			return nil, plugin.RuleGroupIsExistErr()
+		if up.StatusErr(err, codes.AlreadyExists) {
+			return nil, up.RuleGroupIsExistErr()
 		}
 		slog.ErrorContext(ctx, "create rule_group is error: ", err)
 		return nil, err
@@ -69,8 +68,8 @@ func (s *RuleGroupService) DeleteRuleGroup(ctx context.Context, req *pb.DeleteRu
 		ids = append(ids, ruleGroupInfo.Id)
 	}
 	if err := s.uc.DeleteRuleGroup(ctx, ids); err != nil {
-		if utils.StatusErr(err, codes.FailedPrecondition) {
-			return nil, plugin.RuleGroupIsUsingErr()
+		if up.StatusErr(err, codes.FailedPrecondition) {
+			return nil, up.RuleGroupIsUsingErr()
 		}
 		slog.ErrorContext(ctx, "delete rule_group is error: ", err)
 		return nil, err
