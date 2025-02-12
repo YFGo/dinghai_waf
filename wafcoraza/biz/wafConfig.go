@@ -11,8 +11,8 @@ import (
 	"strconv"
 	"strings"
 	"sync"
-	"wafCoraza/data/model"
-	"wafCoraza/data/types"
+	"wafcoraza/data/model"
+	"wafcoraza/data/types"
 )
 
 // WafConfigRepo 加载waf配置

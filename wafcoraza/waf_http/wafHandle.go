@@ -8,9 +8,9 @@ import (
 	"net/http"
 	"strconv"
 	"strings"
-	"wafCoraza/biz"
-	constType "wafCoraza/data/types"
-	"wafCoraza/waf_http/plugins"
+	"wafcoraza/biz"
+	constType "wafcoraza/data/types"
+	"wafcoraza/waf_http/plugins"
 
 	"github.com/corazawaf/coraza/v3/types"
 )

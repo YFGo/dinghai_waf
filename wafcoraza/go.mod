@@ -1,4 +1,4 @@
-module wafCoraza
+module wafcoraza
 
 go 1.23.0
 

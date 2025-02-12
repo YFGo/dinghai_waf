@@ -4,9 +4,9 @@ import (
 	"context"
 	clientv3 "go.etcd.io/etcd/client/v3"
 	"strings"
-	"wafCoraza/biz"
-	"wafCoraza/data/model"
-	"wafCoraza/data/types"
+	"wafcoraza/biz"
+	"wafcoraza/data/model"
+	"wafcoraza/data/types"
 )
 
 type wafAllowListRepo struct {

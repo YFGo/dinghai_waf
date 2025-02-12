@@ -35,9 +35,9 @@ RUN --mount=type=cache,target=/go/pkg/mod/ \
     CGO_ENABLED=0 GOARCH=$TARGETARCH go build -o /bin/server .
 
 # Copy the configuration file to the container
-COPY /conf/ /src/wafCoraza/conf/
-COPY /ruleset/ /src/wafCoraza/ruleset/
-COPY /waf_log/ /src/wafCoraza/waf_log/
+COPY /conf/ /src/wafcoraza/conf/
+COPY /ruleset/ /src/wafcoraza/ruleset/
+COPY /waf_log/ /src/wafcoraza/waf_log/
 
 ################################################################################
 # Create a new stage for running the application that contains the minimal
@@ -62,15 +62,15 @@ RUN --mount=type=cache,target=/var/cache/apk \
         update-ca-certificates
 
 # Create directories and set permissions
-RUN mkdir -p /wafCoraza/waf_log /wafCoraza/conf /wafCoraza/ruleset
+RUN mkdir -p /wafcoraza/waf_log /wafcoraza/conf /wafcoraza/ruleset
 
 # Copy the executable from the "build" stage.
 COPY --from=build /bin/server /bin/
 
 # Copy the configuration file to the final stage
-COPY --from=build /src/wafCoraza/conf/ /wafCoraza/conf/
-COPY --from=build /src/wafCoraza/ruleset/ /wafCoraza/ruleset/
-COPY --from=build /src/wafCoraza/waf_log /wafCoraza/waf_log/
+COPY --from=build /src/wafcoraza/conf/ /wafcoraza/conf/
+COPY --from=build /src/wafcoraza/ruleset/ /wafcoraza/ruleset/
+COPY --from=build /src/wafcoraza/waf_log /wafcoraza/waf_log/
 
 # Expose the port that the application listens on.
 EXPOSE 8887

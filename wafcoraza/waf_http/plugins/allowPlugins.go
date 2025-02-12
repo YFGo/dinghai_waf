@@ -3,8 +3,8 @@ package plugins
 import (
 	"context"
 	"log/slog"
-	"wafCoraza/biz"
-	"wafCoraza/data/types"
+	"wafcoraza/biz"
+	"wafcoraza/data/types"
 )
 
 // AllowHandle 白名单处理事务

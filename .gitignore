@@ -1,5 +1,5 @@
 .idea
-wafCoraza/waf_log
+wafcoraza/waf_log
 *.exe
 
 wafconsole/app/dashBorad/configs/config_dev.yaml
@@ -10,6 +10,8 @@ analyse/configs/config_dev.yaml
 DingHai
 DingHai_linux
 
-wafCoraza/conf/conf_dev.ini
+wafcoraza/conf/conf_dev.ini
 *.zip
 .vscode
+
+data

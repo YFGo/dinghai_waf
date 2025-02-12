@@ -17,7 +17,7 @@ type Data struct {
 }
 
 func NewConfFile() *ini.File {
-	file, err := ini.Load("wafCoraza/conf/conf_dev.ini")
+	file, err := ini.Load("wafcoraza/conf/conf_dev.ini")
 	if err != nil {
 		slog.Error("load config file error: ", err)
 		panic(err)

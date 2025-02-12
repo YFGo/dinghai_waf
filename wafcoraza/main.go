@@ -10,9 +10,9 @@ import (
 	"os/signal"
 	"syscall"
 	"time"
-	"wafCoraza/biz"
-	"wafCoraza/data"
-	wafHttp "wafCoraza/waf_http"
+	"wafcoraza/biz"
+	"wafcoraza/data"
+	wafHttp "wafcoraza/waf_http"
 )
 
 func initApp() (func(), *wafHttp.WafHandleService, *ini.File) {
