@@ -1,193 +1,286 @@
-package utils
+package mycontext
 
 import (
-	"bytes"
 	"context"
-	"encoding/json"
-	"errors"
-	"io/ioutil"
-	"net/http"
-	"strconv"
+	"encoding/base64"
+	"fmt"
+	"math/rand"
+	"os"
 	"sync"
 	"time"
+
+	"log/slog"
 )
 
-type Context struct {
-	request        *http.Request
-	responseWriter http.ResponseWriter
-	ctx            context.Context
-	handler        ControllerHandler
-	//是否超时标记
-	hasTimeout bool
-	//写保护机制
-	writerMux *sync.Mutex
+// CustomContext 自定义上下文类型
+type CustomContext struct {
+	// 内嵌标准Context
+	context.Context
+
+	// 元数据存储（线程安全）
+	metadata  map[string]interface{}
+	metaMutex sync.RWMutex
+
+	// 链路追踪
+	traceID    string
+	spanID     string
+	parentSpan string
+
+	// 日志记录（支持结构化日志）
+	logger *slog.Logger
+
+	// 控制参数
+	timeout    time.Duration
+	deadline   *time.Time
+	cancelFunc context.CancelFunc
+
+	// 错误处理
+	err      error
+	errMutex sync.Mutex
+
+	// 性能监控
+	metricsCollector MetricsCollector
 }
 
-func NewContext(r *http.Request, w http.ResponseWriter) *Context {
-	return &Context{
-		request:        r,
-		responseWriter: w,
-		ctx:            r.Context(),
-		handler:        nil,
-		hasTimeout:     false,
-		writerMux:      &sync.Mutex{},
+// MetricsCollector 指标收集接口
+type MetricsCollector interface {
+	RecordDuration(key string, dt time.Duration)
+	IncrementCounter(key string)
+}
+
+type defaultMetricsCollector struct{}
+
+func (d defaultMetricsCollector) RecordDuration(key string, dt time.Duration) {}
+func (d defaultMetricsCollector) IncrementCounter(key string)                 {}
+
+// NewAppCtx 构造函数
+func NewAppCtx(ctx context.Context, opts ...Option) *CustomContext {
+	baseCtx, cancel := context.WithCancel(ctx)
+	cc := &CustomContext{
+		Context:          baseCtx,
+		metadata:         make(map[string]interface{}),
+		logger:           defaultLogger(), // 默认使用 slog 的 JSONHandler
+		cancelFunc:       cancel,
+		metricsCollector: defaultMetricsCollector{},
+	}
+
+	for _, opt := range opts {
+		opt(cc)
+	}
+
+	// 自动注入追踪ID（如果未设置）
+	if cc.traceID == "" {
+		cc.traceID = generateTraceID()
+	}
+
+	return cc
+}
+
+func defaultLogger() *slog.Logger {
+	// os.Stout 日志打印在控制台上
+	handler := slog.NewJSONHandler(os.Stdout, &slog.HandlerOptions{
+		Level: slog.LevelInfo, // 默认日志级别
+	})
+	return slog.New(handler)
+}
+
+// Option 模式配置函数
+type Option func(*CustomContext)
+
+func WithLogger(logger *slog.Logger) Option {
+	return func(cc *CustomContext) {
+		cc.logger = logger
 	}
 }
 
-// #region base function
-func (ctx *Context) WriterMux() *sync.Mutex {
-	return ctx.writerMux
-}
-func (ctx *Context) GetRequest() *http.Request {
-	return ctx.request
-}
-func (ctx *Context) GetResponse() http.ResponseWriter {
-	return ctx.responseWriter
-}
-func (ctx *Context) SetHasTimeout() {
-	ctx.hasTimeout = true
-}
-func (ctx *Context) HasTimeout() bool {
-	return ctx.hasTimeout
+func WithTraceID(id string) Option {
+	return func(cc *CustomContext) {
+		cc.traceID = id
+	}
 }
 
-// #endregion
-func (ctx *Context) BaseContext() context.Context {
-	return ctx.request.Context()
+// Deadline 实现标准Context接口
+func (cc *CustomContext) Deadline() (time.Time, bool) {
+	if cc.deadline != nil {
+		return *cc.deadline, true
+	}
+	return cc.Context.Deadline()
 }
 
-// #region implement context.Context
-func (ctx *Context) Deadline() (deadline time.Time, ok bool) {
-	return ctx.BaseContext().Deadline()
-}
-func (ctx *Context) Done() <-chan struct{} {
-	return ctx.BaseContext().Done()
-}
-func (ctx *Context) Err() error {
-	return ctx.BaseContext().Err()
-}
-func (ctx *Context) Value(key interface{}) interface{} {
-	return ctx.BaseContext().Value(key)
+func (cc *CustomContext) Done() <-chan struct{} {
+	return cc.Context.Done()
 }
 
-// #endregion
-// #region query url
-func (ctx *Context) QueryInt(key string, def int) int {
-	params := ctx.QueryAll()
-	if vals, ok := params[key]; ok {
-		len := len(vals)
-		if len > 0 {
-			intval, err := strconv.Atoi(vals[len-1])
-			if err != nil {
-				return def
-			}
-			return intval
+func (cc *CustomContext) Err() error {
+	cc.errMutex.Lock()
+	defer cc.errMutex.Unlock()
+
+	if cc.err != nil {
+		return cc.err
+	}
+	return cc.Context.Err()
+}
+
+// Value 查找顺序：自定义元数据 -> 父Context
+func (cc *CustomContext) Value(key interface{}) interface{} {
+	cc.metaMutex.RLock()
+	defer cc.metaMutex.RUnlock()
+
+	if k, ok := key.(string); ok {
+		if v, exists := cc.metadata[k]; exists {
+			return v
 		}
 	}
-	return def
-}
-func (ctx *Context) QueryString(key string, def string) string {
-	params := ctx.QueryAll()
-	if vals, ok := params[key]; ok {
-		len := len(vals)
-		if len > 0 {
-			return vals[len-1]
-		}
-	}
-	return def
-}
-func (ctx *Context) QueryArray(key string, def []string) []string {
-	params := ctx.QueryAll()
-	if vals, ok := params[key]; ok {
-		return vals
-	}
-	return def
-}
-func (ctx *Context) QueryAll() map[string][]string {
-	if ctx.request != nil {
-		return map[string][]string(ctx.request.URL.Query())
-	}
-	return map[string][]string{}
+	return cc.Context.Value(key)
 }
 
-// #endregion
-// #region form post
-func (ctx *Context) FormInt(key string, def int) int {
-	params := ctx.FormAll()
-	if vals, ok := params[key]; ok {
-		len := len(vals)
-		if len > 0 {
-			intval, err := strconv.Atoi(vals[len-1])
-			if err != nil {
-				return def
-			}
-			return intval
-		}
-	}
-	return def
-}
-func (ctx *Context) FormString(key string, def string) string {
-	params := ctx.FormAll()
-	if vals, ok := params[key]; ok {
-		len := len(vals)
-		if len > 0 {
-			return vals[len-1]
-		}
-	}
-	return def
-}
-func (ctx *Context) FormArray(key string, def []string) []string {
-	params := ctx.QueryAll()
-	if vals, ok := params[key]; ok {
-		return vals
-	}
-	return def
-}
-func (ctx *Context) FormAll() map[string][]string {
-	if ctx.request != nil {
-		return map[string][]string(ctx.request.PostForm)
-	}
-	return map[string][]string{}
+/**************** 扩展功能 ****************/
+
+// Set 元数据操作
+func (cc *CustomContext) Set(key string, value interface{}) {
+	cc.metaMutex.Lock()
+	defer cc.metaMutex.Unlock()
+	cc.metadata[key] = value
 }
 
-// #endregion
-// #region application/json post
-func (ctx *Context) BindJson(obj interface{}) error {
-	if ctx.request != nil {
-		body, err := ioutil.ReadAll(ctx.request.Body)
-		if err != nil {
-			return err
-		}
-		ctx.request.Body = ioutil.NopCloser(bytes.NewBuffer(body))
-		err = json.Unmarshal(body, obj)
-		if err != nil {
-			return err
-		}
-	} else {
-		return errors.New("ctx.request empty")
-	}
-	return nil
+func (cc *CustomContext) Get(key string) (interface{}, bool) {
+	cc.metaMutex.RLock()
+	defer cc.metaMutex.RUnlock()
+	v, exists := cc.metadata[key]
+	return v, exists
 }
 
-// #endregion
-// #region response
-func (ctx *Context) Json(status int, obj interface{}) error {
-	if ctx.HasTimeout() {
-		return nil
-	}
-	ctx.responseWriter.Header().Set("Content-Type", "application/json")
-	ctx.responseWriter.WriteHeader(status)
-	byt, err := json.Marshal(obj)
-	if err != nil {
-		ctx.responseWriter.WriteHeader(500)
-		return err
-	}
-	ctx.responseWriter.Write(byt)
-	return nil
+// TraceID 链路追踪
+func (cc *CustomContext) TraceID() string {
+	return cc.traceID
 }
-func (ctx *Context) HTML(status int, obj interface{}, template string) error {
-	return nil
+
+func (cc *CustomContext) NewChildSpan() *CustomContext {
+	newSpanID := generateSpanID()
+	childLogger := cc.logger.With(
+		slog.Group("span", slog.String("id", newSpanID)),
+	)
+
+	return &CustomContext{
+		Context:    cc.Context,
+		traceID:    cc.traceID,
+		parentSpan: cc.spanID,
+		spanID:     newSpanID,
+		logger:     childLogger,
+	}
 }
-func (ctx *Context) Text(status int, obj string) error {
-	return nil
+
+// SetError 错误处理
+func (cc *CustomContext) SetError(err error) {
+	cc.errMutex.Lock()
+	defer cc.errMutex.Unlock()
+
+	if cc.err == nil { // 只记录第一个错误
+		cc.err = err
+		cc.logger.Error("context error",
+			slog.String("traceID", cc.traceID),
+			slog.String("error", err.Error()))
+
+		// 上报错误指标
+		cc.metricsCollector.IncrementCounter("context.errors")
+	}
+}
+
+// Timeout 超时控制
+func (cc *CustomContext) Timeout() time.Duration {
+	return cc.timeout
+}
+
+func (cc *CustomContext) SetTimeout(d time.Duration) {
+	cc.timeout = d
+	if cc.deadline == nil {
+		cc.deadline = new(time.Time)
+	}
+	*cc.deadline = time.Now().Add(d).UTC()
+
+	// 自动超时取消
+	go func() {
+		select {
+		case <-time.After(d):
+			cc.SetError(fmt.Errorf("context timeout after %s", d))
+			cc.cancelFunc()
+		case <-cc.Done():
+		}
+	}()
+}
+
+// Log 日志增强
+func (cc *CustomContext) Log() *slog.Logger {
+	return cc.logger.With(
+		slog.String("traceID", cc.traceID),
+		slog.String("spanID", cc.spanID),
+	)
+}
+
+// CancelWithReason 优雅取消（带原因）
+func (cc *CustomContext) CancelWithReason(reason string) {
+	if reason == "" {
+		cc.cancelFunc()
+		return
+	}
+
+	// 修改上下文的err为reason
+	cc.SetError(fmt.Errorf("context cancelled with reason: %s", reason))
+	cc.cancelFunc()
+
+	// 上报取消指标
+	cc.metricsCollector.IncrementCounter("context.cancellations")
+}
+
+// Clone 深度拷贝（用于并发安全传递）
+func (cc *CustomContext) Clone() *CustomContext {
+	cc.metaMutex.RLock()
+	defer cc.metaMutex.RUnlock()
+
+	newCc := &CustomContext{
+		Context:          cc.Context,
+		traceID:          cc.traceID,
+		spanID:           cc.spanID,
+		parentSpan:       cc.parentSpan,
+		logger:           cc.logger,
+		timeout:          cc.timeout,
+		metricsCollector: cc.metricsCollector,
+	}
+
+	// 深拷贝元数据
+	newCc.metadata = make(map[string]interface{}, len(cc.metadata))
+	for k, v := range cc.metadata {
+		newCc.metadata[k] = deepCopy(v)
+	}
+
+	return newCc
+}
+
+// 辅助函数
+func generateTraceID() string {
+	// 使用随机数生成分布式ID的一部分
+	return fmt.Sprintf("trace-%d-%x", time.Now().UnixNano(), rand.Int63())
+}
+
+func generateSpanID() string {
+	// 可以用随机数或者更复杂的算法生成
+	return fmt.Sprintf("span-%x", rand.Int63())
+}
+
+func deepCopy(src interface{}) interface{} {
+	// 实现简单的深度拷贝（这里仅支持基本类型和字符串）
+	switch v := src.(type) {
+	case string:
+		return v
+	case int, int8, int16, int32, int64:
+		return v
+	case uint, uint8, uint16, uint32, uint64:
+		return v
+	case float32, float64:
+		return v
+	case []byte:
+		return base64.StdEncoding.EncodeToString(v)
+	default:
+		return src // 其他类型不处理
+	}
 }
