@@ -8,8 +8,8 @@ import (
 	"os"
 	"strconv"
 	"sync"
-	"wafCoraza/biz"
-	"wafCoraza/data/model"
+	"wafcoraza/biz"
+	"wafcoraza/data/model"
 )
 
 type saveAttackEventRepo struct {
@@ -23,7 +23,7 @@ func NewSaveAttackEventRepo(data *Data) biz.AttackEventRepo {
 
 // ReadAttackEvent 读取csv文件中的数据
 func (s saveAttackEventRepo) ReadAttackEvent() []model.AttackEvent {
-	file, err := os.OpenFile("wafCoraza/waf_log/attack_events.csv", os.O_RDONLY, os.ModePerm)
+	file, err := os.OpenFile("wafcoraza/waf_log/attack_events.csv", os.O_RDONLY, os.ModePerm)
 	if err != nil {
 		slog.Error("ReadAttackEvent Error opening file: ", err)
 		return nil
@@ -39,7 +39,7 @@ func (s saveAttackEventRepo) ReadAttackEvent() []model.AttackEvent {
 
 // AppendToFile 将新数据写入csv文件
 func (s saveAttackEventRepo) AppendToFile(attackEvent []model.AttackEvent) {
-	path := "wafCoraza/waf_log/attack_events.csv"
+	path := "wafcoraza/waf_log/attack_events.csv"
 	var file *os.File
 	//判断此文件是否存在
 	if _, err := os.Stat(path); os.IsNotExist(err) {
@@ -106,7 +106,7 @@ func (s saveAttackEventRepo) CollectionAttackEvent() {
 		return
 	}
 	//写入成功之后 , 删除json文件
-	if err := os.Remove("wafCoraza/waf_log/attack_events.csv"); err != nil {
+	if err := os.Remove("wafcoraza/waf_log/attack_events.csv"); err != nil {
 		slog.Error("remove attack_events.csv error: ", err)
 		return
 	}

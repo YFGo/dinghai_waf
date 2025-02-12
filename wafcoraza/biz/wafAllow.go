@@ -6,8 +6,8 @@ import (
 	clientv3 "go.etcd.io/etcd/client/v3"
 	"log/slog"
 	"strings"
-	"wafCoraza/data/model"
-	"wafCoraza/data/types"
+	"wafcoraza/data/model"
+	"wafcoraza/data/types"
 )
 
 type WafAllowListRepo interface {

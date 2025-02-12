@@ -8,7 +8,7 @@ import (
 	"net/http"
 	"strconv"
 	"time"
-	"wafCoraza/data/model"
+	"wafcoraza/data/model"
 )
 
 type AttackEventRepo interface {
