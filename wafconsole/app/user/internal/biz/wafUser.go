@@ -9,7 +9,7 @@ import (
 	"log/slog"
 	"wafconsole/app/user/internal/biz/iface"
 	"wafconsole/app/user/internal/data/model"
-	"wafconsole/app/user/internal/server/plugin"
+	up "wafconsole/utils/plugin"
 )
 
 type WafUserRepo interface {
@@ -45,11 +45,11 @@ func (w *WafUserUsecase) LoginByEmailPassword(ctx context.Context, user model.Us
 		slog.ErrorContext(ctx, "LoginByEmailPassword error : ", err)
 		return "", "", status.Error(codes.Internal, err.Error())
 	}
-	userclaims := plugin.UserClaims{
+	userclaims := up.UserClaims{
 		UserId:   uint64(userInfo.ID),
 		Username: userInfo.UserName,
 	}
-	jwtUtils := plugin.InitNewJWTUtils()
+	jwtUtils := up.InitNewJWTUtils()
 	accessToken, refreshToken, _ := jwtUtils.GetToken(userclaims)
 	return accessToken, refreshToken, nil
 }

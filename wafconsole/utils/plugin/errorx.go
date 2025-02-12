@@ -1,12 +1,12 @@
-package plugin
+package utils
 
 import (
 	"github.com/go-kratos/kratos/v2/errors"
 )
 
 const (
-	ErrTokenIsFailed = 900
-	ErrServer        = 901
+	ErrTokenIsFailed = 900 + iota
+	ErrServer
 
 	// 6500 ~ 7000 规则错误
 	ErrRuleGroupIsExist = 6500
@@ -30,6 +30,11 @@ func TokenErr() error {
 
 func ServerErr() error {
 	return errors.New(ErrServer, "", "服务繁忙")
+}
+
+// 1000 ~ 2000 用户相关
+func UserNotFoundErr() error {
+	return errors.New(1000, "", "登录信息错误")
 }
 
 func AllowExistErr() error {

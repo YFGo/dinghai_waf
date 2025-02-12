@@ -5,10 +5,9 @@ import (
 	"log/slog"
 	"strconv"
 	"time"
-	"wafconsole/app/dashBorad/internal/biz/viewLogic"
-	"wafconsole/app/dashBorad/internal/server/plugin"
-
 	pb "wafconsole/api/dashBorad/v1"
+	"wafconsole/app/dashBorad/internal/biz/viewLogic"
+	utils "wafconsole/utils/plugin"
 )
 
 type DataViewService struct {
@@ -38,7 +37,7 @@ func (s *DataViewService) GetAttackInfoFromDay(ctx context.Context, req *pb.GetA
 	attackCount, err := s.uc.GetDayAttack(ctx, today, yesterday)
 	if err != nil {
 		slog.ErrorContext(ctx, "GetDayAttack err : %v", err)
-		return nil, plugin.ServerErr()
+		return nil, utils.ServerErr()
 	}
 	attackAdd := calculateGrowthRate(attackCount.AttackCount, attackCount.AttackYesterday)
 	attackIPAdd := calculateGrowthRate(attackCount.AttackIPCount, attackCount.AttackIPYesterday)
@@ -53,7 +52,7 @@ func (s *DataViewService) GetAttackInfoByTime(ctx context.Context, req *pb.GetAt
 	attackInfoCount, err := s.uc.GetAttackByTime(ctx, req.StartTime, req.EndTime)
 	if err != nil {
 		slog.ErrorContext(ctx, "GetAttackByTime err : %v", err)
-		return nil, plugin.ServerErr()
+		return nil, utils.ServerErr()
 	}
 	attackInfoCountRespList := make([]*pb.AttackInfoByTime, 0)
 	for _, value := range attackInfoCount {
@@ -73,7 +72,7 @@ func (s *DataViewService) GetAttackInfoFromServer(ctx context.Context, req *pb.G
 	attackList, total, err := s.uc.ListAttackLog(ctx, limit, offset, req.StartTime, req.EndTime)
 	if err != nil {
 		slog.ErrorContext(ctx, "ListAttackLog err : %v", err)
-		return nil, plugin.ServerErr()
+		return nil, utils.ServerErr()
 	}
 	res := make([]*pb.GetAttackInfoFormServer, 0, len(attackList))
 	for _, attack := range attackList {
@@ -95,7 +94,7 @@ func (s *DataViewService) GetAttackIpFromAddr(ctx context.Context, req *pb.GetAt
 	attackIPAddrList, err := s.uc.ListIpToAddress(ctx, req.StartTime, req.EndTime)
 	if err != nil {
 		slog.ErrorContext(ctx, "ListIpToAddress err : %v", err)
-		return nil, plugin.ServerErr()
+		return nil, utils.ServerErr()
 	}
 	res := make([]*pb.IpFromAddrCount, 0, len(attackIPAddrList))
 	for _, attackIPAddr := range attackIPAddrList {
@@ -114,7 +113,7 @@ func (s *DataViewService) GetAttackDetail(ctx context.Context, req *pb.GetAttack
 	attackDetail, err := s.uc.GetAttackLogDetail(ctx, req.LogId)
 	if err != nil {
 		slog.ErrorContext(ctx, "GetAttackDetail err : %v", err)
-		return nil, plugin.ServerErr()
+		return nil, utils.ServerErr()
 	}
 	return &pb.GetAttackDetailReply{
 		Uri:           attackDetail.URI,
