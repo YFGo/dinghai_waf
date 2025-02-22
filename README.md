@@ -6,13 +6,6 @@
     1. **便捷: **如果是单纯的从自己的日志或者nginx,apache日志等查看信息不方便 , 不知道自己的网站到底谁在访问,请求了什么. waf在网站或者API防护可以更方便用户查询这些信息,做出及时的处理.
     2. **DIY: **在开发过程中一些特定的功能加入自己的想法.
 
-> v1.0.1 开发目标:
->
-
-1. 开发前端UI界面
-2. 实现用户自定义防护规则功能
-3. 完成日志插件功能开发
-
 ## 技术栈
 项目上层服务使用kratos框架进行开发,内核服务使用coraza waf开源引擎,提高内核开发效率.
 
@@ -140,6 +133,79 @@
 
 ```
 
+## 新建API或grpc协议文件
+> 项目目录下执行
+```bash
+# 初始化项目需要的软件包
+make init
+# 启用项目运行需要的docker软件
+make docker
+# 生成项目需要的wire文件
+make wire
+# go mod tidy
+make tidy
+# 一键初始化项目运行需要的所有环境
+make all
+
+
+# 新建http服务协议文件
+kratos proto add api/http_admin/user.proto
+# 新建grpc服务协议文件
+kratos proto add api/grpc_user/user.proto
+# 新建mq消费数据协议文件
+kratos proto add api/mq_consume/user.proto
+```
+
+## 新建服务
+> 项目目录下执行
+```bash
+# 新建http服务
+kratos new app/http_admin/ --nomod
+# 新建grpc服务
+kratos new app/grpc_user/ --nomod
+# 新建cron服务
+kratos new app/cron/ --nomod
+# 新建mq消费服务
+kratos new app/mq_consume/ --nomod
+```
+
+## 模块开发常用命令
+> 进入app下某个模块下执行
+```bash
+# 模块配置文件proto生成go文件
+make config
+# 模块微服务proto生成go文件（仅用于微服务开发）
+make grpc
+# 模块http服务proto生成go文件（仅用于http服务开发）
+make http
+# 模块错误码proto生成go文件
+make errors
+# 模块proto文件生成go文件（一般用在根据proto协议生成go数据结构，纯粹用于数据结构定义）
+make proto
+# ent ORM初始化
+make entinit
+# ent ORM生成，根据`ent/schema`数据库表生成go文件
+make ent
+# ent ORM导入，导入数据库表数据schema，要求较高的请通过在线工具手动定制。
+make entimport
+# 模块wire生成
+make wire
+# generate代码生成
+make generate
+# 编译项目可执行程序
+make build
+# 运行测试
+make test
+# 运行
+make run
+```
+
+## 运行系统配套服务
+> 项目目录下执行
+```bash
+make docker
+```
+
 ### 数据库ER图
 ![](https://cdn.nlark.com/yuque/0/2024/png/34606362/1730252770131-13ba0a2d-f4dc-4706-a1a3-45c75cf47122.png)
 
@@ -159,13 +225,6 @@
 5. 内核新增配置文件 , 更加灵活
 6. 搭建了线上环境配置 , 以及链路追踪 , 服务注册框架
 
-> 后续更新目标:
-
-
-1. 无UI界面 , 不便于操作
-2. 增加链路追踪
-3. 增加负载均衡功能
-4. 完善用户服务
 
 <font style="color:rgb(31, 35, 40);"></font>
 
