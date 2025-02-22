@@ -1,0 +1,28 @@
+syntax = "proto3";
+
+package kratos.api;
+
+option go_package = "wafconsole/app/wafTop/internal/conf;conf";
+
+
+message ConfDriver {
+	string type = 1;
+	ConfConsul consul = 2;
+	ConfEtcd etcd = 3;
+}
+// consul config
+message ConfConsul {
+	string address = 1;
+	string scheme = 2;
+	string path_prefix = 3;
+	string token = 4;
+	string path = 5;
+}
+
+message ConfEtcd {
+	string address = 1;
+	string scheme = 2;
+	string path_prefix = 3;
+	string token = 4;
+	string path = 5;
+}
