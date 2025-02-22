@@ -26,7 +26,7 @@ func NewServerService(uc *siteBiz.ServerUsecase) *ServerService {
 func (s *ServerService) CreateServer(ctx context.Context, req *pb.CreateServerRequest) (*pb.CreateServerReply, error) {
 	serverInfo := model.ServerWaf{
 		Name:         req.Name,
-		Host:         req.UriKey,
+		UriKey:       req.UriKey,
 		IP:           req.Ip,
 		Port:         int(req.Port),
 		StrategiesID: req.StrategyIds,
@@ -47,7 +47,7 @@ func (s *ServerService) CreateServer(ctx context.Context, req *pb.CreateServerRe
 func (s *ServerService) UpdateServer(ctx context.Context, req *pb.UpdateServerRequest) (*pb.UpdateServerReply, error) {
 	serverInfo := model.ServerWaf{
 		Name:         req.Name,
-		Host:         req.UriKey,
+		UriKey:       req.UriKey,
 		IP:           req.Ip,
 		Port:         int(req.Port),
 		StrategiesID: req.StrategyIds,
@@ -87,7 +87,7 @@ func (s *ServerService) GetServer(ctx context.Context, req *pb.GetServerRequest)
 	serverReply := &pb.GetServerReply{
 		Name:         serverInfo.Name,
 		Ip:           serverInfo.IP,
-		UriKey:       serverInfo.Host,
+		UriKey:       serverInfo.UriKey,
 		Port:         int64(serverInfo.Port),
 		StrategiesId: serverInfo.StrategiesID,
 		AllowIds:     serverInfo.AllowListID,
@@ -118,7 +118,7 @@ func (s *ServerService) ListServer(ctx context.Context, req *pb.ListServerReques
 			Id:     int64(server.ID),
 			Name:   server.Name,
 			Ip:     server.IP,
-			UriKey: server.Host,
+			UriKey: server.UriKey,
 			Port:   int64(server.Port),
 		}
 		serverInfoList = append(serverInfoList, serverInfo)
