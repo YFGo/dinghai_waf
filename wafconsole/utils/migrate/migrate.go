@@ -9,6 +9,7 @@ import (
 	"github.com/golang-migrate/migrate/v4"
 	"path/filepath"
 	"time"
+	"wafconsole/utils/redislock"
 
 	"github.com/golang-migrate/migrate/v4/database"
 	chMigrate "github.com/golang-migrate/migrate/v4/database/clickhouse"
@@ -86,13 +87,14 @@ func NewDatabaseMigrator(cfg *Config) (*DatabaseMigrator, error) {
 // Run 执行全量迁移
 func (m *DatabaseMigrator) Run(ctx context.Context) error {
 	lockKey := "database_migration_lock"
-
+	rdLock := redislock.NewRedisLock(m.redisClient, m.config.LockTimeout)
 	// 获取分布式锁
-	if err := m.acquireLock(ctx, lockKey); err != nil {
+
+	if err := rdLock.AcquireLock(ctx, lockKey); err != nil {
 		return fmt.Errorf("failed to acquire lock: %w", err)
 	}
 	defer func() {
-		if err := m.releaseLock(ctx, lockKey); err != nil {
+		if err := rdLock.ReleaseLock(ctx, lockKey); err != nil {
 			logrus.Errorf("Failed to release lock: %v", err)
 		}
 	}()
@@ -148,37 +150,7 @@ func (m *DatabaseMigrator) runMigration(ctx context.Context, driver database.Dri
 	return nil
 }
 
-// Redis分布式锁实现
-func (m *DatabaseMigrator) acquireLock(ctx context.Context, key string) error {
-	// 尝试获取锁（SET NX PX）
-	result, err := m.redisClient.SetNX(ctx, key, m.lockID, m.config.LockTimeout).Result()
-	if err != nil {
-		return fmt.Errorf("redis operation failed: %w", err)
-	}
-	if !result {
-		return errors.New("lock already acquired by another client")
-	}
-	return nil
-}
-
-func (m *DatabaseMigrator) releaseLock(ctx context.Context, key string) error {
-	// 使用Lua脚本保证原子性删除
-	script := `
-	if redis.call("get", KEYS[1]) == ARGV[1] then
-		return redis.call("del", KEYS[1])
-	else
-		return 0
-	end
-	`
-
-	_, err := m.redisClient.Eval(ctx, script, []string{key}, m.lockID).Result()
-	if err != nil && err != redis.Nil {
-		return fmt.Errorf("failed to release lock: %w", err)
-	}
-	return nil
-}
-
-// 关闭资源
+// Close 关闭资源
 func (m *DatabaseMigrator) Close() error {
 	var errs []error
 
