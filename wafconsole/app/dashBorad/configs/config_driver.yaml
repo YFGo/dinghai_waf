@@ -1,0 +1,1 @@
+type: "file"consul:  address: 127.0.0.1:8500  path: kratos_learn/configsetcd:  address: 127.0.0.1:8500  path: kratos_learn/configs
