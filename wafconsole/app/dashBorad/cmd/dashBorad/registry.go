@@ -9,7 +9,7 @@ import (
 	"github.com/go-kratos/kratos/v2/registry"
 	"github.com/hashicorp/consul/api"
 	"go.etcd.io/etcd/client/v3"
-	"wafconsole/app/wafTop/internal/conf"
+	"wafconsole/app/dashBorad/internal/conf"
 )
 
 func initRegistryConf() *conf.Registry {

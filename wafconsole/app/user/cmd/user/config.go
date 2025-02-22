@@ -6,7 +6,7 @@ import (
 	"github.com/go-kratos/kratos/v2/config"
 	"github.com/go-kratos/kratos/v2/config/file"
 	consulapi "github.com/hashicorp/consul/api"
-	"wafconsole/app/wafTop/internal/conf"
+	"wafconsole/app/user/internal/conf"
 )
 
 // initConfig init the config
