@@ -6,6 +6,7 @@
 package main
 
 import (
+	"github.com/go-kratos/kratos/v2/registry"
 	"wafconsole/app/dashBorad/internal/biz"
 	"wafconsole/app/dashBorad/internal/conf"
 	"wafconsole/app/dashBorad/internal/data"
@@ -20,6 +21,6 @@ import (
 // wireApp init kratos application.
 //
 //go:generate wire
-func wireApp(*conf.Server, *conf.Bootstrap, log.Logger) (*kratos.App, func(), error) {
+func wireApp(*conf.Server, *conf.Bootstrap, log.Logger, registry.Registrar) (*kratos.App, func(), error) {
 	panic(wire.Build(server.ProviderSet, data.ProviderSet, biz.ProviderSet, service.ProviderSet, newApp))
 }
