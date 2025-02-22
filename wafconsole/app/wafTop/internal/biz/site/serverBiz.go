@@ -93,8 +93,8 @@ func (s *ServerUsecase) checkServerExist(ctx context.Context, name string, id in
 
 // updateServerInfoEtcd 将服务器信息整理存入etcd
 func (s *ServerUsecase) updateServerInfoEtcd(ctx context.Context, serverInfo model.ServerWaf) error {
-	serverStrategiesKey := serverInfo.Host + serverStrategy //站点和策略的key
-	serverAllowKey := serverInfo.Host + serverAllow         //站点和白名单的key
+	serverStrategiesKey := serverInfo.UriKey + serverStrategy //站点和策略的key
+	serverAllowKey := serverInfo.UriKey + serverAllow         //站点和白名单的key
 	var (
 		serverStrategies string
 		serverAllowValue string
@@ -113,7 +113,7 @@ func (s *ServerUsecase) updateServerInfoEtcd(ctx context.Context, serverInfo mod
 			serverAllowValue += strconv.Itoa(int(serverInfo.AllowListID[i])) + cutOff
 		}
 	}
-	serverRealAddrKey := serverInfo.Host + serverAddrKey // 站点真实地址
+	serverRealAddrKey := serverInfo.UriKey + serverAddrKey // 站点真实地址
 	serverRealAddrValue := serverInfo.IP + ":" + strconv.Itoa(serverInfo.Port)
 	if err := s.repo.SaveServerToEtcd(ctx, serverStrategiesKey, serverRealAddrKey, serverStrategies, serverRealAddrValue, serverAllowKey, serverAllowValue); err != nil { //存储站点对应的关系
 		slog.ErrorContext(ctx, "save server to etcd failed: ", err, "server_info", serverInfo)

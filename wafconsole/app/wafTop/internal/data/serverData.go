@@ -85,10 +85,10 @@ func (s serverRepo) Update(ctx context.Context, id int64, serverInfo model.Serve
 		serverAllows     []model.ServerAllow
 	)
 	serverWaf := model.ServerWaf{
-		Name: serverInfo.Name,
-		Host: serverInfo.Host,
-		IP:   serverInfo.IP,
-		Port: serverInfo.Port,
+		Name:   serverInfo.Name,
+		UriKey: serverInfo.UriKey,
+		IP:     serverInfo.IP,
+		Port:   serverInfo.Port,
 	}
 	err := s.data.db.Transaction(func(tx *gorm.DB) error {
 		err := tx.Where("id = ?", id).Updates(&serverWaf).Error

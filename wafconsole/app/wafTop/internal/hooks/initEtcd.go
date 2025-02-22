@@ -1,13 +1,13 @@
 package hooks
 
 import (
+	"context"
 	clientv3 "go.etcd.io/etcd/client/v3"
-
-	"wafconsole/utils/context"
+	"log/slog"
 )
 
 // InitEtcd 在每一次平台服务启动时 , 初始化etcd中的值
-func InitEtcd(etcd *clientv3.Client, ctx *utils.CustomContext) {
+func InitEtcd(etcd *clientv3.Client, ctx context.Context) {
 	if etcd == nil {
 		return
 	}
@@ -20,16 +20,16 @@ func InitEtcd(etcd *clientv3.Client, ctx *utils.CustomContext) {
 		// 获取键的当前值
 		resp, err := etcd.KV.Get(ctx, key)
 		if err != nil {
-			ctx.Log().ErrorContext(ctx, "init etcd fail", err)
+			slog.ErrorContext(ctx, "etcd.KV.Get error: %v", err)
 		}
 		// 检查键是否存在
 		if len(resp.Kvs) == 0 {
 			// 键不存在，插入键值对
 			_, err = etcd.KV.Put(ctx, key, values[i])
 			if err != nil {
-				ctx.Log().ErrorContext(ctx, "etcd.KV.Get error: %v", err)
+				slog.ErrorContext(ctx, "etcd.KV.Put error: %v", err)
 			}
 		}
 	}
-	ctx.Log().InfoContext(ctx, "init etcd success")
+	slog.InfoContext(ctx, "etcd init success")
 }

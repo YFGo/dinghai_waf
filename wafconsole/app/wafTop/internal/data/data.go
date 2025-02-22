@@ -12,7 +12,6 @@ import (
 	"time"
 	"wafconsole/app/wafTop/internal/conf"
 	"wafconsole/app/wafTop/internal/hooks"
-	"wafconsole/utils/context"
 )
 
 // ProviderSet is data providers.
@@ -27,7 +26,7 @@ type Data struct {
 // NewData .
 func NewData(s *conf.Server, bootstrap *conf.Bootstrap) (*Data, func(), error) {
 	c := bootstrap.Data
-	appCtx := utils.NewAppCtx(context.Background())
+	appCtx := context.Background()
 	dbMysql, err := newMysql(c.Mysql, appCtx)
 	if err != nil {
 		return nil, nil, err
@@ -50,7 +49,7 @@ func NewData(s *conf.Server, bootstrap *conf.Bootstrap) (*Data, func(), error) {
 	}, cleanup, nil
 }
 
-func newMysql(cfg *conf.Data_Mysql, ctx *utils.CustomContext) (*gorm.DB, error) {
+func newMysql(cfg *conf.Data_Mysql, ctx context.Context) (*gorm.DB, error) {
 	dsn := fmt.Sprintf("%s:%s@tcp(%s:%d)/%s?parseTime=true&loc=Local", cfg.User, cfg.Password, cfg.Host, cfg.Port, cfg.Db)
 	mysqlConfig := mysql.Config{
 		DSN:                       dsn,   // DSN data source name
@@ -72,7 +71,7 @@ func newMysql(cfg *conf.Data_Mysql, ctx *utils.CustomContext) (*gorm.DB, error) 
 	return db, nil
 }
 
-func newETCD(cfg *conf.Data_Etcd, ctx *utils.CustomContext) *clientv3.Client {
+func newETCD(cfg *conf.Data_Etcd, ctx context.Context) *clientv3.Client {
 	etcdClient, err := clientv3.New(clientv3.Config{
 		Endpoints:   []string{cfg.Host},
 		DialTimeout: 2 * time.Second,
