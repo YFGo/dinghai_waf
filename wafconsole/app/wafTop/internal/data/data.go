@@ -66,8 +66,6 @@ func newMysql(cfg *conf.Data_Mysql, ctx context.Context) (*gorm.DB, error) {
 	}
 	sqlDB.SetMaxIdleConns(int(cfg.MaxIdle))
 	sqlDB.SetMaxOpenConns(int(cfg.MaxOpen))
-	// 自动 建表
-	hooks.CreateTable(db)
 	return db, nil
 }
 

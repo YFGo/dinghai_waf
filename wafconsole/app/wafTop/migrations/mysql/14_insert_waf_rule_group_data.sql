@@ -1,0 +1,1 @@
+INSERT INTO waf_rule_group (id , created_at, updated_at, name, description, is_buildin)    VALUES(1 , NOW() , NOW() , 'coraza的内置防护规则' , 'coraza内置防护规则' , 1)
