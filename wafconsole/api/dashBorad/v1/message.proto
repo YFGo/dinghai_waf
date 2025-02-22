@@ -1,0 +1,141 @@
+syntax = "proto3";
+
+package api.dashBorad.v1;
+
+option go_package = "wafconsole/api/dashBorad/v1;v1";
+option java_multiple_files = true;
+option java_package = "api.dashBorad.v1";
+import "buf/validate/validate.proto";
+
+// #### 获取今日攻击信息 攻击数 异常IP数 , 较昨日增长数据
+message GetAttackInfoFromDayRequest{}
+
+message GetAttackInfoFromDayReply{
+    int64 attack_count = 1;
+    int64 attack_ip_count = 2;
+    float attack_add = 3;
+    float attack_ip_add = 4;
+}
+
+// #### 获取指定日志内的攻击数据 指定时间内的攻击数 , 以及异常IP数据的变化
+message GetAttackInfoByTimeRequest{
+    string start_time = 1 [
+            (buf.validate.field).cel = {
+                id: "start_time",
+                message: "请选择正确的日期格式",
+                expression: "size(this) == 10"
+            }
+    ];
+    string end_time = 2 [
+            (buf.validate.field).cel = {
+                id: "end_time",
+                message: "请选择正确的日期格式",
+                expression: "size(this) == 10"
+            }
+    ];
+}
+
+message AttackInfoByTime {
+    string time = 1;
+    int64 attack_count = 2;
+    int64 attack_ip_count = 3;
+}
+
+message GetAttackInfoByTimeReply{
+    repeated AttackInfoByTime attack_info_by_times = 1;
+}
+
+// #### 分类获取各个应用被攻击的信息 获取应用被攻击的信息
+message GetAttackInfoFromServerRequest{
+    string start_time = 1 [
+        (buf.validate.field).cel = {
+            id: "start_time",
+            message: "请选择正确的日期格式",
+            expression: "size(this) == 10"
+        }
+    ];
+    string end_time = 2 [
+        (buf.validate.field).cel = {
+            id: "end_time",
+            message: "请选择正确的日期格式",
+            expression: "size(this) == 10"
+        }
+    ];
+    int64 page_now = 3[
+            (buf.validate.field).cel = {
+                id: "page_now",
+                message: "分页参数错误",
+                expression: "this > 0"
+            }
+    ];
+    int64 page_size = 4 [
+            (buf.validate.field).cel = {
+                id: "page_size",
+                message: "分页参数错误",
+                expression: "this > 0"
+            }
+    ];
+}
+
+message GetAttackInfoFormServer{
+    string log_id = 1;
+    string uri = 2;
+    string ctime = 3;
+    string rule_name = 4;
+}
+
+
+message GetAttackInfoFromServerReply{
+    repeated GetAttackInfoFormServer get_attack_info_form_server = 1;
+    int64 total = 2;
+}
+
+// ##### 获取异常IP来源地区
+message GetAttackIpFromAddrRequest{
+    string start_time = 1[
+            (buf.validate.field).cel = {
+                id: "start_time",
+                message: "选择正确的时间",
+                expression: "size(this)  == 10"
+            }
+    ];
+    string end_time = 2 [
+            (buf.validate.field).cel = {
+                id: "end_time",
+                message: "选择正确的时间",
+                expression: "size(this) == 10"
+            }
+    ];
+}
+
+message IpFromAddrCount{
+    string addr = 1;
+    string count = 2;
+}
+
+message GetAttackIpFromAddrReply{
+    repeated IpFromAddrCount ip_from_addr_counts = 1;
+}
+
+// ### 获取指定的攻击日志详情
+message GetAttackDetailRequest{
+    string log_id = 1 [
+            (buf.validate.field).cel = {
+                id: "log_id",
+                message: "攻击日志id为空",
+                expression: "size(this) > 0"
+            }
+    ];
+}
+
+message GetAttackDetailReply{
+    string uri = 1;
+    string ctime = 2;
+    string protocol = 3;
+    string request = 4;
+    string request_method = 5;
+    string client_ip = 6;
+    string rule_name = 7;
+    string rule_desc = 8;
+    int64 client_port = 9;
+}

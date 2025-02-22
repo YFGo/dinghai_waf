@@ -37,7 +37,7 @@ func RegisterRuleGroupHTTPServer(s *http.Server, srv RuleGroupHTTPServer) {
 	r := s.Route("/")
 	r.POST("/app/wafTop/v1/ruleGroup", _RuleGroup_CreateRuleGroup0_HTTP_Handler(srv))
 	r.PATCH("/app/wafTop/v1/ruleGroup", _RuleGroup_UpdateRuleGroup0_HTTP_Handler(srv))
-	r.DELETE("/app/wafTop/v1/ruleGroup", _RuleGroup_DeleteRuleGroup0_HTTP_Handler(srv))
+	r.PUT("/app/wafTop/v1/ruleGroup", _RuleGroup_DeleteRuleGroup0_HTTP_Handler(srv))
 	r.GET("/app/wafTop/v1/ruleGroup/{id}", _RuleGroup_GetRuleGroup0_HTTP_Handler(srv))
 	r.GET("/app/wafTop/v1/ruleGroups", _RuleGroup_ListRuleGroup0_HTTP_Handler(srv))
 }
@@ -89,6 +89,9 @@ func _RuleGroup_UpdateRuleGroup0_HTTP_Handler(srv RuleGroupHTTPServer) func(ctx 
 func _RuleGroup_DeleteRuleGroup0_HTTP_Handler(srv RuleGroupHTTPServer) func(ctx http.Context) error {
 	return func(ctx http.Context) error {
 		var in DeleteRuleGroupRequest
+		if err := ctx.Bind(&in); err != nil {
+			return err
+		}
 		if err := ctx.BindQuery(&in); err != nil {
 			return err
 		}
@@ -178,10 +181,10 @@ func (c *RuleGroupHTTPClientImpl) CreateRuleGroup(ctx context.Context, in *Creat
 func (c *RuleGroupHTTPClientImpl) DeleteRuleGroup(ctx context.Context, in *DeleteRuleGroupRequest, opts ...http.CallOption) (*DeleteRuleGroupReply, error) {
 	var out DeleteRuleGroupReply
 	pattern := "/app/wafTop/v1/ruleGroup"
-	path := binding.EncodeURL(pattern, in, true)
+	path := binding.EncodeURL(pattern, in, false)
 	opts = append(opts, http.Operation(OperationRuleGroupDeleteRuleGroup))
 	opts = append(opts, http.PathTemplate(pattern))
-	err := c.cc.Invoke(ctx, "DELETE", path, nil, &out, opts...)
+	err := c.cc.Invoke(ctx, "PUT", path, in, &out, opts...)
 	if err != nil {
 		return nil, err
 	}

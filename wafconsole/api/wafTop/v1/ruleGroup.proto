@@ -24,7 +24,8 @@ service RuleGroup {
 	};
 	rpc DeleteRuleGroup (DeleteRuleGroupRequest) returns (DeleteRuleGroupReply) {
 		option (google.api.http) = {
-			delete: "/app/wafTop/v1/ruleGroup"
+			put: "/app/wafTop/v1/ruleGroup"
+			body: "*"
 		};
 	};
 	rpc GetRuleGroup (GetRuleGroupRequest) returns (GetRuleGroupReply) {

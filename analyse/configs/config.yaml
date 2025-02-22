@@ -7,8 +7,12 @@ server:
     timeout: 1s
 data:
   click_house:
-    dsn: tcp://120.26.68.38:9000/waf?username=default&dial_timeout=10s&read_timeout=20s
+    dsn: tcp://192.168.10.4:9000/waf?username=default&dial_timeout=10s&read_timeout=20s
   kafka:
     group_id: group1
-    addr: 120.26.68.38:9092
+    addr: 192.168.10.4:9092
     assignor: range
+  redis:
+    addr: 192.168.10.4:6379
+    db: 0
+    password: '123456'

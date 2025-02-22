@@ -41,7 +41,10 @@ func (s serverRepo) GetByNameAndID(ctx context.Context, serverName string, id in
 
 // Create 新增服务器
 func (s serverRepo) Create(ctx context.Context, serverInfo model.ServerWaf) (int64, error) {
-	var serverStrategies []model.ServerStrategies
+	var (
+		serverStrategies []model.ServerStrategies
+		serverAllows     []model.ServerAllow
+	)
 	err := s.data.db.Transaction(func(tx *gorm.DB) error {
 		err := tx.Create(&serverInfo).Error // 插入主表数据
 		if err != nil {
@@ -54,9 +57,22 @@ func (s serverRepo) Create(ctx context.Context, serverInfo model.ServerWaf) (int
 			}
 			serverStrategies = append(serverStrategies, serverStrategy)
 		}
-		err = tx.Create(&serverStrategies).Error // 插入关联表数据
+		for _, allowId := range serverInfo.AllowListID {
+			serverAllowTemp := model.ServerAllow{
+				AllowID:  allowId,
+				ServerID: int64(serverInfo.ID),
+			}
+			serverAllows = append(serverAllows, serverAllowTemp)
+		}
+		err = tx.Create(&serverStrategies).Error // 插入关联表数据 站点和策略
 		if err != nil {
 			return err
+		}
+		if len(serverAllows) != 0 {
+			err = tx.Create(&serverAllows).Error // 插入关联表数据 站点和白名单
+			if err != nil {
+				return err
+			}
 		}
 		return nil
 	})
@@ -64,22 +80,26 @@ func (s serverRepo) Create(ctx context.Context, serverInfo model.ServerWaf) (int
 }
 
 func (s serverRepo) Update(ctx context.Context, id int64, serverInfo model.ServerWaf) error {
-	var serverStrategies []model.ServerStrategies
+	var (
+		serverStrategies []model.ServerStrategies
+		serverAllows     []model.ServerAllow
+	)
 	serverWaf := model.ServerWaf{
-		Name: serverInfo.Name,
-		Host: serverInfo.Host,
-		IP:   serverInfo.IP,
-		Port: serverInfo.Port,
+		Name:   serverInfo.Name,
+		UriKey: serverInfo.UriKey,
+		IP:     serverInfo.IP,
+		Port:   serverInfo.Port,
 	}
 	err := s.data.db.Transaction(func(tx *gorm.DB) error {
 		err := tx.Where("id = ?", id).Updates(&serverWaf).Error
 		if err != nil {
 			return err
 		}
-		err = tx.Where("server_id = ?", id).Unscoped().Delete(&model.ServerStrategies{}).Error //删除关联表数据
+		err = tx.Where("server_id = ?", id).Unscoped().Delete(&model.ServerStrategies{}).Error //删除关联表数据 站点和策略
 		if err != nil {
 			return err
 		}
+		err = tx.Where("server_id = ?", id).Unscoped().Delete(&model.ServerAllow{}).Error // 删除关联表数据 站点和白名单
 		for _, strategyId := range serverInfo.StrategiesID {
 			serverStrategy := model.ServerStrategies{
 				ServerID:   id,
@@ -87,9 +107,22 @@ func (s serverRepo) Update(ctx context.Context, id int64, serverInfo model.Serve
 			}
 			serverStrategies = append(serverStrategies, serverStrategy)
 		}
-		err = tx.Create(&serverStrategies).Error // 插入关联表数据
+		err = tx.Create(&serverStrategies).Error // 插入关联表数据 站点和策略
 		if err != nil {
 			return err
+		}
+		for _, allowId := range serverInfo.AllowListID {
+			serverAllowTemp := model.ServerAllow{
+				AllowID:  allowId,
+				ServerID: id,
+			}
+			serverAllows = append(serverAllows, serverAllowTemp)
+		}
+		if len(serverInfo.AllowListID) != 0 {
+			err = tx.Create(&serverAllows).Error // 插入关联表数据 站点和白名单
+			if err != nil {
+				return err
+			}
 		}
 		return nil
 	})
@@ -98,7 +131,11 @@ func (s serverRepo) Update(ctx context.Context, id int64, serverInfo model.Serve
 
 func (s serverRepo) Delete(ctx context.Context, serverIds []int64) (int64, error) {
 	err := s.data.db.Transaction(func(tx *gorm.DB) error {
-		err := tx.Where("server_id in (?)", serverIds).Unscoped().Delete(&model.ServerStrategies{}).Error //删除关联表数据
+		err := tx.Where("server_id in (?)", serverIds).Unscoped().Delete(&model.ServerStrategies{}).Error //删除关联表数据 站点和策略
+		if err != nil {
+			return err
+		}
+		err = tx.Where("server_id in (?)", serverIds).Unscoped().Delete(&model.ServerAllow{}).Error // 删除关联表数据 站点和白名单
 		if err != nil {
 			return err
 		}
@@ -142,22 +179,32 @@ func (s serverRepo) GetServerStrategiesID(ctx context.Context, id int64) ([]int6
 }
 
 // SaveServerToEtcd 将web程序应用的策略 , 及真实地址存入etcd
-func (s serverRepo) SaveServerToEtcd(ctx context.Context, serverStrategiesKey, serverRealAddrKey, serverStrategies, serverRealAddr string) error {
+func (s serverRepo) SaveServerToEtcd(ctx context.Context, serverStrategiesKey, serverRealAddrKey, serverStrategies, serverRealAddr, serverAllowKey, serverAllowValue string) error {
 	_, err := s.data.etcd.KV.Put(ctx, serverStrategiesKey, serverStrategies)
 	if err != nil {
 		return err
 	}
 	_, err = s.data.etcd.KV.Put(ctx, serverRealAddrKey, serverRealAddr)
+	if err != nil {
+		return err
+	}
+	if len(serverAllowValue) != 0 {
+		_, err = s.data.etcd.KV.Put(ctx, serverAllowKey, serverAllowValue)
+	}
 	return err
 }
 
 // DeleteServerToEtcd 删除etcd中指定的服务器信息值
-func (s serverRepo) DeleteServerToEtcd(ctx context.Context, serverStrategiesKey, serverRealAddrKey string) error {
+func (s serverRepo) DeleteServerToEtcd(ctx context.Context, serverStrategiesKey, serverRealAddrKey, serverAllowKey string) error {
 	_, err := s.data.etcd.KV.Delete(ctx, serverStrategiesKey)
 	if err != nil {
 		return err
 	}
 	_, err = s.data.etcd.KV.Delete(ctx, serverRealAddrKey)
+	if err != nil {
+		return err
+	}
+	_, err = s.data.etcd.KV.Delete(ctx, serverAllowKey)
 	return err
 }
 
@@ -165,4 +212,11 @@ func (s serverRepo) ListHostByIds(ctx context.Context, ids []int64) ([]string, e
 	var hosts []string
 	err := s.data.db.Table(model.ServerWafTableName).Select("host").Where("id in (?)", ids).Find(&hosts).Error
 	return hosts, err
+}
+
+// GetServerAllowIDList 根据策略id 获取应用的白名单id
+func (s serverRepo) GetServerAllowIDList(ctx context.Context, id int64) ([]int64, error) {
+	var allowListIds []int64
+	err := s.data.db.Table(model.ServerAllowTableName).Select("allow_id").Where("server_id = ?", id).Scan(&allowListIds).Error
+	return allowListIds, err
 }

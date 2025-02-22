@@ -1,13 +1,14 @@
 syntax = "proto3";
 package kratos.api;
 
-option go_package = "wafconsole/app/wafTop/internal/conf;conf";
+option go_package = "wafconsole/app/dashBorad/internal/conf;conf";
 
 import "google/protobuf/duration.proto";
 
 message Bootstrap {
   Server server = 1;
   Data data = 2;
+  Trace trace = 3;
 }
 
 message Server {
@@ -38,9 +39,23 @@ message Data {
   message Redis {
     string network = 1;
     string addr = 2;
-    google.protobuf.Duration read_timeout = 3;
-    google.protobuf.Duration write_timeout = 4;
+    string password = 3;
+    google.protobuf.Duration read_timeout = 4;
+    google.protobuf.Duration write_timeout = 5;
+  }
+  message Clickhouse {
+    string dsn = 1;
+  }
+  message Ip2 {
+    string path = 1;
   }
   Mysql mysql = 1;
   Redis redis = 2;
+  Clickhouse clickhouse = 3;
+  Ip2 ip2 = 4;
 }
+
+message Trace {
+  string endpoint = 1;
+}
+

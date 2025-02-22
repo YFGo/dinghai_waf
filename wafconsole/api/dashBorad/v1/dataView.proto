@@ -1,0 +1,38 @@
+syntax = "proto3";
+
+package api.dashBorad.v1;
+
+option go_package = "wafconsole/api/dashBorad/v1;v1";
+option java_multiple_files = true;
+option java_package = "api.dashBorad.v1";
+
+import "api/dashBorad/v1/message.proto";
+import "google/api/annotations.proto";
+
+service DataView {
+	rpc GetAttackInfoFromDay (GetAttackInfoFromDayRequest) returns (GetAttackInfoFromDayReply) {
+		option (google.api.http) = {
+			get: "/app/dashBorad/v1/attack/dataView"
+		};
+	};
+	rpc GetAttackInfoByTime(GetAttackInfoByTimeRequest) returns (GetAttackInfoByTimeReply) {
+		option (google.api.http) = {
+			get: "app/dashBorad/v1/attack/dataViews"
+		};
+	};
+	rpc GetAttackInfoFromServer(GetAttackInfoFromServerRequest) returns (GetAttackInfoFromServerReply) {
+		option (google.api.http) = {
+			get: "app/dashBorad/v1/attack/servers"
+		};
+	};
+	rpc GetAttackIpFromAddr(GetAttackIpFromAddrRequest) returns (GetAttackIpFromAddrReply) {
+		option (google.api.http) = {
+			get: "app/dashBorad/v1/attack/IPAddr"
+		};
+	};
+	rpc GetAttackDetail(GetAttackDetailRequest) returns (GetAttackDetailReply) {
+		option (google.api.http) = {
+			get: "/app/dashBorad/v1/attack/detail"
+		};
+	};
+}

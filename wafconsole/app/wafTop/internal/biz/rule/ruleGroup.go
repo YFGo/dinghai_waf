@@ -4,6 +4,8 @@ import (
 	"context"
 	"encoding/json"
 	"github.com/go-kratos/kratos/v2/errors"
+	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/status"
 	"gorm.io/gorm"
 	"log/slog"
 	"strconv"
@@ -22,7 +24,7 @@ type RuleGroupRepo interface {
 	GetStrategyEtcd(ctx context.Context, strategyKey string) (string, error)
 }
 
-const ruleGroupPrefix = "rule_group_"
+const ruleGroupPrefix = "group_"
 
 type RuleGroupUsecase struct {
 	repo            RuleGroupRepo
@@ -147,7 +149,7 @@ func (r *RuleGroupUsecase) createRuleInfoEtcd(ctx context.Context, id int64, rul
 // CreateRuleGroup 新增规则组
 func (r *RuleGroupUsecase) CreateRuleGroup(ctx context.Context, ruleGroup model.RuleGroup) error {
 	if !r.checkNameIsExist(ctx, ruleGroup.Name, 0) { //昵称重复
-		return nil
+		return status.Error(codes.AlreadyExists, "rule_group is exists")
 	}
 	id, err := r.repo.Create(ctx, ruleGroup)
 	if err != nil {
@@ -179,7 +181,16 @@ func (r *RuleGroupUsecase) UpdateRuleGroup(ctx context.Context, id int64, ruleGr
 
 // DeleteRuleGroup 删除规则组
 func (r *RuleGroupUsecase) DeleteRuleGroup(ctx context.Context, ids []int64) error {
+	// 如果规则组中存在未被删除的规则 , 则不能删除此规则组
 	for _, id := range ids {
+		userRuleIsExist, err := r.userRuleRepo.ListUserRulesByGroupId(id)
+		if err != nil {
+			slog.ErrorContext(ctx, "get user rules by group id err : %v", err)
+			return err
+		}
+		if len(userRuleIsExist) != 0 {
+			return status.Error(codes.FailedPrecondition, "rule group is using")
+		}
 		ruleGroupKey := ruleGroupPrefix + strconv.Itoa(int(id))
 		if err := r.repo.DeleteRuleGroupInfoToEtcd(ctx, ruleGroupKey); err != nil {
 			slog.ErrorContext(ctx, "delete rule group info to etcd err : %v", err)
@@ -222,15 +233,13 @@ func (r *RuleGroupUsecase) DeleteRuleGroup(ctx context.Context, ids []int64) err
 				return err
 			}
 		}
+		_, err = r.repo.Delete(ctx, []int64{id}) //单个删除
+		if err != nil {
+			slog.ErrorContext(ctx, "delete rule_group err: ", err)
+			return err
+		}
 	}
-	affected, err := r.repo.Delete(ctx, ids)
-	if err != nil {
-		slog.ErrorContext(ctx, "delete rule_group err: ", err)
-		return err
-	}
-	if int(affected) != len(ids) {
-		slog.ErrorContext(ctx, "rule_group is not exists", ids)
-	}
+
 	return nil
 }
 

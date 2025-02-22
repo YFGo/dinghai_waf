@@ -124,7 +124,7 @@ message Method {
 // interface must redeclare all the methods from the included interface, but
 // documentation and options are inherited as follows:
 //
-// - If after comment and whitespace stripping, the documentation
+// - If after comment and allowspace stripping, the documentation
 //   string of the redeclared method is empty, it will be inherited
 //   from the original method.
 //

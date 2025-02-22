@@ -3,11 +3,13 @@ package service
 import (
 	"context"
 	"log/slog"
-	"wafconsole/app/user/internal/biz"
-	"wafconsole/app/user/internal/data/model"
-	"wafconsole/app/user/internal/server/plugin"
 
 	pb "wafconsole/api/user/v1"
+	"wafconsole/app/user/internal/biz"
+	"wafconsole/app/user/internal/data/model"
+	up "wafconsole/utils/plugin"
+
+	"google.golang.org/grpc/codes"
 )
 
 type WafUserService struct {
@@ -41,12 +43,12 @@ func (s *WafUserService) DeleteWafUser(ctx context.Context, req *pb.DeleteWafUse
 func (s *WafUserService) GetWafUser(ctx context.Context, req *pb.GetWafUserRequest) (*pb.GetWafUserReply, error) {
 	userId := req.Id
 	if userId == 0 { //查询自己
-		userId = int64(ctx.Value(plugin.UserIDMid).(uint64))
+		userId = int64(ctx.Value(up.UserIDMid).(uint64))
 	}
 	userInfo, err := s.uc.GetUserInfoByID(ctx, userId)
 	if err != nil {
 		slog.ErrorContext(ctx, "GetUserInfoByID err : %v", err)
-		return nil, plugin.ServerErr()
+		return nil, up.ServerErr()
 	}
 	return &pb.GetWafUserReply{
 		Email:      userInfo.Email,
@@ -62,8 +64,11 @@ func (s *WafUserService) Login(ctx context.Context, req *pb.LoginUserInfoRequest
 	}
 	accessToken, refreshToken, err := s.uc.LoginByEmailPassword(ctx, userInfo)
 	if err != nil {
+		if up.StatusErr(err, codes.NotFound) {
+			return nil, up.UserNotFoundErr()
+		}
 		slog.ErrorContext(ctx, "LoginByEmailPassword err : %v", err)
-		return nil, plugin.ServerErr()
+		return nil, up.ServerErr()
 	}
 	return &pb.LoginUserInfoReply{
 		AccessToken:  accessToken,

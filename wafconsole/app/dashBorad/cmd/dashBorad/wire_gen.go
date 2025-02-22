@@ -9,11 +9,12 @@ package main
 import (
 	"github.com/go-kratos/kratos/v2"
 	"github.com/go-kratos/kratos/v2/log"
-	"wafconsole/app/dashBorad/internal/biz"
+	"github.com/go-kratos/kratos/v2/registry"
+	"wafconsole/app/dashBorad/internal/biz/viewLogic"
 	"wafconsole/app/dashBorad/internal/conf"
 	"wafconsole/app/dashBorad/internal/data"
 	"wafconsole/app/dashBorad/internal/server"
-	"wafconsole/app/dashBorad/internal/service"
+	"wafconsole/app/dashBorad/internal/service/view"
 )
 
 import (
@@ -25,17 +26,17 @@ import (
 // wireApp init kratos application.
 //
 //go:generate wire
-func wireApp(confServer *conf.Server, bootstrap *conf.Bootstrap, logger log.Logger) (*kratos.App, func(), error) {
+func wireApp(confServer *conf.Server, bootstrap *conf.Bootstrap, logger log.Logger, registrar registry.Registrar) (*kratos.App, func(), error) {
 	dataData, cleanup, err := data.NewData(confServer, bootstrap)
 	if err != nil {
 		return nil, nil, err
 	}
-	greeterRepo := data.NewGreeterRepo(dataData, logger)
-	greeterUsecase := biz.NewGreeterUsecase(greeterRepo, logger)
-	greeterService := service.NewGreeterService(greeterUsecase)
-	grpcServer := server.NewGRPCServer(confServer, greeterService, logger)
-	httpServer := server.NewHTTPServer(confServer, greeterService, logger)
-	app := newApp(logger, grpcServer, httpServer)
+	dataViewRepo := data.NewDataViewRepo(dataData)
+	dataViewUsecase := viewLogic.NewDataViewUsecase(dataViewRepo)
+	dataViewService := view.NewDataViewService(dataViewUsecase)
+	grpcServer := server.NewGRPCServer(confServer, dataViewService, logger)
+	httpServer := server.NewHTTPServer(confServer, dataViewService, logger)
+	app := newApp(logger, grpcServer, httpServer, registrar)
 	return app, func() {
 		cleanup()
 	}, nil

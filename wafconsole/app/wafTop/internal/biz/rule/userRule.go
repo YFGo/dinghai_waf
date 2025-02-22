@@ -4,6 +4,8 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
+	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/status"
 	"gorm.io/gorm"
 	"log/slog"
 	"strconv"
@@ -14,12 +16,12 @@ import (
 )
 
 const (
-	IPSameMod = "SecRule REMOTE_ADDR \"METHOD IP_MOD\" \"id:1,block,msg:'IP address is not allowed.'\""
-	Same      = "等于"
-	NotSame   = "不等于"
-	Like      = "Like"
-
-	RulePrefix = "rule_"
+	IpMod            = `SecRule REMOTE_ADDR "METHOD IP_MOD" "id:RULE_ID,phase:1,deny"`
+	Same             = "等于"
+	IPSameSeclang    = "@ipMatch"
+	IPNotSameSeclang = "!@ipMatch"
+	RulePrefix       = "rule_"
+	RuleGroupPrefix  = "group_"
 )
 
 type UserRuleRepo interface {
@@ -59,7 +61,8 @@ func (u *UserRuleUsecase) checkRuleGroupIsExist(ctx context.Context, groupId int
 	return true
 }
 
-func (u *UserRuleUsecase) createRuleToEtcd(ctx context.Context, ruleID int64, userRule model.UserRule) error {
+// createRuleToEtcd 新增etcd规则信息
+func (u *UserRuleUsecase) createRuleToEtcd(ctx context.Context, ruleID int64, userRule model.UserRule, oldRuleGroupID int64) error {
 	userRuleInfo := dto.UserRuleInfo{
 		ID:        ruleID,
 		RiskLevel: userRule.RiskLevel,
@@ -71,7 +74,37 @@ func (u *UserRuleUsecase) createRuleToEtcd(ctx context.Context, ruleID int64, us
 		slog.ErrorContext(ctx, "marshal user_rule_info is failed: ", err)
 		return err
 	}
-	ruleGroupKey := "rule_group_" + strconv.Itoa(int(userRule.GroupId))
+	if oldRuleGroupID != 0 && userRule.GroupId != oldRuleGroupID { //规则组信息发生改变
+		oldRUleGroupKey := RuleGroupPrefix + strconv.Itoa(int(oldRuleGroupID))
+		oldRuleGroupInfo, err := u.ruleGroupRepo.GetRuleGroupEtcd(ctx, oldRUleGroupKey) //旧规则组信息
+		if err != nil {
+			slog.ErrorContext(ctx, "get rule_group_info from etcd is failed: ", err)
+			return err
+		}
+		var oldRuleGroupDto dto.RuleGroupEtcd
+		err = json.Unmarshal([]byte(oldRuleGroupInfo), &oldRuleGroupDto)
+		if err != nil {
+			slog.ErrorContext(ctx, "unmarshal rule_group_info is failed: ", err)
+			return err
+		}
+		var newRuleIDList []int64
+		for _, oldRuleID := range oldRuleGroupDto.RuleIdList {
+			if oldRuleID != ruleID {
+				newRuleIDList = append(newRuleIDList, oldRuleID) //去掉此规则id
+			}
+		}
+		oldRuleGroupDto.RuleIdList = newRuleIDList
+		newRuleInfoDto, err := json.Marshal(&oldRuleGroupDto)
+		if err != nil {
+			slog.ErrorContext(ctx, "marshal rule_group_info is failed: ", err)
+			return err
+		}
+		if err = u.ruleGroupRepo.CreateRuleGroupInfoToEtcd(ctx, oldRUleGroupKey, string(newRuleInfoDto)); err != nil { //旧规则组更新
+			slog.ErrorContext(ctx, "create rule_group_info to etcd is failed: ", err)
+			return err
+		}
+	}
+	ruleGroupKey := RuleGroupPrefix + strconv.Itoa(int(userRule.GroupId))
 	//根据规则组id查询 规则组信息
 	ruleGroup, err := u.ruleGroupRepo.GetRuleGroupEtcd(ctx, ruleGroupKey)
 	if err != nil {
@@ -86,7 +119,18 @@ func (u *UserRuleUsecase) createRuleToEtcd(ctx context.Context, ruleID int64, us
 		return err
 	}
 	// 将新的信息追加到此规则组中
-	ruleGroupDto.RuleIdList = append(ruleGroupDto.RuleIdList, ruleID)
+	isFlag := true //是否可以插入数据
+	for _, id := range ruleGroupDto.RuleIdList {
+		if id != ruleID {
+			isFlag = true //可以插入
+		} else {
+			isFlag = false //不可以插入
+			break
+		}
+	}
+	if isFlag {
+		ruleGroupDto.RuleIdList = append(ruleGroupDto.RuleIdList, ruleID)
+	}
 	newRuleInfoDto, err := json.Marshal(&ruleGroupDto)
 	if err != nil {
 		slog.ErrorContext(ctx, "marshal rule_group_info is failed: ", err)
@@ -108,20 +152,25 @@ func (u *UserRuleUsecase) createRuleToEtcd(ctx context.Context, ruleID int64, us
 // CreateUserRule 创建用户自定义规则
 func (u *UserRuleUsecase) CreateUserRule(ctx context.Context, userRule model.UserRule) error {
 	if !u.checkUserRuleIsExist(ctx, 0, userRule.Name) {
-		return errors.New("用户自定义规则已经存在")
+		return status.Error(codes.AlreadyExists, "用户自定义规则已经存在")
 	}
 	if !u.checkRuleGroupIsExist(ctx, userRule.GroupId) {
-		return errors.New("规则组不存在")
+		return status.Error(codes.NotFound, "规则组不存在")
 	}
 	// 处理用户自定义规则
-	seclang := u.disposeUserRule(ctx, userRule.SeclangMod)
-	userRule.ModSecurity = seclang
 	userRuleID, err := u.repo.Create(ctx, userRule)
 	if err != nil {
 		slog.ErrorContext(ctx, "create user_rule is failed: ", err)
 		return err
 	}
-	err = u.createRuleToEtcd(ctx, userRuleID, userRule)
+	seclang := u.disposeUserRule(ctx, userRule.SeclangMod, userRuleID)
+	userRule.ModSecurity = seclang
+	// 去修改存储的seclang 安全规则语言
+	if err := u.repo.Update(ctx, userRuleID, userRule); err != nil {
+		slog.ErrorContext(ctx, "update user_rule is failed: ", err)
+		return err
+	}
+	err = u.createRuleToEtcd(ctx, userRuleID, userRule, 0)
 	if err != nil {
 		slog.ErrorContext(ctx, "create rule_info to etcd is failed: ", err)
 		return err
@@ -137,14 +186,21 @@ func (u *UserRuleUsecase) UpdateUserRule(ctx context.Context, id int64, userRule
 	if !u.checkRuleGroupIsExist(ctx, userRule.GroupId) {
 		return errors.New("规则组不存在")
 	}
-	seclang := u.disposeUserRule(ctx, userRule.SeclangMod)
+	// 1. 先查询旧数据
+	oldUserRule, err := u.repo.Get(ctx, id)
+	if err != nil {
+		slog.ErrorContext(ctx, "get user_rule is failed: ", err)
+		return err
+	}
+
+	seclang := u.disposeUserRule(ctx, userRule.SeclangMod, id)
 	userRule.ModSecurity = seclang
 	if err := u.repo.Update(ctx, id, userRule); err != nil {
 		slog.ErrorContext(ctx, "update user_rule is failed: ", err)
 		return err
 	}
 	// 更新规则信息存入etcd
-	err := u.createRuleToEtcd(ctx, id, userRule)
+	err = u.createRuleToEtcd(ctx, id, userRule, oldUserRule.GroupId)
 	if err != nil {
 		slog.ErrorContext(ctx, "create rule_info to etcd is failed: ", err)
 		return err
@@ -166,7 +222,7 @@ func (u *UserRuleUsecase) DeleteUserRule(ctx context.Context, ids []int64) error
 			slog.ErrorContext(ctx, "get rule_group_id is failed: ", err)
 			return err
 		}
-		ruleGroupKey := "rule_group_" + strconv.Itoa(int(ruleGroupInfo.GroupId))
+		ruleGroupKey := RuleGroupPrefix + strconv.Itoa(int(ruleGroupInfo.GroupId))
 		// 获取规则组信息
 		ruleGroupInfoEtcd, err := u.ruleGroupRepo.GetRuleGroupEtcd(ctx, ruleGroupKey)
 		if err != nil {
@@ -207,7 +263,7 @@ func (u *UserRuleUsecase) DeleteUserRule(ctx context.Context, ids []int64) error
 	return nil
 }
 
-func (u *UserRuleUsecase) disposeUserRule(ctx context.Context, userRule model.SeclangMod) string {
+func (u *UserRuleUsecase) disposeUserRule(ctx context.Context, userRule model.SeclangMod, ruleID int64) string {
 	var (
 		res    string
 		method string
@@ -215,12 +271,13 @@ func (u *UserRuleUsecase) disposeUserRule(ctx context.Context, userRule model.Se
 	switch userRule.MatchGoal {
 	case "IP":
 		if userRule.MatchAction == Same {
-			method = "@eq"
-		} else if userRule.MatchAction == NotSame {
-			method = "!@eq"
+			method = IPSameSeclang
+		} else {
+			method = IPNotSameSeclang
 		}
-		res = strings.ReplaceAll(IPSameMod, "METHOD", method)
+		res = strings.ReplaceAll(IpMod, "METHOD", method)
 		res = strings.ReplaceAll(res, "IP_MOD", userRule.MatchContent)
 	}
+	res = strings.ReplaceAll(res, "RULE_ID", strconv.Itoa(int(ruleID)))
 	return res
 }

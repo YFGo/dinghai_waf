@@ -9,12 +9,15 @@ package main
 import (
 	"github.com/go-kratos/kratos/v2"
 	"github.com/go-kratos/kratos/v2/log"
+	"github.com/go-kratos/kratos/v2/registry"
+	"wafconsole/app/wafTop/internal/biz/allow"
 	"wafconsole/app/wafTop/internal/biz/rule"
 	"wafconsole/app/wafTop/internal/biz/site"
 	"wafconsole/app/wafTop/internal/biz/strategy"
 	"wafconsole/app/wafTop/internal/conf"
 	"wafconsole/app/wafTop/internal/data"
 	"wafconsole/app/wafTop/internal/server"
+	service4 "wafconsole/app/wafTop/internal/service/allow"
 	service2 "wafconsole/app/wafTop/internal/service/rule"
 	"wafconsole/app/wafTop/internal/service/site"
 	service3 "wafconsole/app/wafTop/internal/service/strategy"
@@ -29,7 +32,7 @@ import (
 // wireApp init kratos application.
 //
 //go:generate wire
-func wireApp(confServer *conf.Server, bootstrap *conf.Bootstrap, logger log.Logger) (*kratos.App, func(), error) {
+func wireApp(confServer *conf.Server, bootstrap *conf.Bootstrap, logger log.Logger, registrar registry.Registrar) (*kratos.App, func(), error) {
 	dataData, cleanup, err := data.NewData(confServer, bootstrap)
 	if err != nil {
 		return nil, nil, err
@@ -38,7 +41,9 @@ func wireApp(confServer *conf.Server, bootstrap *conf.Bootstrap, logger log.Logg
 	wafAppUsecase := siteBiz.NewGreeterUsecase(wafAppRepo, logger)
 	wafAppService := service.NewWafAppService(wafAppUsecase)
 	serverRepo := data.NewServerRepo(dataData)
-	serverUsecase := siteBiz.NewServerUsecase(serverRepo, wafAppRepo)
+	listAllowRepo := data.NewAllowListRepo(dataData)
+	wafStrategyRepo := data.NewWafStrategyRepo(dataData)
+	serverUsecase := siteBiz.NewServerUsecase(serverRepo, wafAppRepo, listAllowRepo, wafStrategyRepo)
 	serverService := service.NewServerService(serverUsecase)
 	buildRuleRepo := data.NewBuildRuleRepo(dataData)
 	buildRuleUsecase := ruleBiz.NewBuildRuleUsecase(buildRuleRepo)
@@ -49,12 +54,13 @@ func wireApp(confServer *conf.Server, bootstrap *conf.Bootstrap, logger log.Logg
 	ruleGroupService := service2.NewRuleGroupService(ruleGroupUsecase)
 	userRuleUsecase := ruleBiz.NewUserRuleUsecase(userRuleRepo, ruleGroupRepo)
 	userRuleService := service2.NewUserRuleService(userRuleUsecase)
-	wafStrategyRepo := data.NewWafStrategyRepo(dataData)
 	wafStrategyUsecase := strategyBiz.NewWafStrategyUsecase(wafStrategyRepo, ruleGroupRepo, buildRuleRepo, userRuleRepo)
 	strategyService := service3.NewStrategyService(wafStrategyUsecase)
-	grpcServer := server.NewGRPCServer(confServer, wafAppService, serverService, buildRuleService, ruleGroupService, userRuleService, strategyService, logger)
-	httpServer := server.NewHTTPServer(confServer, wafAppService, serverService, buildRuleService, ruleGroupService, userRuleService, strategyService, logger)
-	app := newApp(logger, grpcServer, httpServer)
+	listAllowUsecase := allow.NewListAllowUsecase(listAllowRepo)
+	allowListService := service4.NewAllowListService(listAllowUsecase)
+	grpcServer := server.NewGRPCServer(confServer, wafAppService, serverService, buildRuleService, ruleGroupService, userRuleService, strategyService, allowListService, logger)
+	httpServer := server.NewHTTPServer(confServer, wafAppService, serverService, buildRuleService, ruleGroupService, userRuleService, strategyService, allowListService, logger)
+	app := newApp(logger, grpcServer, httpServer, registrar)
 	return app, func() {
 		cleanup()
 	}, nil

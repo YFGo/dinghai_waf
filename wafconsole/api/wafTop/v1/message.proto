@@ -13,14 +13,14 @@ message SeclangMod {
 			(buf.validate.field).cel = {
 				id: "match_goal",
 				message: "请选择正确的匹配目标",
-				expression: "this in ['IP' , 'COOKIE' , 'HEADER']"
+				expression: "this in ['IP']"
 			}
 	];
 	string match_action = 2 [
 			(buf.validate.field).cel = {
 				id: "match_action",
 				message: "请选择正确的匹配方式",
-				expression: "this in ['等于' , '模糊匹配' , '不等于']"
+				expression: "this in ['等于' , '不等于']"
 			}
 	];
 	string match_content = 3 [
@@ -137,9 +137,9 @@ message CreateServerRequest {
 			expression: "this.isIp()"
 		}
 	];
-	string host = 3 [
+	string uri_key = 3 [
 			(buf.validate.field).cel = {
-				id: "base_url",
+				id: "uri_key",
 				message: "基础地址格式错误",
 				expression: "size(this) > 0"
 			}
@@ -151,13 +151,9 @@ message CreateServerRequest {
 			expression: "this >= 1 && this <= 65535"
 		}
 	];
-	repeated int64 strategy_ids = 5 [
-			(buf.validate.field).cel = {
-				id: "strategy_ids",
-				message: "请选择服务器使用的策略",
-				expression: "size(this)  > 0"
-			}
-	] ;
+	repeated int64 strategy_ids = 5;
+	repeated int64 allow_ids = 6;
+
 }
 message CreateServerReply {}
 
@@ -176,34 +172,30 @@ message UpdateServerRequest {
 			expression: "this.isIp()"
 		}
 	];
-	string host = 3 [
+	string uri_key = 3 [
 		(buf.validate.field).cel = {
-			id: "base_url",
+			id: "uri_key",
 			message: "基础地址格式错误",
 			expression: "size(this) > 0"
 		}
 	];
-	int64 port = 4 [
+	string old_uri_key = 4;
+	int64 port = 5 [
 		(buf.validate.field).cel = {
 			id: "port",
 			message: "端口选择在1~65535之间",
 			expression: "this >= 1 && this <= 65535"
 		}
 	];
-	int64 id = 5 [
+	int64 id = 6 [
 			(buf.validate.field).cel = {
 				id: "id",
 				message: "服务器不存在",
 				expression: "this > 0"
 			}
 	];
-	repeated int64 strategy_ids = 6 [
-		(buf.validate.field).cel = {
-			id: "strategy_ids",
-			message: "请选择服务器使用的策略",
-			expression: "size(this)  > 0"
-		}
-	] ;
+	repeated int64 strategy_ids = 7;
+	repeated int64 allow_ids = 8;
 }
 message UpdateServerReply {}
 
@@ -237,10 +229,11 @@ message GetServerRequest {
 message GetServerReply {
 	string name = 1;
 	string ip = 2;
-	string host = 3;
+	string uri_key = 3;
 	int64 port = 4;
 	repeated int64 strategies_id = 5;
-	WafAppInfo waf_apps = 6;
+	repeated int64 allow_ids = 6;
+	WafAppInfo waf_apps = 7;
 }
 
 // 查询服务器列表
@@ -264,7 +257,7 @@ message ListServerRequest {
 message ServerInfo {
 	string name = 1;
 	string ip = 2;
-	string host = 3;
+	string uri_key = 3;
 	int64 port = 4;
 	int64  id = 5;
 }
@@ -626,8 +619,8 @@ message CreateRuleGroupRequest {
 	int64 is_buildin = 3 [
 			(buf.validate.field).cel = {
 				id: "is_buildin",
-				message: "请选择是否是默认规则",
-				expression: "this in [1 , 2]"
+				message: "禁止添加内置规则组",
+				expression: "this in [2]"
 			}
 	];
 }
@@ -658,24 +651,30 @@ message UpdateRuleGroupRequest {
 	int64 is_buildin = 4 [
 		(buf.validate.field).cel = {
 			id: "is_buildin",
-			message: "请选择是否是默认规则",
-			expression: "this in [1 , 2]"
+			message: "禁止添加内置规则组",
+			expression: "this in [2]"
 		}
 	];
 }
 message UpdateRuleGroupReply {}
 
-message DeleteRuleGroupRequest {
-	repeated int64 ids = 1[
+message DeleteRuleGroupInfo {
+	int64 id = 1;
+	int64 is_buildin = 2 [
 			(buf.validate.field).cel = {
-				id: "ids",
-				message: "请选择规则组",
+				id: "is_buildin"
+				message: "内置规则禁止删除",
+				expression: "this == 2"
+			}
+	];
+}
+
+message DeleteRuleGroupRequest {
+	repeated DeleteRuleGroupInfo delete_rule_group_infos = 1 [
+			(buf.validate.field).cel = {
+				id: "delete_rule_group_infos",
+				message: "选择需要删除的对象",
 				expression: "size(this) > 0"
-			},
-			(buf.validate.field).repeated.items.cel = {
-				id: "ids",
-				message: "规则组选择错误",
-				expression: "this > 0"
 			}
 	];
 }
@@ -739,3 +738,125 @@ message ListRuleInfoByGroup {
 	SeclangMod seclang_mod = 6;
 }
 // ######## 规则组 ##########
+
+// ######### 白名单 #########
+message CreateAllowListRequest {
+	string name = 1[
+			(buf.validate.field).cel = {
+				id: "name",
+				message: "昵称长度在1~15字符之间",
+				expression: "size(this) >= 1 && size(this) <= 15"
+			}
+	];
+	string description = 2[
+		(buf.validate.field).cel = {
+			id: "description",
+			message: "描述禁止为空",
+			expression: "size(this) > 0"
+		}
+	];
+	string key = 3[
+			(buf.validate.field).cel = {
+				id: "key",
+				message: "匹配方式错误",
+				expression: "this in ['URI' , 'IP']"
+			}
+	];
+	string value = 4;
+}
+message CreateAllowListReply {}
+
+message UpdateAllowListRequest {
+	string name = 1[
+		(buf.validate.field).cel = {
+			id: "name",
+			message: "昵称长度在1~15字符之间",
+			expression: "size(this) >= 1 && size(this) <= 15"
+		}
+	];
+	string description = 2[
+		(buf.validate.field).cel = {
+			id: "description",
+			message: "描述不能为空",
+			expression: "size(this) > 0"
+		}
+	];
+	string key = 3[
+		(buf.validate.field).cel = {
+			id: "key",
+			message: "匹配方式错误",
+			expression: "this in ['URI' , 'IP']"
+		}
+	];
+	string value = 4;
+	int64 id = 5 [
+			(buf.validate.field).cel = {
+				id: "id",
+				message: "白名单不存在",
+				expression: "this > 0"
+			}
+	];
+}
+message UpdateAllowListReply {}
+
+message DeleteAllowListRequest {
+	repeated int64 ids = 1[
+			(buf.validate.field).cel = {
+				id: "ids",
+				message: "白名单不能为空",
+				expression: "size(this) > 0"
+			}
+	];
+}
+message DeleteAllowListReply {}
+
+message GetAllowListRequest {
+	int64 id = 1[
+			(buf.validate.field).cel = {
+				id: "id",
+				message: "白名单不存在",
+				expression: "this > 0"
+			}
+	];
+}
+message GetAllowListReply {
+	string name = 1;
+	string description = 2;
+	string key = 3;
+	string value = 4;
+	string created_at =5;
+	string updated_at = 6;
+}
+
+message ListAllowListRequest {
+	string name = 1;
+	int64 page_now = 2 [
+			(buf.validate.field).cel = {
+				id: "page_now",
+				message: "分页参数错误",
+				expression: "this > 0"
+			}
+	];
+	int64 page_size = 3 [
+			(buf.validate.field).cel = {
+				id: "page_size",
+				message: "分页参数错误",
+				expression: "this > 0"
+			}
+	];
+}
+
+message AllowListInfo {
+	int64 id = 1;
+	string name = 2;
+	string key = 3;
+	string value = 4;
+	string created_at =5;
+	string updated_at = 6;
+}
+
+message ListAllowListReply {
+	int64 total = 1;
+	repeated AllowListInfo list_allow_list = 2;
+}
+// ######### 白名单 #########

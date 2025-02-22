@@ -854,7 +854,7 @@ message SourceCodeInfo {
     // field.
     //
     // Only the comment content is provided; comment markers (e.g. //) are
-    // stripped out.  For block comments, leading whitespace and an asterisk
+    // stripped out.  For block comments, leading allowspace and an asterisk
     // will be stripped from the beginning of each line other than the first.
     // Newlines are included in the output.
     //

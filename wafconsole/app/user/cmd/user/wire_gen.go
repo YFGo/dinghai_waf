@@ -9,6 +9,7 @@ package main
 import (
 	"github.com/go-kratos/kratos/v2"
 	"github.com/go-kratos/kratos/v2/log"
+	"github.com/go-kratos/kratos/v2/registry"
 	"wafconsole/app/user/internal/biz"
 	"wafconsole/app/user/internal/conf"
 	"wafconsole/app/user/internal/data"
@@ -25,7 +26,7 @@ import (
 // wireApp init kratos application.
 //
 //go:generate wire
-func wireApp(confServer *conf.Server, bootstrap *conf.Bootstrap, logger log.Logger) (*kratos.App, func(), error) {
+func wireApp(confServer *conf.Server, bootstrap *conf.Bootstrap, logger log.Logger, registrar registry.Registrar) (*kratos.App, func(), error) {
 	dataData, cleanup, err := data.NewData(confServer, bootstrap)
 	if err != nil {
 		return nil, nil, err
@@ -38,7 +39,7 @@ func wireApp(confServer *conf.Server, bootstrap *conf.Bootstrap, logger log.Logg
 	commonService := service.NewCommonService(wafUserCommonUsecase)
 	grpcServer := server.NewGRPCServer(confServer, wafUserService, commonService, logger)
 	httpServer := server.NewHTTPServer(confServer, wafUserService, commonService, logger)
-	app := newApp(logger, grpcServer, httpServer)
+	app := newApp(logger, grpcServer, httpServer, registrar)
 	return app, func() {
 		cleanup()
 	}, nil

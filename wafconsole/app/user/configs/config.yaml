@@ -1,21 +1,21 @@
 server:
   http:
-    addr: 0.0.0.0:8888
+    addr: 0.0.0.0:8002
     timeout: 1s
   grpc:
     addr: 0.0.0.0:9002
     timeout: 1s
 data:
   mysql:
-    host: 127.0.0.1
-    port: 3306
+    host: 192.168.10.4
+    port: 3310
     user: root
-    password: 123456
+    password: '123456'
     db: DingHaiWAF
     max_idle: 10
     max_open: 100
   redis:
-    addr: 127.0.0.1:6379
-    read_timeout: 0.2s
-    write_timeout: 0.2s
+    addr: 192.168.10.4:6379
+    db: 0
+    password: 123456
 

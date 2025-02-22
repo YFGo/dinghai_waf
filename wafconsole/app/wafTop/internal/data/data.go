@@ -1,6 +1,7 @@
 package data
 
 import (
+	"context"
 	"fmt"
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/google/wire"
@@ -14,7 +15,7 @@ import (
 )
 
 // ProviderSet is data providers.
-var ProviderSet = wire.NewSet(NewData, NewAppWafRepo, NewServerRepo, NewBuildRuleRepo, NewRuleGroupRepo, NewUserRuleRepo, NewWafStrategyRepo)
+var ProviderSet = wire.NewSet(NewData, NewAppWafRepo, NewServerRepo, NewBuildRuleRepo, NewRuleGroupRepo, NewUserRuleRepo, NewWafStrategyRepo, NewAllowListRepo)
 
 // Data .
 type Data struct {
@@ -25,14 +26,15 @@ type Data struct {
 // NewData .
 func NewData(s *conf.Server, bootstrap *conf.Bootstrap) (*Data, func(), error) {
 	c := bootstrap.Data
-	mysql, err := newMysql(c.Mysql)
+	appCtx := context.Background()
+	dbMysql, err := newMysql(c.Mysql, appCtx)
 	if err != nil {
 		return nil, nil, err
 	}
-	etcd := newETCD(c.Etcd)
+	etcd := newETCD(c.Etcd, appCtx)
 	cleanup := func() {
-		if mysql != nil {
-			if db, err := mysql.DB(); err == nil && db != nil {
+		if dbMysql != nil {
+			if db, err := dbMysql.DB(); err == nil && db != nil {
 				db.Close()
 			}
 		}
@@ -40,13 +42,14 @@ func NewData(s *conf.Server, bootstrap *conf.Bootstrap) (*Data, func(), error) {
 			etcd.Close()
 		}
 	}
+
 	return &Data{
-		db:   mysql,
+		db:   dbMysql,
 		etcd: etcd,
 	}, cleanup, nil
 }
 
-func newMysql(cfg *conf.Data_Mysql) (*gorm.DB, error) {
+func newMysql(cfg *conf.Data_Mysql, ctx context.Context) (*gorm.DB, error) {
 	dsn := fmt.Sprintf("%s:%s@tcp(%s:%d)/%s?parseTime=true&loc=Local", cfg.User, cfg.Password, cfg.Host, cfg.Port, cfg.Db)
 	mysqlConfig := mysql.Config{
 		DSN:                       dsn,   // DSN data source name
@@ -68,15 +71,16 @@ func newMysql(cfg *conf.Data_Mysql) (*gorm.DB, error) {
 	return db, nil
 }
 
-func newETCD(cfg *conf.Data_Etcd) *clientv3.Client {
+func newETCD(cfg *conf.Data_Etcd, ctx context.Context) *clientv3.Client {
 	etcdClient, err := clientv3.New(clientv3.Config{
 		Endpoints:   []string{cfg.Host},
-		DialTimeout: 5 * time.Second,
+		DialTimeout: 2 * time.Second,
 	})
 	if err != nil {
 		slog.Error("etcd client failed: ", err)
 		panic(err)
 	}
-	hooks.InitEtcd(etcdClient) // 初始化键值对
+	// 设置超时时间
+	hooks.InitEtcd(etcdClient, ctx) // 初始化键值对
 	return etcdClient
 }

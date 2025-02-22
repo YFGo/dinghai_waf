@@ -20,7 +20,7 @@ var (
 )
 
 func init() {
-	flag.StringVar(&flagconf, "conf", "../../configs", "config path, eg: -conf config.yaml")
+	flag.StringVar(&flagconf, "conf", "../../configs", "config path, eg: -conf config_dev.yaml")
 }
 
 func wireApp(confServer *conf.Server, bootstrap *conf.Bootstrap) (func(), *attack_log.AttackLogUsercase, error) {

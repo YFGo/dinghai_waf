@@ -7,7 +7,7 @@ server:
     timeout: 1s
 data:
   mysql:
-    host: 127.0.0.1
+    host: 192.168.10.4
     port: 3306
     user: root
     password: 123456
@@ -15,6 +15,10 @@ data:
     max_idle: 10
     max_open: 100
   redis:
-    addr: 127.0.0.1:6379
+    addr: 192.168.10.4:6379
     read_timeout: 0.2s
     write_timeout: 0.2s
+  clickhouse:
+    dsn: tcp://192.168.10.4:9000/waf?username=default&dial_timeout=10s&read_timeout=20s
+  ip2:
+    path: wafconsole/app/dashBorad/internal/data/model/ip2region.xdb

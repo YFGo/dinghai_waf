@@ -2,9 +2,11 @@ package service
 
 import (
 	"context"
+	"google.golang.org/grpc/codes"
 	"log/slog"
 	siteBiz "wafconsole/app/wafTop/internal/biz/site"
 	"wafconsole/app/wafTop/internal/data/model"
+	up "wafconsole/utils/plugin"
 
 	pb "wafconsole/api/wafTop/v1"
 )
@@ -24,15 +26,19 @@ func NewServerService(uc *siteBiz.ServerUsecase) *ServerService {
 func (s *ServerService) CreateServer(ctx context.Context, req *pb.CreateServerRequest) (*pb.CreateServerReply, error) {
 	serverInfo := model.ServerWaf{
 		Name:         req.Name,
-		Host:         req.Host,
+		UriKey:       req.UriKey,
 		IP:           req.Ip,
 		Port:         int(req.Port),
 		StrategiesID: req.StrategyIds,
+		AllowListID:  req.AllowIds,
 	}
 	err := s.uc.CreateServerSite(ctx, serverInfo)
 	if err != nil {
+		if up.StatusErr(err, codes.AlreadyExists) {
+			return nil, up.ServerExistErr()
+		}
 		slog.ErrorContext(ctx, "create server_waf service error: ", err)
-		return nil, err
+		return nil, up.ServerErr()
 	}
 	return &pb.CreateServerReply{}, nil
 }
@@ -41,15 +47,22 @@ func (s *ServerService) CreateServer(ctx context.Context, req *pb.CreateServerRe
 func (s *ServerService) UpdateServer(ctx context.Context, req *pb.UpdateServerRequest) (*pb.UpdateServerReply, error) {
 	serverInfo := model.ServerWaf{
 		Name:         req.Name,
-		Host:         req.Host,
+		UriKey:       req.UriKey,
 		IP:           req.Ip,
 		Port:         int(req.Port),
 		StrategiesID: req.StrategyIds,
+		AllowListID:  req.AllowIds,
 	}
-	err := s.uc.UpdateServerSite(ctx, req.Id, serverInfo)
+	err := s.uc.UpdateServerSite(ctx, req.Id, serverInfo, req.OldUriKey)
 	if err != nil {
+		if up.StatusErr(err, codes.AlreadyExists) {
+			return nil, up.ServerExistErr()
+		}
+		if up.StatusErr(err, codes.NotFound) {
+			return nil, up.ServerChooseErr(err)
+		}
 		slog.ErrorContext(ctx, "update server_waf service error: ", err)
-		return nil, err
+		return nil, up.ServerErr()
 	}
 	return &pb.UpdateServerReply{}, nil
 }
@@ -74,9 +87,10 @@ func (s *ServerService) GetServer(ctx context.Context, req *pb.GetServerRequest)
 	serverReply := &pb.GetServerReply{
 		Name:         serverInfo.Name,
 		Ip:           serverInfo.IP,
-		Host:         serverInfo.Host,
+		UriKey:       serverInfo.UriKey,
 		Port:         int64(serverInfo.Port),
 		StrategiesId: serverInfo.StrategiesID,
+		AllowIds:     serverInfo.AllowListID,
 	}
 	if appInfo != nil {
 		wafAppInfo := &pb.WafAppInfo{
@@ -101,11 +115,11 @@ func (s *ServerService) ListServer(ctx context.Context, req *pb.ListServerReques
 	var serverInfoList []*pb.ServerInfo
 	for _, server := range serverList {
 		serverInfo := &pb.ServerInfo{
-			Id:   int64(server.ID),
-			Name: server.Name,
-			Ip:   server.IP,
-			Host: server.Host,
-			Port: int64(server.Port),
+			Id:     int64(server.ID),
+			Name:   server.Name,
+			Ip:     server.IP,
+			UriKey: server.UriKey,
+			Port:   int64(server.Port),
 		}
 		serverInfoList = append(serverInfoList, serverInfo)
 	}
