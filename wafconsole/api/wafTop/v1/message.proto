@@ -137,9 +137,9 @@ message CreateServerRequest {
 			expression: "this.isIp()"
 		}
 	];
-	string host = 3 [
+	string uri_key = 3 [
 			(buf.validate.field).cel = {
-				id: "base_url",
+				id: "uri_key",
 				message: "基础地址格式错误",
 				expression: "size(this) > 0"
 			}
@@ -172,14 +172,14 @@ message UpdateServerRequest {
 			expression: "this.isIp()"
 		}
 	];
-	string host = 3 [
+	string uri_key = 3 [
 		(buf.validate.field).cel = {
-			id: "base_url",
+			id: "uri_key",
 			message: "基础地址格式错误",
 			expression: "size(this) > 0"
 		}
 	];
-	string old_host = 4;
+	string old_uri_key = 4;
 	int64 port = 5 [
 		(buf.validate.field).cel = {
 			id: "port",
@@ -229,7 +229,7 @@ message GetServerRequest {
 message GetServerReply {
 	string name = 1;
 	string ip = 2;
-	string host = 3;
+	string uri_key = 3;
 	int64 port = 4;
 	repeated int64 strategies_id = 5;
 	repeated int64 allow_ids = 6;
@@ -257,7 +257,7 @@ message ListServerRequest {
 message ServerInfo {
 	string name = 1;
 	string ip = 2;
-	string host = 3;
+	string uri_key = 3;
 	int64 port = 4;
 	int64  id = 5;
 }

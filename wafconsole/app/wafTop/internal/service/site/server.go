@@ -26,7 +26,7 @@ func NewServerService(uc *siteBiz.ServerUsecase) *ServerService {
 func (s *ServerService) CreateServer(ctx context.Context, req *pb.CreateServerRequest) (*pb.CreateServerReply, error) {
 	serverInfo := model.ServerWaf{
 		Name:         req.Name,
-		Host:         req.Host,
+		Host:         req.UriKey,
 		IP:           req.Ip,
 		Port:         int(req.Port),
 		StrategiesID: req.StrategyIds,
@@ -47,13 +47,13 @@ func (s *ServerService) CreateServer(ctx context.Context, req *pb.CreateServerRe
 func (s *ServerService) UpdateServer(ctx context.Context, req *pb.UpdateServerRequest) (*pb.UpdateServerReply, error) {
 	serverInfo := model.ServerWaf{
 		Name:         req.Name,
-		Host:         req.Host,
+		Host:         req.UriKey,
 		IP:           req.Ip,
 		Port:         int(req.Port),
 		StrategiesID: req.StrategyIds,
 		AllowListID:  req.AllowIds,
 	}
-	err := s.uc.UpdateServerSite(ctx, req.Id, serverInfo, req.OldHost)
+	err := s.uc.UpdateServerSite(ctx, req.Id, serverInfo, req.OldUriKey)
 	if err != nil {
 		if up.StatusErr(err, codes.AlreadyExists) {
 			return nil, up.ServerExistErr()
@@ -87,7 +87,7 @@ func (s *ServerService) GetServer(ctx context.Context, req *pb.GetServerRequest)
 	serverReply := &pb.GetServerReply{
 		Name:         serverInfo.Name,
 		Ip:           serverInfo.IP,
-		Host:         serverInfo.Host,
+		UriKey:       serverInfo.Host,
 		Port:         int64(serverInfo.Port),
 		StrategiesId: serverInfo.StrategiesID,
 		AllowIds:     serverInfo.AllowListID,
@@ -115,11 +115,11 @@ func (s *ServerService) ListServer(ctx context.Context, req *pb.ListServerReques
 	var serverInfoList []*pb.ServerInfo
 	for _, server := range serverList {
 		serverInfo := &pb.ServerInfo{
-			Id:   int64(server.ID),
-			Name: server.Name,
-			Ip:   server.IP,
-			Host: server.Host,
-			Port: int64(server.Port),
+			Id:     int64(server.ID),
+			Name:   server.Name,
+			Ip:     server.IP,
+			UriKey: server.Host,
+			Port:   int64(server.Port),
 		}
 		serverInfoList = append(serverInfoList, serverInfo)
 	}
