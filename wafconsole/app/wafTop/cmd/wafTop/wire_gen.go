@@ -33,7 +33,7 @@ import (
 //
 //go:generate wire
 func wireApp(confServer *conf.Server, bootstrap *conf.Bootstrap, logger log.Logger, registrar registry.Registrar) (*kratos.App, func(), error) {
-	dataData, cleanup, err := data.NewData(confServer, bootstrap)
+	dataData, cleanup, err := data.NewData(confServer, bootstrap, logger)
 	if err != nil {
 		return nil, nil, err
 	}
@@ -46,7 +46,7 @@ func wireApp(confServer *conf.Server, bootstrap *conf.Bootstrap, logger log.Logg
 	serverUsecase := siteBiz.NewServerUsecase(serverRepo, wafAppRepo, listAllowRepo, wafStrategyRepo)
 	serverService := service.NewServerService(serverUsecase)
 	buildRuleRepo := data.NewBuildRuleRepo(dataData)
-	buildRuleUsecase := ruleBiz.NewBuildRuleUsecase(buildRuleRepo)
+	buildRuleUsecase := ruleBiz.NewBuildRuleUsecase(buildRuleRepo, logger)
 	buildRuleService := service2.NewBuildRuleService(buildRuleUsecase)
 	ruleGroupRepo := data.NewRuleGroupRepo(dataData)
 	userRuleRepo := data.NewUserRuleRepo(dataData)

@@ -2,6 +2,7 @@ package ruleBiz
 
 import (
 	"context"
+	"github.com/go-kratos/kratos/v2/log"
 	"gorm.io/gorm"
 	"log/slog"
 	"wafconsole/app/wafTop/internal/biz/iface"
@@ -15,11 +16,13 @@ type BuildRuleRepo interface {
 
 type BuildRuleUsecase struct {
 	repo BuildRuleRepo
+	log  *log.Helper
 }
 
-func NewBuildRuleUsecase(repo BuildRuleRepo) *BuildRuleUsecase {
+func NewBuildRuleUsecase(repo BuildRuleRepo, logger log.Logger) *BuildRuleUsecase {
 	return &BuildRuleUsecase{
 		repo: repo,
+		log:  log.NewHelper(logger),
 	}
 }
 
@@ -43,7 +46,7 @@ func (b *BuildRuleUsecase) ListBuildinRules(ctx context.Context, name string, li
 	//获取总数量
 	total, err := b.repo.Count(ctx, whereOpts...)
 	if err != nil {
-		slog.ErrorContext(ctx, "count buildin_rule failed: ", err)
+		b.log.WithContext(ctx).Error(err)
 		return nil, total, err
 	}
 	//获取内置规则

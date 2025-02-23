@@ -3,15 +3,19 @@ package data
 import (
 	"context"
 	"fmt"
+	"log/slog"
+	"time"
+
+	"github.com/go-kratos/kratos/v2/log"
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/google/wire"
 	clientv3 "go.etcd.io/etcd/client/v3"
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
-	"log/slog"
-	"time"
+
 	"wafconsole/app/wafTop/internal/conf"
 	"wafconsole/app/wafTop/internal/hooks"
+	"wafconsole/utils/migrate"
 )
 
 // ProviderSet is data providers.
@@ -21,17 +25,23 @@ var ProviderSet = wire.NewSet(NewData, NewAppWafRepo, NewServerRepo, NewBuildRul
 type Data struct {
 	db   *gorm.DB
 	etcd *clientv3.Client
+	log  *log.Helper
 }
 
 // NewData .
-func NewData(s *conf.Server, bootstrap *conf.Bootstrap) (*Data, func(), error) {
+func NewData(s *conf.Server, bootstrap *conf.Bootstrap, logger log.Logger) (*Data, func(),
+	error) {
 	c := bootstrap.Data
-	appCtx := context.Background()
-	dbMysql, err := newMysql(c.Mysql, appCtx)
+	logKratos := log.NewHelper(log.With(logger, "module", "waf_top/data"))
+	dbMysql, err := newMysql(c.Mysql)
 	if err != nil {
 		return nil, nil, err
 	}
-	etcd := newETCD(c.Etcd, appCtx)
+	etcd := newETCD(c.Etcd)
+
+	// 执行全量迁移
+	newMigrate(c)
+
 	cleanup := func() {
 		if dbMysql != nil {
 			if db, err := dbMysql.DB(); err == nil && db != nil {
@@ -46,10 +56,11 @@ func NewData(s *conf.Server, bootstrap *conf.Bootstrap) (*Data, func(), error) {
 	return &Data{
 		db:   dbMysql,
 		etcd: etcd,
+		log:  logKratos,
 	}, cleanup, nil
 }
 
-func newMysql(cfg *conf.Data_Mysql, ctx context.Context) (*gorm.DB, error) {
+func newMysql(cfg *conf.Data_Mysql) (*gorm.DB, error) {
 	dsn := fmt.Sprintf("%s:%s@tcp(%s:%d)/%s?parseTime=true&loc=Local", cfg.User, cfg.Password, cfg.Host, cfg.Port, cfg.Db)
 	mysqlConfig := mysql.Config{
 		DSN:                       dsn,   // DSN data source name
@@ -58,18 +69,18 @@ func newMysql(cfg *conf.Data_Mysql, ctx context.Context) (*gorm.DB, error) {
 	}
 	db, err := gorm.Open(mysql.New(mysqlConfig), &gorm.Config{})
 	if err != nil {
-		return nil, err
+		panic(err)
 	}
 	sqlDB, err := db.DB()
 	if err != nil {
-		return nil, err
+		panic(err)
 	}
 	sqlDB.SetMaxIdleConns(int(cfg.MaxIdle))
 	sqlDB.SetMaxOpenConns(int(cfg.MaxOpen))
 	return db, nil
 }
 
-func newETCD(cfg *conf.Data_Etcd, ctx context.Context) *clientv3.Client {
+func newETCD(cfg *conf.Data_Etcd) *clientv3.Client {
 	etcdClient, err := clientv3.New(clientv3.Config{
 		Endpoints:   []string{cfg.Host},
 		DialTimeout: 2 * time.Second,
@@ -79,6 +90,35 @@ func newETCD(cfg *conf.Data_Etcd, ctx context.Context) *clientv3.Client {
 		panic(err)
 	}
 	// 设置超时时间
-	hooks.InitEtcd(etcdClient, ctx) // 初始化键值对
+	hooks.InitEtcd(etcdClient, context.Background()) // 初始化键值对
 	return etcdClient
+}
+
+func newMigrate(cfg *conf.Data) {
+	cfgMigrate := &migrate.Config{
+		MySqlDSN:      "user:password@tcp(localhost:3306)/dbname?parseTime=true",
+		ClickHouseDSN: "tcp://localhost:9000?database=default&username=user&password=pass",
+		RedisAddr:     "localhost:6379",
+		RedisPassword: "",
+		RedisDB:       0,
+		MigrationDir:  "./database/migrations",
+		LockTimeout:   30 * time.Second,
+	}
+
+	migrator, err := migrate.NewDatabaseMigrator(cfgMigrate)
+	if err != nil {
+		slog.Error("migrate failed: ", err)
+		panic(err)
+	}
+
+	defer func() {
+		if err = migrator.Close(); err != nil {
+			slog.Error("migrate close failed: ", err)
+		}
+	}()
+	ctx := context.Background()
+	if err = migrator.Run(ctx); err != nil {
+		slog.Error("migrate run failed: ", err)
+		panic(err)
+	}
 }
