@@ -30,8 +30,9 @@ type Config struct {
 	RedisAddr     string
 	RedisPassword string
 	RedisDB       int
-	MigrationDir  string
+	MigrationDir  string // 指向 migrations 父目录（包含 mysql 和 clickhouse 子目录）
 	LockTimeout   time.Duration
+	TargetVersion uint
 }
 
 // DatabaseMigrator 数据库迁移器
@@ -56,15 +57,15 @@ func NewDatabaseMigrator(cfg *Config) (*DatabaseMigrator, error) {
 		return nil, fmt.Errorf("MySQL ping failed: %w", err)
 	}
 
-	// 初始化ClickHouse连接（修正错误信息）
+	// 初始化ClickHouse连接
 	clickhouseDB, err := sql.Open("clickhouse", cfg.ClickHouseDSN)
 	if err != nil {
-		return nil, fmt.Errorf("failed to connect to ClickHouse: %w", err) // 修正错误信息
+		return nil, fmt.Errorf("failed to connect to ClickHouse: %w", err)
 	}
 
-	// 验证ClickHouse连接（修正错误信息）
+	// 验证ClickHouse连接
 	if err = clickhouseDB.Ping(); err != nil {
-		return nil, fmt.Errorf("ClickHouse ping failed: %w", err) // 修正错误信息
+		return nil, fmt.Errorf("ClickHouse ping failed: %w", err)
 	}
 
 	// 初始化Redis客户端
@@ -102,12 +103,6 @@ func (m *DatabaseMigrator) Run(ctx context.Context) error {
 		}
 	}()
 
-	line2MigrateFilesMap, err := DistinguishModules(m.config.MigrationDir)
-	if err != nil {
-		return err
-	}
-	fmt.Println(line2MigrateFilesMap)
-
 	if err := m.migrateMySQL(ctx); err != nil {
 		return fmt.Errorf("MySQL migration failed: %w", err)
 	}
@@ -119,38 +114,70 @@ func (m *DatabaseMigrator) Run(ctx context.Context) error {
 	return nil
 }
 
-// MySQL迁移（保持不变）
+// MySQL 迁移
 func (m *DatabaseMigrator) migrateMySQL(ctx context.Context) error {
 	driver, err := mysqlMigrate.WithInstance(m.mysqlDB, &mysqlMigrate.Config{})
 	if err != nil {
-		return err
+		return fmt.Errorf("failed to create MySQL driver: %w", err)
 	}
-	return m.runMigration(ctx, driver, "mysql", "DingHaiWAF")
+	return m.runMigration(ctx, driver, "mysql")
 }
 
-// ClickHouse迁移（保持不变）
+// ClickHouse 迁移
 func (m *DatabaseMigrator) migrateClickHouse(ctx context.Context) error {
 	driver, err := chMigrate.WithInstance(m.clickhouseDB, &chMigrate.Config{})
 	if err != nil {
 		return fmt.Errorf("failed to create ClickHouse driver: %w", err)
 	}
-	return m.runMigration(ctx, driver, "clickhouse", "waf")
+	return m.runMigration(ctx, driver, "clickhouse")
 }
 
 // 通用迁移执行方法（保持不变）
-func (m *DatabaseMigrator) runMigration(ctx context.Context, driver database.Driver,
-	dbType string, dbName string) error {
+// 通用迁移逻辑
+func (m *DatabaseMigrator) runMigration(
+	ctx context.Context,
+	driver database.Driver,
+	dbType string,
+) error {
+	// 获取原始路径
 	migratePath := filepath.Join(m.config.MigrationDir, dbType)
+
+	// 修复步骤：强制转换为 URL 兼容的斜杠格式
+	migratePath = filepath.ToSlash(migratePath)
+
+	// 构建 URL
 	sourceURL := fmt.Sprintf("file://%s", migratePath)
 
+	// 初始化迁移实例
 	migrator, err := migrate.NewWithDatabaseInstance(sourceURL, dbType, driver)
 	if err != nil {
 		return fmt.Errorf("failed to initialize migrator: %w", err)
 	}
 	defer migrator.Close()
 
-	if err := migrator.Up(); err != nil && !errors.Is(err, migrate.ErrNoChange) {
-		return fmt.Errorf("migration failed: %w", err)
+	// 检查是否为脏版本
+	version, dirty, err := migrator.Version()
+	if err != nil && !errors.Is(err, migrate.ErrNilVersion) {
+		return fmt.Errorf("failed to check version: %w", err)
+	}
+	if dirty {
+		// 强制清除脏状态
+		if err := migrator.Force(int(version)); err != nil {
+			return fmt.Errorf("failed to force clean version: %w", err)
+		}
+	}
+
+	// 执行迁移
+	var migrationErr error
+	if m.config.TargetVersion > 0 {
+		migrationErr = migrator.Migrate(m.config.TargetVersion)
+	} else {
+		migrationErr = migrator.Up()
+	}
+
+	// 处理迁移结果
+	if migrationErr != nil && !errors.Is(migrationErr, migrate.ErrNoChange) {
+		return fmt.Errorf("migration failed: %w", migrationErr)
 	}
 
 	logrus.Infof("%s migration completed successfully", dbType)

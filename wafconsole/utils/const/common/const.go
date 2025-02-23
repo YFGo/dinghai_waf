@@ -5,3 +5,7 @@ const (
 	MySqlMigrate      = "mysql"
 	ClickHouseMigrate = "clickhouse"
 )
+
+const (
+	CutOff = "_"
+)
