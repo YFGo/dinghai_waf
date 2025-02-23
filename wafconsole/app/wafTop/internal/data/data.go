@@ -40,7 +40,7 @@ func NewData(s *conf.Server, bootstrap *conf.Bootstrap, logger log.Logger) (*Dat
 	etcd := newETCD(c.Etcd)
 
 	// 执行全量迁移
-	newMigrate(c)
+	newMigrate(bootstrap)
 
 	cleanup := func() {
 		if dbMysql != nil {
@@ -94,7 +94,8 @@ func newETCD(cfg *conf.Data_Etcd) *clientv3.Client {
 	return etcdClient
 }
 
-func newMigrate(cfg *conf.Data) {
+func newMigrate(bootstrap *conf.Bootstrap) {
+	cfg := bootstrap.Data
 	// 从 conf.Data 中提取 MySQL 配置
 	mysqlConfig := cfg.Mysql
 	mysqlDSN := fmt.Sprintf("%s:%s@tcp(%s:%d)/%s?parseTime=true",
@@ -113,6 +114,7 @@ func newMigrate(cfg *conf.Data) {
 
 	// 构建 migrate.Config
 	cfgMigrate := &migrate.Config{
+		AppName:       bootstrap.Server.AppName,
 		MySqlDSN:      mysqlDSN,
 		ClickHouseDSN: clickHouseDSN,
 		RedisAddr:     redisAddr,
