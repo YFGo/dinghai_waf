@@ -1,0 +1,1 @@
+alter table server_waf    change host uri_key varchar(255) not null comment '''服务器域名''';
