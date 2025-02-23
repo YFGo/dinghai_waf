@@ -52,7 +52,7 @@ func main() {
 	// 设置 HTTP 处理函数
 	http.HandleFunc("/", wafService.ProxyHandler())
 
-	// 监听并在 0.0.0.0:8888 上启动服务器
+	// 监听并在  上启动服务器
 	slog.Info("Starting HTTP server on :" + file.Section("app").Key("port").String())
 	httpServer := &http.Server{Addr: ":" + file.Section("app").Key("port").String()}
 	go func() {
