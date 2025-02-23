@@ -8,7 +8,7 @@ import "google/protobuf/duration.proto";
 message Bootstrap {
   Server server = 1;
   Data data = 2;
-
+  Trace trace = 3;
 }
 
 message Server {
@@ -39,16 +39,23 @@ message Data {
   message Redis {
     string network = 1;
     string addr = 2;
-    google.protobuf.Duration read_timeout = 3;
-    google.protobuf.Duration write_timeout = 4;
+    string password = 3;
+    int32 db = 4;
+    google.protobuf.Duration dial_timeout = 5;
+    google.protobuf.Duration read_timeout = 6;
+    google.protobuf.Duration write_timeout = 7;
   }
   message Etcd {
     string host = 1;
     string username = 2;
   }
+  message ClickHouse {
+    string dsn = 1;
+  }
   Mysql mysql = 1;
   Redis redis = 2;
   Etcd etcd = 3;
+  ClickHouse click_house = 4;
 }
 
 message Trace {
