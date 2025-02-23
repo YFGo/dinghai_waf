@@ -120,7 +120,7 @@ func newMigrate(bootstrap *conf.Bootstrap) {
 		RedisAddr:     redisAddr,
 		RedisPassword: redisPassword,
 		RedisDB:       0,
-		MigrationDir:  "wafconsole/migrate.txt",
+		MigrationDir:  "wafconsole/migrations",
 		LockTimeout:   30 * time.Second,
 	}
 	migrator, err := migrate.NewDatabaseMigrator(cfgMigrate)
