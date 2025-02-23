@@ -21,7 +21,7 @@ import (
 
 // Config 迁移配置
 type Config struct {
-	MySQLDSN      string
+	MySqlDSN      string
 	ClickHouseDSN string
 	RedisAddr     string        // Redis服务器地址
 	RedisPassword string        // Redis密码
@@ -42,7 +42,7 @@ type DatabaseMigrator struct {
 // NewDatabaseMigrator 创建新实例
 func NewDatabaseMigrator(cfg *Config) (*DatabaseMigrator, error) {
 	// 初始化MySQL连接
-	mysqlDB, err := sql.Open("mysql", cfg.MySQLDSN)
+	mysqlDB, err := sql.Open("mysql", cfg.MySqlDSN)
 	if err != nil {
 		return nil, fmt.Errorf("failed to connect to MySQL: %w", err)
 	}
