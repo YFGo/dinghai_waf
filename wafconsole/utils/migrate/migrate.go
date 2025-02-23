@@ -48,7 +48,7 @@ func NewDatabaseMigrator(cfg *Config) (*DatabaseMigrator, error) {
 	}
 
 	// 验证MySQL连接
-	if err := mysqlDB.Ping(); err != nil {
+	if err = mysqlDB.Ping(); err != nil {
 		return nil, fmt.Errorf("MySQL ping failed: %w", err)
 	}
 
@@ -118,7 +118,7 @@ func (m *DatabaseMigrator) migrateMySQL(ctx context.Context) error {
 		return err
 	}
 
-	return m.runMigration(ctx, driver, "mysql")
+	return m.runMigration(ctx, driver, "mysql", "DingHaiWAF")
 }
 
 // ClickHouse迁移
@@ -128,11 +128,12 @@ func (m *DatabaseMigrator) migrateClickHouse(ctx context.Context) error {
 		return fmt.Errorf("failed to create ClickHouse driver: %w", err)
 	}
 
-	return m.runMigration(ctx, driver, "clickhouse")
+	return m.runMigration(ctx, driver, "clickhouse", "waf")
 }
 
 // 通用迁移执行方法
-func (m *DatabaseMigrator) runMigration(ctx context.Context, driver database.Driver, dbType string) error {
+func (m *DatabaseMigrator) runMigration(ctx context.Context, driver database.Driver,
+	dbType string, dbName string) error {
 	migratePath := filepath.Join(m.config.MigrationDir, dbType)
 	sourceURL := fmt.Sprintf("file://%s", migratePath)
 

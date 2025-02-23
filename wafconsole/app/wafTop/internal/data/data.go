@@ -95,16 +95,32 @@ func newETCD(cfg *conf.Data_Etcd) *clientv3.Client {
 }
 
 func newMigrate(cfg *conf.Data) {
-	cfgMigrate := &migrate.Config{
-		MySqlDSN:      "user:password@tcp(localhost:3306)/dbname?parseTime=true",
-		ClickHouseDSN: "tcp://localhost:9000?database=default&username=user&password=pass",
-		RedisAddr:     "localhost:6379",
-		RedisPassword: "",
-		RedisDB:       0,
-		MigrationDir:  "./database/migrations",
-		LockTimeout:   30 * time.Second,
+	// 从 conf.Data 中提取 MySQL 配置
+	mysqlConfig := cfg.Mysql
+	mysqlDSN := fmt.Sprintf("%s:%s@tcp(%s:%d)/%s?parseTime=true",
+		mysqlConfig.User, mysqlConfig.Password, mysqlConfig.Host, mysqlConfig.Port, mysqlConfig.Db)
+
+	// 从 conf.Data 中提取 Redis 配置
+	redisConfig := cfg.Redis
+	redisAddr := redisConfig.Addr
+	redisPassword := ""
+	if len(redisConfig.Password) > 0 {
+		redisPassword = redisConfig.Password
 	}
 
+	// 从 conf.Data 中提取 ClickHouse 配置
+	clickHouseDSN := cfg.ClickHouse.Dsn
+
+	// 构建 migrate.Config
+	cfgMigrate := &migrate.Config{
+		MySqlDSN:      mysqlDSN,
+		ClickHouseDSN: clickHouseDSN,
+		RedisAddr:     redisAddr,
+		RedisPassword: redisPassword,
+		RedisDB:       0,
+		MigrationDir:  "wafconsole/migrate.txt",
+		LockTimeout:   30 * time.Second,
+	}
 	migrator, err := migrate.NewDatabaseMigrator(cfgMigrate)
 	if err != nil {
 		slog.Error("migrate failed: ", err)
