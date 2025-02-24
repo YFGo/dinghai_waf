@@ -132,7 +132,6 @@ func (m *DatabaseMigrator) migrateClickHouse(ctx context.Context) error {
 	return m.runMigration(ctx, driver, "clickhouse")
 }
 
-// 通用迁移执行方法（保持不变）
 // 通用迁移逻辑
 func (m *DatabaseMigrator) runMigration(
 	ctx context.Context,
@@ -162,7 +161,7 @@ func (m *DatabaseMigrator) runMigration(
 	}
 	if dirty {
 		// 强制清除脏状态
-		if err := migrator.Force(int(version)); err != nil {
+		if err = migrator.Force(int(version)); err != nil {
 			return fmt.Errorf("failed to force clean version: %w", err)
 		}
 	}
