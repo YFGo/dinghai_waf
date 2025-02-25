@@ -141,7 +141,7 @@ func (m *DatabaseMigrator) runMigration(
 	// 获取原始路径
 	migratePath := filepath.Join(m.config.MigrationDir, dbType)
 
-	// 修复步骤：强制转换为 URL 兼容的斜杠格式
+	// 强制转换为 URL 兼容的斜杠格式
 	migratePath = filepath.ToSlash(migratePath)
 
 	// 构建 URL

@@ -1,0 +1,41 @@
+syntax = "proto3";
+
+package api.wafTop.v1;
+
+option go_package = "wafconsole/api/wafTop/v1;v1";
+option java_multiple_files = true;
+option java_package = "api.wafTop.v1";
+
+import "google/api/annotations.proto";
+import "api/wafTop/v1/message.proto";
+
+service Notice {
+	rpc CreateNotice (CreateNoticeRequest) returns (CreateNoticeReply){
+		option (google.api.http) = {
+			post: "/app/waf_top/v1/notice"
+			body: "*"
+		};
+	};
+	rpc UpdateNotice (UpdateNoticeRequest) returns (UpdateNoticeReply) {
+		option (google.api.http) = {
+			put: "/app/waf_top/v1/notice/state"
+			body: "*"
+		};
+	};
+	rpc DeleteNotice (DeleteNoticeRequest) returns (DeleteNoticeReply) {
+		option (google.api.http) = {
+			delete: "/app/waf_top/v1/notice"
+		};
+	};
+	rpc GetNotice (GetNoticeRequest) returns (GetNoticeReply) {
+		option (google.api.http) = {
+			get: "/app/waf_top/v1/notice/{id}"
+		};
+	};
+	rpc ListNotice (ListNoticeRequest) returns (ListNoticeReply) {
+		option (google.api.http) = {
+			get: "/app/waf_top/v1/notices"
+		};
+	};
+}
+
