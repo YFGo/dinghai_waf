@@ -860,3 +860,24 @@ message ListAllowListReply {
 	repeated AllowListInfo list_allow_list = 2;
 }
 // ######### 白名单 #########
+
+// ##### notice
+message CreateNoticeRequest {}
+message CreateNoticeReply {}
+
+message UpdateNoticeRequest {}
+message UpdateNoticeReply {}
+
+message DeleteNoticeRequest {}
+message DeleteNoticeReply {}
+
+message GetNoticeRequest {}
+message GetNoticeReply {}
+
+message ListNoticeRequest {}
+message ListNoticeReply {}
+
+
+// #### 网站负责人
+message GetServerPrincipalRequest {}
+message GetServerPrincipalReply {}
