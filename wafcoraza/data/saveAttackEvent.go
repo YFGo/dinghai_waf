@@ -22,7 +22,7 @@ func NewSaveAttackEventRepo(data *Data) biz.AttackEventRepo {
 }
 
 // ReadAttackEvent 读取csv文件中的数据
-func (s saveAttackEventRepo) ReadAttackEvent() []model.AttackEvent {
+func (s *saveAttackEventRepo) ReadAttackEvent() []model.AttackEvent {
 	file, err := os.OpenFile("wafcoraza/waf_log/attack_events.csv", os.O_RDONLY, os.ModePerm)
 	if err != nil {
 		slog.Error("ReadAttackEvent Error opening file: ", err)
@@ -38,7 +38,7 @@ func (s saveAttackEventRepo) ReadAttackEvent() []model.AttackEvent {
 }
 
 // AppendToFile 将新数据写入csv文件
-func (s saveAttackEventRepo) AppendToFile(attackEvent []model.AttackEvent) {
+func (s *saveAttackEventRepo) AppendToFile(attackEvent []model.AttackEvent) {
 	path := "wafcoraza/waf_log/attack_events.csv"
 	var file *os.File
 	//判断此文件是否存在
@@ -80,7 +80,7 @@ func (s saveAttackEventRepo) AppendToFile(attackEvent []model.AttackEvent) {
 }
 
 // CollectionAttackEvent 将数据写入kafka
-func (s saveAttackEventRepo) CollectionAttackEvent() {
+func (s *saveAttackEventRepo) CollectionAttackEvent() {
 	events := s.ReadAttackEvent()
 	if len(events) == 0 {
 		slog.Info("no attack event")
@@ -113,7 +113,7 @@ func (s saveAttackEventRepo) CollectionAttackEvent() {
 	slog.Info("write kafka success")
 }
 
-func (s saveAttackEventRepo) WriteEventTask() {
+func (s *saveAttackEventRepo) WriteEventTask() {
 	spec := "0 0/5 * * * ?" // 每隔5分钟执行一次
 	// 添加一个任务
 	eventTaskID, err := s.data.timeTask.AddFunc(spec, s.CollectionAttackEvent)
