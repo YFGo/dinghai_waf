@@ -2,13 +2,16 @@ package wafHttp
 
 import (
 	"context"
+	uuid "github.com/satori/go.uuid"
 	"io"
 	"log/slog"
 	"net"
 	"net/http"
 	"strconv"
 	"strings"
+	"time"
 	"wafcoraza/biz"
+	"wafcoraza/data/model"
 	constType "wafcoraza/data/types"
 	"wafcoraza/waf_http/plugins"
 
@@ -16,16 +19,19 @@ import (
 )
 
 type WafHandleService struct {
-	uc          *biz.AttackEventUsercase
-	wafConfigUc *biz.WafConfigUsercase
-	wafAllowUc  *biz.WafAllowListUsecase
+	uc           *biz.AttackEventUsercase
+	wafConfigUc  *biz.WafConfigUsercase
+	wafAllowUc   *biz.WafAllowListUsecase
+	normalHttpUc *biz.NormalHttpUsercase
 }
 
-func NewWafHandleService(uc *biz.AttackEventUsercase, wafConfigUc *biz.WafConfigUsercase, wafAllowUc *biz.WafAllowListUsecase) *WafHandleService {
+func NewWafHandleService(uc *biz.AttackEventUsercase, wafConfigUc *biz.WafConfigUsercase,
+	wafAllowUc *biz.WafAllowListUsecase, normalHttpUc *biz.NormalHttpUsercase) *WafHandleService {
 	return &WafHandleService{
-		uc:          uc,
-		wafConfigUc: wafConfigUc,
-		wafAllowUc:  wafAllowUc,
+		uc:           uc,
+		wafConfigUc:  wafConfigUc,
+		wafAllowUc:   wafAllowUc,
+		normalHttpUc: normalHttpUc,
 	}
 }
 
@@ -103,6 +109,23 @@ func (w *WafHandleService) ProxyHandler() http.HandlerFunc {
 				}
 			}
 			plugins.Proxy(isAllow, realAddr, req, rw, requestBody) // 处理结果
+		}
+		normalHttpId := uuid.NewV4() //生成攻击事件的唯一id
+		if isAllow {                 // 记录正常请求
+			normalHttpInfo := model.ListNormalHttp{
+				ID:            normalHttpId.String(),
+				IP:            clientIP,
+				RequestURI:    req.URL.Path,
+				RequestTime:   time.Now(),
+				RequestMethod: req.Method,
+				Protocol:      req.Proto,
+				RequestBody:   string(requestBody),
+			}
+			err = w.normalHttpUc.SaveNormalHttp(context.Background(), normalHttpInfo)
+			if err != nil {
+				slog.Error("save normalHttp err: ", err)
+				return
+			}
 		}
 	}
 }

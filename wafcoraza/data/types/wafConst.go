@@ -18,3 +18,8 @@ const (
 const (
 	WafDeny = "deny"
 )
+
+// NormalHttp
+const (
+	NormalHttpTopic = "normal_http"
+)
