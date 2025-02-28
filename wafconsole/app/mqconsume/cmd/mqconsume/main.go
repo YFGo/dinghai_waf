@@ -4,7 +4,7 @@ import (
 	"flag"
 	"os"
 
-	"wafconsole/app/mq_consume/internal/conf"
+	"wafconsole/app/mqconsume/internal/conf"
 
 	"github.com/go-kratos/kratos/v2"
 	"github.com/go-kratos/kratos/v2/config"

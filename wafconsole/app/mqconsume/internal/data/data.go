@@ -1,14 +1,14 @@
 package data
 
 import (
-	"wafconsole/app/mq_consume/internal/conf"
-
 	"github.com/go-kratos/kratos/v2/log"
 	"github.com/google/wire"
+
+	"wafconsole/app/mqconsume/internal/conf"
 )
 
 // ProviderSet is data providers.
-var ProviderSet = wire.NewSet(NewData, NewGreeterRepo)
+var ProviderSet = wire.NewSet(NewData)
 
 // Data .
 type Data struct {

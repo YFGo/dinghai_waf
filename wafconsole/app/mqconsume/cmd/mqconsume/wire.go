@@ -6,11 +6,11 @@
 package main
 
 import (
-	"wafconsole/app/mq_consume/internal/biz"
-	"wafconsole/app/mq_consume/internal/conf"
-	"wafconsole/app/mq_consume/internal/data"
-	"wafconsole/app/mq_consume/internal/server"
-	"wafconsole/app/mq_consume/internal/service"
+	"wafconsole/app/mqconsume/internal/biz"
+	"wafconsole/app/mqconsume/internal/conf"
+	"wafconsole/app/mqconsume/internal/data"
+	"wafconsole/app/mqconsume/internal/server"
+	"wafconsole/app/mqconsume/internal/service"
 
 	"github.com/go-kratos/kratos/v2"
 	"github.com/go-kratos/kratos/v2/log"
