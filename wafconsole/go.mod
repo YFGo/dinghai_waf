@@ -4,6 +4,7 @@ go 1.23
 
 require (
 	buf.build/gen/go/bufbuild/protovalidate/protocolbuffers/go v1.35.1-20240920164238-5a7b106cbb87.1
+	github.com/ClickHouse/clickhouse-go/v2 v2.23.2
 	github.com/bufbuild/protovalidate-go v0.7.2
 	github.com/go-kratos/kratos/contrib/config/consul/v2 v2.0.0-20250210091908-15168b5a1b7d
 	github.com/go-kratos/kratos/contrib/registry/consul/v2 v2.0.0-20250210091908-15168b5a1b7d
@@ -37,7 +38,6 @@ require (
 	dario.cat/mergo v1.0.0 // indirect
 	filippo.io/edwards25519 v1.1.0 // indirect
 	github.com/ClickHouse/ch-go v0.61.5 // indirect
-	github.com/ClickHouse/clickhouse-go/v2 v2.23.2 // indirect
 	github.com/andybalholm/brotli v1.1.0 // indirect
 	github.com/antlr4-go/antlr/v4 v4.13.0 // indirect
 	github.com/armon/go-metrics v0.4.1 // indirect
