@@ -237,24 +237,3 @@ make docker
 # 软件UI管理界面
 - [Jaeger链路追踪管理界面](http://127.0.0.1:16686/)
 
-# 安装方法
-## 二进制部署
-### Windows
-> v1.0.0
->
-> mysql8.0版本以上 , redis推荐使用6版本以上
->
-
-1. 下载DingHai.zip文件 , 解压缩
-2. 将上层用户服务 , 防护配置服务以及内核的配置文件中的配置信息修改为正确地址
-
-![](https://cdn.nlark.com/yuque/0/2024/png/34606362/1730266685966-d5dd3865-7e97-4723-a1c0-db4d981d5c15.png)
-
-3. 启动三个exe文件
-4. v1.0.0暂无UI界面 , 需要开发人员通过接口文档使用.将json文件导入apifox即可, wafCoraza会占用端口<font style="color:#DF2A3F;">8887</font>
-
-![](https://cdn.nlark.com/yuque/0/2024/png/34606362/1730267289446-d5e5632e-34b0-48bb-957c-16e9a9a5952b.png)
-
-### linux
-下载 DingHai_linux.zip文件,在linux系统上解压即可,其余步骤和上述操作系统
-
