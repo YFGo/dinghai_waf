@@ -2,51 +2,69 @@ package main
 
 import (
 	"fmt"
-
-	"wafconsole/app/cron/internal/conf"
-
 	"github.com/go-kratos/kratos/contrib/registry/consul/v2"
+	"github.com/go-kratos/kratos/contrib/registry/etcd/v2"
 	"github.com/go-kratos/kratos/v2/config"
 	"github.com/go-kratos/kratos/v2/config/file"
 	"github.com/go-kratos/kratos/v2/registry"
-
 	"github.com/hashicorp/consul/api"
+	"go.etcd.io/etcd/client/v3"
+	"wafconsole/app/cron/internal/conf"
 )
 
-// initRegistryConf init the registry config
 func initRegistryConf() *conf.Registry {
-	registry := config.New(
+	registryCfg := config.New(
 		config.WithSource(
 			file.NewSource(fmt.Sprintf("%s/registry.yaml", flagconf)),
 		),
 	)
-	defer registry.Close()
+	defer registryCfg.Close()
 
-	if err := registry.Load(); err != nil {
-		panic(err)
+	if err := registryCfg.Load(); err != nil {
+		panic(fmt.Sprintf("failed to load registry config: %v", err))
 	}
+
 	registryConfig := &conf.Registry{}
-	if err := registry.Scan(registryConfig); err != nil {
-		panic(err)
+	if err := registryCfg.Scan(registryConfig); err != nil {
+		panic(fmt.Sprintf("failed to scan registry config: %v", err))
 	}
+
 	return registryConfig
 }
 
-// initRegistry init the registry
 func initRegistry(conf *conf.Registry) registry.Registrar {
 	switch conf.Type {
 	case "consul":
 		if conf.Consul == nil {
 			panic("consul config is nil")
 		}
-		// 读取consul配置
-		cli, err := api.NewClient(&api.Config{Address: conf.Consul.Address})
+
+		consulClient, err := api.NewClient(&api.Config{
+			Address: conf.Consul.Address,
+		})
 		if err != nil {
-			panic(err)
+			panic(fmt.Sprintf("failed to create Consul client: %v", err))
 		}
-		// 创建consul注册中心
-		return consul.New(cli, consul.WithHealthCheck(false))
+
+		consulRegistry := consul.New(consulClient, consul.WithHealthCheck(false))
+		return consulRegistry
+	case "etcd":
+		if conf.Etcd == nil {
+			panic("etcd config is nil")
+		}
+
+		etcdCfg := clientv3.Config{
+			Endpoints: []string{conf.Etcd.Address},
+		}
+
+		etcdClient, err := clientv3.New(etcdCfg)
+		if err != nil {
+			panic(fmt.Sprintf("failed to create Etcd client: %v", err))
+		}
+
+		etcdRegistry := etcd.New(etcdClient)
+		return etcdRegistry
 	default:
-		panic("unknown registry driver")
+		panic(fmt.Sprintf("unknown registry driver: %s", conf.Type))
 	}
 }
