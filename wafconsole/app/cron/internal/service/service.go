@@ -1,6 +1,9 @@
 package service
 
-import "github.com/google/wire"
+import (
+	"github.com/google/wire"
+	"wafconsole/app/cron/internal/service/normalhttp"
+)
 
 // ProviderSet is service providers.
-var ProviderSet = wire.NewSet(NewJobService, NewUserCountService, NewRabbitmqPushService)
+var ProviderSet = wire.NewSet(NewJobService, normalhttp.NewServiceNormalHttp)
