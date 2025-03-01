@@ -15,7 +15,7 @@ import (
 
 // ProviderSet is data providers.
 var ProviderSet = wire.NewSet(NewData, discovery.NewDiscovery, mq.NewKafkaBroker,
-	discovery.NewSiteServerRpc, NewUserRpcRepo, NewMqPushRepo)
+	discovery.NewSiteServerRpc, NewNormalHttpRepo)
 
 // Data .
 type Data struct {

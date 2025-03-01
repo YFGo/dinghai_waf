@@ -1,6 +1,9 @@
 package service
 
-import "github.com/go-kratos/kratos/v2/log"
+import (
+	"github.com/go-kratos/kratos/v2/log"
+	"wafconsole/app/cron/internal/service/normalhttp"
+)
 
 type JobInterface interface {
 	GetName() string //获取cron名称
@@ -9,31 +12,29 @@ type JobInterface interface {
 }
 
 type JobCommonService struct {
-	name string
-	spec string
-	log  *log.Helper
+	Name string
+	Spec string
+	Log  *log.Helper
 }
 
 func (d *JobCommonService) GetName() string {
-	return d.name
+	return d.Name
 }
 
 func (d *JobCommonService) GetSpec() string {
-	return d.spec
+	return d.Spec
 }
 
 type CronService struct {
 	jobList []JobInterface
 }
 
-func NewJobService(userCountSrc *UserCountService, mq *RabbitmqPushService) *CronService {
+func NewJobService(saveNormalHttpInfo *normalhttp.ServiceNormalHttp) *CronService {
 	job := &CronService{
 		jobList: make([]JobInterface, 0),
 	}
-	// 添加示例任务
-	job.AddJob(userCountSrc)
-	// 添加队列生产任务
-	job.AddJob(mq)
+	// 保存正常的http请求
+	job.AddJob(saveNormalHttpInfo)
 	return job
 }
 

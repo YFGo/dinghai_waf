@@ -10,13 +10,14 @@ import (
 	"github.com/go-kratos/kratos/v2"
 	"github.com/go-kratos/kratos/v2/log"
 	"github.com/go-kratos/kratos/v2/registry"
-	"wafconsole/app/cron/internal/biz"
+	"wafconsole/app/cron/internal/biz/normalhttp"
 	"wafconsole/app/cron/internal/conf"
 	"wafconsole/app/cron/internal/data"
 	"wafconsole/app/cron/internal/data/discovery"
 	"wafconsole/app/cron/internal/data/mq"
 	"wafconsole/app/cron/internal/server"
 	"wafconsole/app/cron/internal/service"
+	normalhttp2 "wafconsole/app/cron/internal/service/normalhttp"
 )
 
 import (
@@ -34,13 +35,10 @@ func wireApp(confServer *conf.Server, confData *conf.Data, confRegistry *conf.Re
 	if err != nil {
 		return nil, nil, err
 	}
-	userRepo := data.NewUserRpcRepo(dataData, logger)
-	userUseCase := biz.NewUserUseCase(userRepo, logger)
-	userCountService := service.NewUserCountService(logger, userUseCase)
-	mqPushRepo := data.NewMqPushRepo(dataData, confData, logger)
-	mqPushUseCase := biz.NewMqPushUseCase(mqPushRepo, logger)
-	rabbitmqPushService := service.NewRabbitmqPushService(logger, mqPushUseCase)
-	cronService := service.NewJobService(userCountService, rabbitmqPushService)
+	repoNormalHttp := data.NewNormalHttpRepo(dataData, logger)
+	usercaseNormalHttp := normalhttp.NewUsercaseNormalHttp(repoNormalHttp, logger)
+	serviceNormalHttp := normalhttp2.NewServiceNormalHttp(logger, usercaseNormalHttp)
+	cronService := service.NewJobService(serviceNormalHttp)
 	cronServer := server.NewCronServer(cronService, logger)
 	app := newApp(logger, cronServer)
 	return app, func() {
