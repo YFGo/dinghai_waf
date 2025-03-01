@@ -81,7 +81,7 @@ func main() {
 	rConf := initRegistryConf()
 	rr := initRegistry(rConf)
 
-	app, cleanup, err := wireApp(bc.Server, &bc, logger, rr)
+	app, cleanup, err := wireApp(bc.Server, bc.Data, rConf, logger, rr)
 	if err != nil {
 		panic(err)
 	}
