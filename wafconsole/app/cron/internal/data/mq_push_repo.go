@@ -23,6 +23,6 @@ func NewMqPushRepo(data *Data, cfg *conf.Data, logger log.Logger) biz.MqPushRepo
 
 // AddUser . Add user.
 func (m *mqPushRepo) PushUserInfo(info *v1.MqUserInfo) error {
-	_ = m.data.rabbitmqBroker.Publish(context.Background(), m.c.Rabbitmq.Routing, info)
+	_ = m.data.kafkaClient.Publish(context.Background(), m.c.Rabbitmq.Routing, info)
 	return nil
 }

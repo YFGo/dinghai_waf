@@ -3,6 +3,7 @@ package data
 import (
 	"github.com/tx7do/kratos-transport/broker"
 	"wafconsole/app/cron/internal/data/discovery"
+	"wafconsole/app/cron/internal/data/mq"
 
 	v1 "wafconsole/api/wafTop/v1"
 
@@ -13,28 +14,28 @@ import (
 )
 
 // ProviderSet is data providers.
-var ProviderSet = wire.NewSet(NewData, discovery.NewDiscovery, NewRabbitMQBroker,
+var ProviderSet = wire.NewSet(NewData, discovery.NewDiscovery, mq.NewKafkaBroker,
 	discovery.NewSiteServerRpc, NewUserRpcRepo, NewMqPushRepo)
 
 // Data .
 type Data struct {
 	log *log.Helper
 
-	rabbitmqBroker broker.Broker
+	kafkaClient broker.Broker
 
 	siteServerRpc v1.ServerClient
 }
 
 // NewData .
-func NewData(c *conf.Data, logger log.Logger, rabbitmqBroker broker.Broker,
+func NewData(c *conf.Data, logger log.Logger, kafkaClient broker.Broker,
 	siteServerRpc v1.ServerClient) (*Data, func(), error) {
 	l := log.NewHelper(log.With(logger, "module", "data"))
 	cleanup := func() {
 		l.Info("closing the data resources")
 	}
 	return &Data{
-		log:            l,
-		rabbitmqBroker: rabbitmqBroker,
-		siteServerRpc:  siteServerRpc,
+		log:           l,
+		kafkaClient:   kafkaClient,
+		siteServerRpc: siteServerRpc,
 	}, cleanup, nil
 }

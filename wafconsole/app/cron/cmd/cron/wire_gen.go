@@ -14,6 +14,7 @@ import (
 	"wafconsole/app/cron/internal/conf"
 	"wafconsole/app/cron/internal/data"
 	"wafconsole/app/cron/internal/data/discovery"
+	"wafconsole/app/cron/internal/data/mq"
 	"wafconsole/app/cron/internal/server"
 	"wafconsole/app/cron/internal/service"
 )
@@ -26,7 +27,7 @@ import (
 
 // wireApp init kratos application.
 func wireApp(confServer *conf.Server, confData *conf.Data, confRegistry *conf.Registry, logger log.Logger, registrar registry.Registrar) (*kratos.App, func(), error) {
-	broker := data.NewRabbitMQBroker(confData, logger)
+	broker := mq.NewKafkaBroker(confData, logger)
 	registryDiscovery := discovery.NewDiscovery(confRegistry)
 	serverClient := discovery.NewSiteServerRpc(registryDiscovery)
 	dataData, cleanup, err := data.NewData(confData, logger, broker, serverClient)
