@@ -40,6 +40,7 @@ message Data {
   Database database = 1;
   Redis redis = 2;
   RabbitMQ rabbitmq = 3;
+  Kafka kafka = 4;
 }
 
 message Trace {
@@ -51,4 +52,11 @@ message RabbitMQ {
   string codec = 2;  // 编解码器
   string exchange = 3;  // 交换机
   string routing = 4;  // 路由
+}
+
+message Kafka {
+  repeated string addrs = 1;
+  string codec = 2;
+  string topic = 3;     // 新增
+  string group_id = 4;  // 新增（消费者组）
 }
