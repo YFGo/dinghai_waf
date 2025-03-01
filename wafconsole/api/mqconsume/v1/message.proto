@@ -13,11 +13,3 @@ message MqUserInfo {
     string password = 3;
     string name = 4;
 }
-
-message NoticeUserRequest {
-
-}
-
-message NoticeUserReply {
-
-}
