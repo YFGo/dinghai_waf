@@ -2,9 +2,9 @@ package data
 
 import (
 	"context"
+	v1 "wafconsole/api/mqconsume/v1"
 	"wafconsole/app/cron/internal/conf"
 
-	"wafconsole/api/mq_consume"
 	"wafconsole/app/cron/internal/biz"
 
 	"github.com/go-kratos/kratos/v2/log"
@@ -22,7 +22,7 @@ func NewMqPushRepo(data *Data, cfg *conf.Data, logger log.Logger) biz.MqPushRepo
 }
 
 // AddUser . Add user.
-func (m *mqPushRepo) PushUserInfo(info *mq_consume.MqUserInfo) error {
+func (m *mqPushRepo) PushUserInfo(info *v1.MqUserInfo) error {
 	_ = m.data.rabbitmqBroker.Publish(context.Background(), m.c.Rabbitmq.Routing, info)
 	return nil
 }
