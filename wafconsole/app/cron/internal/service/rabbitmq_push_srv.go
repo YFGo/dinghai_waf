@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"github.com/go-kratos/kratos/v2/log"
 	"math/rand"
-	"wafconsole/api/mq_consume"
+	v1 "wafconsole/api/mqconsume/v1"
 	"wafconsole/app/cron/internal/biz"
 )
 
@@ -28,11 +28,10 @@ func (d *RabbitmqPushService) GetFunc() func() {
 	return func() {
 		// 随机1-10之间的数
 		id := rand.Intn(10) + 1
-		err := d.mqCase.AddUser(&mq_consume.MqUserInfo{
+		err := d.mqCase.AddUser(&v1.MqUserInfo{
 			Account:  fmt.Sprintf("test%d", id),
 			Password: "123456",
 			Name:     "测试",
-			Avatar:   "",
 		})
 		if err != nil {
 			d.log.Errorf("rabbitmq推送测试失败: %v", err)

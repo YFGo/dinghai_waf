@@ -27,8 +27,8 @@ import (
 func wireApp(confServer *conf.Server, confData *conf.Data, confRegistry *conf.Registry, logger log.Logger, registrar registry.Registrar) (*kratos.App, func(), error) {
 	broker := data.NewRabbitMQBroker(confData, logger)
 	discovery := data.NewDiscovery(confRegistry)
-	userClient := data.NewUserRpcClient(discovery)
-	dataData, cleanup, err := data.NewData(confData, logger, broker, userClient)
+	serverClient := data.NewUserRpcClient(discovery)
+	dataData, cleanup, err := data.NewData(confData, logger, broker, serverClient)
 	if err != nil {
 		return nil, nil, err
 	}

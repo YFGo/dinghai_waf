@@ -4,7 +4,8 @@ import (
 	"context"
 	"github.com/tx7do/kratos-transport/broker"
 
-	"wafconsole/api/grpc_user"
+	v1 "wafconsole/api/wafTop/v1"
+
 	"wafconsole/app/cron/internal/conf"
 
 	"github.com/go-kratos/kratos/v2/log"
@@ -26,11 +27,12 @@ type Data struct {
 
 	rabbitmqBroker broker.Broker
 
-	guClient grpc_user.UserClient
+	guClient v1.ServerClient
 }
 
 // NewData .
-func NewData(c *conf.Data, logger log.Logger, rabbitmqBroker broker.Broker, uc grpc_user.UserClient) (*Data, func(), error) {
+func NewData(c *conf.Data, logger log.Logger, rabbitmqBroker broker.Broker,
+	uc v1.ServerClient) (*Data, func(), error) {
 	l := log.NewHelper(log.With(logger, "module", "data"))
 	cleanup := func() {
 		l.Info("closing the data resources")
@@ -42,7 +44,7 @@ func NewData(c *conf.Data, logger log.Logger, rabbitmqBroker broker.Broker, uc g
 	}, cleanup, nil
 }
 
-func NewUserRpcClient(r registry.Discovery) grpc_user.UserClient {
+func NewUserRpcClient(r registry.Discovery) v1.ServerClient {
 	conn, err := grpc.DialInsecure(
 		context.Background(),
 		grpc.WithEndpoint("discovery:///wafconsole.grpc_user"),
@@ -59,5 +61,5 @@ func NewUserRpcClient(r registry.Discovery) grpc_user.UserClient {
 	if err != nil {
 		panic(err)
 	}
-	return grpc_user.NewUserClient(conn)
+	return v1.NewServerClient(conn)
 }
