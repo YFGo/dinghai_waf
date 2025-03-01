@@ -5,7 +5,7 @@ import (
 	"github.com/go-kratos/kratos/contrib/config/consul/v2"
 	"github.com/go-kratos/kratos/v2/config"
 	"github.com/go-kratos/kratos/v2/config/file"
-	consul_api "github.com/hashicorp/consul/api"
+	consulapi "github.com/hashicorp/consul/api"
 	"wafconsole/app/cron/internal/conf"
 )
 
@@ -38,7 +38,7 @@ func initConfig() config.Config {
 			panic("consul config is nil")
 		}
 		// 读取consul配置
-		consulClient, err := consul_api.NewClient(&consul_api.Config{
+		consulClient, err := consulapi.NewClient(&consulapi.Config{
 			Address:    driverConfig.Consul.Address,
 			Scheme:     driverConfig.Consul.Scheme,
 			PathPrefix: driverConfig.Consul.PathPrefix,

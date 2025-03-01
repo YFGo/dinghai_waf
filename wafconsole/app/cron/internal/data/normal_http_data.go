@@ -18,6 +18,6 @@ func NewNormalHttpRepo(data *Data, logger log.Logger) normalhttp.RepoNormalHttp 
 }
 
 func (n normalHttpRepo) SaveNormalHttp2DB() error {
-	//TODO implement me
-	panic("implement me")
+
+	return nil
 }

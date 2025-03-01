@@ -1,6 +1,9 @@
 package normalhttp
 
-import "github.com/go-kratos/kratos/v2/log"
+import (
+	"context"
+	"github.com/go-kratos/kratos/v2/log"
+)
 
 type RepoNormalHttp interface {
 	SaveNormalHttp2DB() error
@@ -16,6 +19,9 @@ func NewUsercaseNormalHttp(repo RepoNormalHttp, logger log.Logger) *UsercaseNorm
 }
 
 // SaveNormalHttp 保存正常http请求
-func (n *UsercaseNormalHttp) SaveNormalHttp() {
-	n.repo.SaveNormalHttp2DB()
+func (n *UsercaseNormalHttp) SaveNormalHttp(ctx context.Context) {
+	if err := n.repo.SaveNormalHttp2DB(); err != nil {
+		n.log.WithContext(ctx).Errorf("save normal http error: %v", err)
+	}
+	return
 }
