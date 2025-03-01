@@ -1,0 +1,19 @@
+syntax = "proto3";
+
+package kratos.api;
+
+option go_package = "kratos_learn/internal/conf;conf";
+
+
+message ConfDriver {
+    string type = 1;
+    ConfConsul consul = 2;
+}
+// consul config
+message ConfConsul {
+    string address = 1;
+    string scheme = 2;
+    string path_prefix = 3;
+    string token = 4;
+    string path = 5;
+}

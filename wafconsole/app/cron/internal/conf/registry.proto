@@ -1,0 +1,15 @@
+syntax = "proto3";
+
+package kratos.api;
+
+option go_package = "kratos_learn/internal/conf;conf";
+
+message Registry {
+    string type = 1;
+    RegistryConsul consul = 2;
+}
+
+// consul Registryig
+message RegistryConsul {
+    string address = 1;
+}
