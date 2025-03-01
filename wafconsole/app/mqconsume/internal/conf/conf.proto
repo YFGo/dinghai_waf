@@ -34,6 +34,7 @@ message Data {
   Database database = 1;
   Redis redis = 2;
   RabbitMQ rabbitmq = 3;
+  Kafka kafka = 4;
 }
 
 message Trace {
@@ -46,4 +47,10 @@ message RabbitMQ {
   string exchange = 3;  // 交换机
   bool durable_exchange = 4; // 是否持久化交换机
   string routing = 5;  // 路由键
+}
+
+message Kafka {
+  repeated string brokers = 1;    // Broker 地址列表
+  string topic = 2;               // 订阅主题
+  string group = 3;               // 消费者组
 }

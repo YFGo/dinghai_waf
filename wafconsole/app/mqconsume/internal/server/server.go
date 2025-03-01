@@ -5,4 +5,4 @@ import (
 )
 
 // ProviderSet is server providers.
-var ProviderSet = wire.NewSet(NewRabbitMQServer)
+var ProviderSet = wire.NewSet(NewRabbitMQServer, NewKafkaServer)
