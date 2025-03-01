@@ -7,9 +7,14 @@ option go_package = "kratos_learn/internal/conf;conf";
 message Registry {
     string type = 1;
     RegistryConsul consul = 2;
+    RegistryEtcd etcd = 3;
 }
 
 // consul Registryig
 message RegistryConsul {
+    string address = 1;
+}
+
+message RegistryEtcd {
     string address = 1;
 }
