@@ -5,6 +5,7 @@ import (
 	"flag"
 	"fmt"
 	"github.com/go-kratos/kratos/v2/registry"
+	"github.com/tx7do/kratos-transport/transport/kafka"
 	"github.com/tx7do/kratos-transport/transport/rabbitmq"
 	"os"
 
@@ -33,7 +34,8 @@ func init() {
 	flag.StringVar(&flagconf, "conf", "../../configs", "config path, eg: -conf config_dev.yaml")
 }
 
-func newApp(logger log.Logger, mqs *rabbitmq.Server, rr registry.Registrar) *kratos.App {
+func newApp(logger log.Logger, mqs *rabbitmq.Server,
+	kafka *kafka.Server, rr registry.Registrar) *kratos.App {
 	return kratos.New(
 		kratos.ID(id),
 		kratos.Name(Name),
@@ -42,6 +44,7 @@ func newApp(logger log.Logger, mqs *rabbitmq.Server, rr registry.Registrar) *kra
 		kratos.Logger(logger),
 		kratos.Server(
 			mqs,
+			kafka,
 		),
 		kratos.Registrar(rr),
 	)

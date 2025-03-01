@@ -17,7 +17,7 @@ func NewNoticeUserRepo(data *Data, logger log.Logger) notice.UserNoticeRepo {
 	}
 }
 
-func (n noticeUserRepo) StartData() error {
+func (n noticeUserRepo) Test() error {
 	//TODO implement me
 	panic("implement me")
 }

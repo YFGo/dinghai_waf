@@ -3,7 +3,7 @@ package notice
 import "github.com/go-kratos/kratos/v2/log"
 
 type UserNoticeRepo interface {
-	StartData() error
+	Test() error
 }
 
 type UserNoticeUsecase struct {
@@ -19,9 +19,10 @@ func NewUserNoticeUsecase(repo UserNoticeRepo, logger log.Logger) *UserNoticeUse
 }
 
 func (uc *UserNoticeUsecase) Start() error {
-	err := uc.repo.StartData()
+	err := uc.repo.Test() // 消费正常的http请求
 	if err != nil {
 		return err
 	}
 	uc.log.Info("UserNoticeUsecase Start")
+	return err
 }

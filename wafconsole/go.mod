@@ -24,6 +24,7 @@ require (
 	github.com/sirupsen/logrus v1.9.3
 	github.com/tx7do/kratos-transport v1.1.12
 	github.com/tx7do/kratos-transport/broker/rabbitmq v1.2.17
+	github.com/tx7do/kratos-transport/transport/kafka v1.2.3
 	github.com/tx7do/kratos-transport/transport/rabbitmq v1.2.18
 	go.etcd.io/etcd/client/v3 v3.5.16
 	go.opentelemetry.io/otel v1.32.0
@@ -73,7 +74,7 @@ require (
 	github.com/hashicorp/serf v0.10.1 // indirect
 	github.com/jinzhu/inflection v1.0.0 // indirect
 	github.com/jinzhu/now v1.1.5 // indirect
-	github.com/klauspost/compress v1.17.8 // indirect
+	github.com/klauspost/compress v1.17.11 // indirect
 	github.com/mattn/go-colorable v0.1.13 // indirect
 	github.com/mattn/go-isatty v0.0.17 // indirect
 	github.com/mitchellh/go-homedir v1.1.0 // indirect
@@ -84,8 +85,13 @@ require (
 	github.com/pkg/errors v0.9.1 // indirect
 	github.com/rabbitmq/amqp091-go v1.10.0 // indirect
 	github.com/segmentio/asm v1.2.0 // indirect
+	github.com/segmentio/kafka-go v0.4.47 // indirect
 	github.com/shopspring/decimal v1.4.0 // indirect
 	github.com/stoewer/go-strcase v1.3.0 // indirect
+	github.com/tx7do/kratos-transport/broker/kafka v1.2.17 // indirect
+	github.com/xdg-go/pbkdf2 v1.0.0 // indirect
+	github.com/xdg-go/scram v1.1.2 // indirect
+	github.com/xdg-go/stringprep v1.0.4 // indirect
 	go.etcd.io/etcd/api/v3 v3.5.16 // indirect
 	go.etcd.io/etcd/client/pkg/v3 v3.5.16 // indirect
 	go.opentelemetry.io/otel/exporters/otlp/otlptrace v1.32.0 // indirect
