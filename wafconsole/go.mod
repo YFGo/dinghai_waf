@@ -20,8 +20,10 @@ require (
 	github.com/google/wire v0.6.0
 	github.com/hashicorp/consul/api v1.26.1
 	github.com/lionsoul2014/ip2region/binding/golang v0.0.0-20240510055607-89e20ab7b6c6
+	github.com/robfig/cron/v3 v3.0.1
 	github.com/sirupsen/logrus v1.9.3
 	github.com/tx7do/kratos-transport v1.1.12
+	github.com/tx7do/kratos-transport/broker/rabbitmq v1.2.17
 	github.com/tx7do/kratos-transport/transport/rabbitmq v1.2.18
 	go.etcd.io/etcd/client/v3 v3.5.16
 	go.opentelemetry.io/otel v1.32.0
@@ -84,7 +86,6 @@ require (
 	github.com/segmentio/asm v1.2.0 // indirect
 	github.com/shopspring/decimal v1.4.0 // indirect
 	github.com/stoewer/go-strcase v1.3.0 // indirect
-	github.com/tx7do/kratos-transport/broker/rabbitmq v1.2.17 // indirect
 	go.etcd.io/etcd/api/v3 v3.5.16 // indirect
 	go.etcd.io/etcd/client/pkg/v3 v3.5.16 // indirect
 	go.opentelemetry.io/otel/exporters/otlp/otlptrace v1.32.0 // indirect
