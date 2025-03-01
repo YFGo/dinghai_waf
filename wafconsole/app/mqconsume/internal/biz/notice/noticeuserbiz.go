@@ -18,10 +18,10 @@ func NewUserNoticeUsecase(repo UserNoticeRepo, logger log.Logger) *UserNoticeUse
 	}
 }
 
-func (uc *UserNoticeUsecase) Start() {
+func (uc *UserNoticeUsecase) Start() error {
 	err := uc.repo.StartData()
 	if err != nil {
-		return
+		return err
 	}
 	uc.log.Info("UserNoticeUsecase Start")
 }

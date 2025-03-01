@@ -12,17 +12,11 @@ message Bootstrap {
 }
 
 message Server {
-  message HTTP {
-    string network = 1;
-    string addr = 2;
-    google.protobuf.Duration timeout = 3;
-  }
   message GRPC {
     string network = 1;
     string addr = 2;
     google.protobuf.Duration timeout = 3;
   }
-  HTTP http = 1;
   GRPC grpc = 2;
 }
 
@@ -39,8 +33,17 @@ message Data {
   }
   Database database = 1;
   Redis redis = 2;
+  RabbitMQ rabbitmq = 3;
 }
 
 message Trace {
   string endpoint = 1;
+}
+
+message RabbitMQ {
+  repeated string addrs = 1;  // 对端网络地址
+  string codec = 2;  // 编解码器
+  string exchange = 3;  // 交换机
+  bool durable_exchange = 4; // 是否持久化交换机
+  string routing = 5;  // 路由键
 }
