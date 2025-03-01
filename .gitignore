@@ -7,6 +7,8 @@ wafconsole/app/user/configs/config_dev.yaml
 wafconsole/app/wafTop/configs/config_dev.yaml
 analyse/configs/config_dev.yaml
 
+*/*/*/configs
+
 DingHai
 DingHai_linux
 

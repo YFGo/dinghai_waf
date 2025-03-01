@@ -36,7 +36,6 @@ grpc:
            --proto_path=../../third_party \
            --go_out=paths=source_relative:. \
            --go-grpc_out=paths=source_relative:. \
-           --validate_out=paths=source_relative,lang=go:. \
            $(API_PROTO_FILES)
 
 .PHONY: http
@@ -46,7 +45,6 @@ http:
             --proto_path=../../third_party \
             --go_out=paths=source_relative:. \
             --go-http_out=paths=source_relative:. \
-            --validate_out=paths=source_relative,lang=go:. \
             --openapi_out=fq_schema_naming=true,default_response=false,naming=proto:. \
             $(API_PROTO_FILES)
 

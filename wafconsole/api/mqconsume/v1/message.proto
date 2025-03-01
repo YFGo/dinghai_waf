@@ -6,25 +6,18 @@ option go_package = "wafconsole/api/mqconsume/v1;v1";
 option java_multiple_files = true;
 option java_package = "api.mqconsume.v1";
 
-service Message {
-	rpc CreateMessage (CreateMessageRequest) returns (CreateMessageReply);
-	rpc UpdateMessage (UpdateMessageRequest) returns (UpdateMessageReply);
-	rpc DeleteMessage (DeleteMessageRequest) returns (DeleteMessageReply);
-	rpc GetMessage (GetMessageRequest) returns (GetMessageReply);
-	rpc ListMessage (ListMessageRequest) returns (ListMessageReply);
+
+message MqUserInfo {
+    int64 id = 1;
+    string account = 2;
+    string password = 3;
+    string name = 4;
 }
 
-message CreateMessageRequest {}
-message CreateMessageReply {}
+message NoticeUserRequest {
 
-message UpdateMessageRequest {}
-message UpdateMessageReply {}
+}
 
-message DeleteMessageRequest {}
-message DeleteMessageReply {}
+message NoticeUserReply {
 
-message GetMessageRequest {}
-message GetMessageReply {}
-
-message ListMessageRequest {}
-message ListMessageReply {}
+}
