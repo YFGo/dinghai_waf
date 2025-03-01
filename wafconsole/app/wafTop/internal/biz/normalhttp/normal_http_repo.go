@@ -10,6 +10,7 @@ import (
 
 type RepoNormalHttp interface {
 	iface.BaseRepo[model.NormalHttpModel]
+	CreateNormalHttpBatch(ctx context.Context, normalHttpInfo []model.NormalHttpModel) error
 }
 
 type UsecaseNormalHttp struct {
@@ -22,7 +23,11 @@ func NewUsecaseNormalHttp(repo RepoNormalHttp, logger log.Logger) *UsecaseNormal
 }
 
 func (u *UsecaseNormalHttp) SaveNormalHttpInfo(ctx context.Context,
-	normalHttpInfo model.NormalHttpModel) error {
-	u.repo.Create(ctx, normalHttpInfo)
+	normalHttpInfoList []model.NormalHttpModel) error {
+	err := u.repo.CreateNormalHttpBatch(ctx, normalHttpInfoList)
+	if err != nil {
+		u.log.WithContext(ctx).Errorf("save normal http info failed: %v", err)
+		return err
+	}
 	return nil
 }

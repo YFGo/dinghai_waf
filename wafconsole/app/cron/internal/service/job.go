@@ -2,7 +2,6 @@ package service
 
 import (
 	"github.com/go-kratos/kratos/v2/log"
-	"wafconsole/app/cron/internal/service/normalhttp"
 )
 
 type JobInterface interface {
@@ -29,7 +28,7 @@ type CronService struct {
 	jobList []JobInterface
 }
 
-func NewJobService(saveNormalHttpInfo *normalhttp.ServiceNormalHttp) *CronService {
+func NewJobService(saveNormalHttpInfo *NormalHttpService) *CronService {
 	job := &CronService{
 		jobList: make([]JobInterface, 0),
 	}

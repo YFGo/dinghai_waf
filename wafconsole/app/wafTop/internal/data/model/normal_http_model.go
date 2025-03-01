@@ -2,6 +2,8 @@ package model
 
 import "time"
 
+const NormalHttpTableName = "normal_http_log"
+
 type NormalHttpModel struct {
 	ID            string    `json:"id"`
 	IP            string    `json:"ip"`
