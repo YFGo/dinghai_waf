@@ -17,7 +17,6 @@ import (
 	"wafconsole/app/cron/internal/data/mq"
 	"wafconsole/app/cron/internal/server"
 	"wafconsole/app/cron/internal/service"
-	normalhttp2 "wafconsole/app/cron/internal/service/normalhttp"
 )
 
 import (
@@ -37,7 +36,7 @@ func wireApp(confServer *conf.Server, confData *conf.Data, confRegistry *conf.Re
 	}
 	repoNormalHttp := data.NewNormalHttpRepo(dataData, logger)
 	usercaseNormalHttp := normalhttp.NewUsercaseNormalHttp(repoNormalHttp, logger)
-	serviceNormalHttp := normalhttp2.NewServiceNormalHttp(logger, usercaseNormalHttp)
+	serviceNormalHttp := service.NewServiceNormalHttp(logger, usercaseNormalHttp)
 	cronService := service.NewJobService(serviceNormalHttp)
 	cronServer := server.NewCronServer(cronService, logger)
 	app := newApp(logger, cronServer)

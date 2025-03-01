@@ -7,6 +7,7 @@ option java_multiple_files = true;
 option java_package = "api.wafTop.v1";
 
 import "buf/validate/validate.proto";
+import public "google/protobuf/timestamp.proto";
 
 message SeclangMod {
 	string match_goal = 1 [
@@ -885,14 +886,36 @@ message GetServerPrincipalReply {}
 
 
 // ##### 普通http请求
-message CreateNormalHttpRequest {
-	string id = 1;
-	string ip = 2;
-	string request_uri = 3;
-	string request_time = 4;
+message NormalHttpInfo {
+	string id = 1 [
+		(buf.validate.field).cel = {
+			id: "id",
+			message: "请求id不能为空",
+			expression: "size(this) > 0"
+		}
+	];
+	string ip = 2 [
+		(buf.validate.field).cel = {
+			id: "ip",
+			message: "ip地址格式不规范",
+			expression: "this.isIp()"
+		}
+	];
+	string request_uri = 3 [
+		(buf.validate.field).cel = {
+			id: "request_uri",
+			message: "请求路径不能为空",
+			expression: "size(this) > 0"
+		}
+	];
+	google.protobuf.Timestamp request_time = 4;
 	string request_method = 5;
 	string protocol = 6;
 	string request_body = 7;
+}
+
+message CreateNormalHttpRequest {
+	repeated NormalHttpInfo normal_http_infos = 1;
 }
 message CreateNormalHttpReply {}
 

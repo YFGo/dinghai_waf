@@ -55,3 +55,14 @@ func (n normalHttpRepo) ListByWhere(ctx context.Context, limit, offset int64, op
 	//TODO implement me
 	panic("implement me")
 }
+
+// CreateNormalHttpBatch 批量创建正常http请求日志
+func (n normalHttpRepo) CreateNormalHttpBatch(ctx context.Context,
+	normalHttpInfo []model.NormalHttpModel) error {
+	err := n.data.clickHouse.Table(model.NormalHttpTableName).Create(&normalHttpInfo).Error
+	if err != nil {
+		n.log.WithContext(ctx).Errorf("create normal http info failed: %v", err)
+		return err
+	}
+	return nil
+}

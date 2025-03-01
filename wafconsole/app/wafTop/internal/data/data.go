@@ -3,6 +3,7 @@ package data
 import (
 	"context"
 	"fmt"
+	"gorm.io/driver/clickhouse"
 	"log/slog"
 	"time"
 
@@ -24,9 +25,10 @@ var ProviderSet = wire.NewSet(NewData, NewAppWafRepo, NewServerRepo, NewBuildRul
 
 // Data .
 type Data struct {
-	db   *gorm.DB
-	etcd *clientv3.Client
-	log  *log.Helper
+	db         *gorm.DB
+	clickHouse *gorm.DB
+	etcd       *clientv3.Client
+	log        *log.Helper
 }
 
 // NewData .
@@ -40,6 +42,11 @@ func NewData(s *conf.Server, bootstrap *conf.Bootstrap, logger log.Logger) (*Dat
 	}
 	etcd := newETCD(c.Etcd)
 
+	clickHouseDB, err := newClickHouse(c.ClickHouse)
+	if err != nil {
+		return nil, nil, err
+	}
+
 	// 执行全量迁移
 	newMigrate(bootstrap)
 
@@ -52,12 +59,18 @@ func NewData(s *conf.Server, bootstrap *conf.Bootstrap, logger log.Logger) (*Dat
 		if etcd != nil {
 			etcd.Close()
 		}
+		if clickHouseDB != nil {
+			if db, err := clickHouseDB.DB(); err == nil && db != nil {
+				db.Close()
+			}
+		}
 	}
 
 	return &Data{
-		db:   dbMysql,
-		etcd: etcd,
-		log:  logKratos,
+		db:         dbMysql,
+		etcd:       etcd,
+		log:        logKratos,
+		clickHouse: clickHouseDB,
 	}, cleanup, nil
 }
 
@@ -93,6 +106,15 @@ func newETCD(cfg *conf.Data_Etcd) *clientv3.Client {
 	// 设置超时时间
 	hooks.InitEtcd(etcdClient, context.Background()) // 初始化键值对
 	return etcdClient
+}
+
+func newClickHouse(cfg *conf.Data_ClickHouse) (*gorm.DB, error) {
+	clickhouseDB, err := gorm.Open(clickhouse.Open(cfg.Dsn), &gorm.Config{})
+	if err != nil {
+		slog.Error("failed to connect clickhouse", err)
+		return nil, err
+	}
+	return clickhouseDB, nil
 }
 
 func newMigrate(bootstrap *conf.Bootstrap) {
