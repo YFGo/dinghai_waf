@@ -18,7 +18,8 @@ type Domain interface {
 		model.Strategy |
 		model.StrategyConfig |
 		model.UserRule |
-		model.AllowList
+		model.AllowList |
+		model.NormalHttpModel
 }
 
 type BaseRepo[T Domain] interface {

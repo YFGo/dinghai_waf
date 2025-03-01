@@ -881,3 +881,29 @@ message ListNoticeReply {}
 // #### 网站负责人
 message GetServerPrincipalRequest {}
 message GetServerPrincipalReply {}
+
+
+
+// ##### 普通http请求
+message CreateNormalHttpRequest {
+	string id = 1;
+	string ip = 2;
+	string request_uri = 3;
+	string request_time = 4;
+	string request_method = 5;
+	string protocol = 6;
+	string request_body = 7;
+}
+message CreateNormalHttpReply {}
+
+message UpdateNormalHttpRequest {}
+message UpdateNormalHttpReply {}
+
+message DeleteNormalHttpRequest {}
+message DeleteNormalHttpReply {}
+
+message GetNormalHttpRequest {}
+message GetNormalHttpReply {}
+
+message ListNormalHttpRequest {}
+message ListNormalHttpReply {}
