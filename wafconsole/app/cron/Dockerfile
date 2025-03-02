@@ -1,24 +1,36 @@
-FROM golang:1.19 AS builder
-
-COPY . /src
+# 第一阶段：构建环境
+FROM golang:1.21 AS builder
 WORKDIR /src
 
+# 安装构建依赖
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    git \
+    gcc \
+    && rm -rf /var/lib/apt/lists/*
+
+COPY . /src
 RUN GOPROXY=https://goproxy.cn make build
 
-FROM debian:stable-slim
+# 第二阶段：运行环境
+FROM debian:bookworm-slim
 
+# 安装运行时依赖 + 时区
 RUN apt-get update && apt-get install -y --no-install-recommends \
-		ca-certificates  \
-        netbase \
-        && rm -rf /var/lib/apt/lists/ \
-        && apt-get autoremove -y && apt-get autoclean -y
+    ca-certificates \
+    netbase \
+    tzdata \
+    && rm -rf /var/lib/apt/lists/* \
+    && apt-get autoremove -y && apt-get autoclean -y
 
+# 设置时区
+ENV TZ=Asia/Shanghai
+RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone
+
+# 复制二进制文件
 COPY --from=builder /src/bin /app
 
 WORKDIR /app
-
-EXPOSE 8000
-EXPOSE 9000
+EXPOSE 8000 9000
 VOLUME /data/conf
 
 CMD ["./server", "-conf", "/data/conf"]
