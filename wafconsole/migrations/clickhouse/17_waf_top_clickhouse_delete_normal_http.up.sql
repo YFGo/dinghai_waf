@@ -1,0 +1,1 @@
+drop table if exists normal_http_requests;
