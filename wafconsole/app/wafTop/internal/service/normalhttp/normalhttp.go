@@ -20,7 +20,7 @@ func NewNormalHttpService(uc *normalhttp.UsecaseNormalHttp) *NormalHttpService {
 	}
 }
 
-func (s *NormalHttpService) CreateNormalHttp(ctx context.Context, req *pb.CreateNormalHttpRequest) (*pb.CreateNormalHttpReply, error) {
+func (s *NormalHttpService) CreateNormalHttpBatch(ctx context.Context, req *pb.CreateNormalHttpRequest) (*pb.CreateNormalHttpReply, error) {
 	var normalHttpInfoList []model.NormalHttpModel
 	for _, normalHttpInfo := range req.NormalHttpInfos {
 		normalHttpInfoList = append(normalHttpInfoList, model.NormalHttpModel{

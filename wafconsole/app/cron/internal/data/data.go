@@ -15,20 +15,20 @@ import (
 )
 
 // ProviderSet is data providers.
-var ProviderSet = wire.NewSet(NewData, discovery.NewDiscovery, discovery.NewSiteServerRpc, NewNormalHttpRepo)
+var ProviderSet = wire.NewSet(NewData, discovery.NewDiscovery, discovery.NewNormalHttpRpc, NewNormalHttpRepo)
 
 // Data .
 type Data struct {
 	log               *log.Helper
 	kafkaConsumeGroup sarama.ConsumerGroup
 	kafkaProducer     sarama.SyncProducer
-	siteServerRpc     v1.ServerClient
+	normalHttpRpc     v1.NormalHttpClient
 	clickhouseDB      *gorm.DB
 	rdb               *redis.Client
 }
 
 // NewData .
-func NewData(c *conf.Data, logger log.Logger, siteServerRpc v1.ServerClient) (*Data, func(), error) {
+func NewData(c *conf.Data, logger log.Logger, normalHttpRpc v1.NormalHttpClient) (*Data, func(), error) {
 	l := log.NewHelper(log.With(logger, "module", "data"))
 	kafkaConsumeGroup, err := mq.NewKafkaConsumerGroup(c, logger)
 	if err != nil {
@@ -72,7 +72,7 @@ func NewData(c *conf.Data, logger log.Logger, siteServerRpc v1.ServerClient) (*D
 		log:               l,
 		kafkaConsumeGroup: kafkaConsumeGroup,
 		kafkaProducer:     kafkaProducer,
-		siteServerRpc:     siteServerRpc,
+		normalHttpRpc:     normalHttpRpc,
 		clickhouseDB:      clickhouseDB,
 		rdb:               redisDB,
 	}, cleanup, nil

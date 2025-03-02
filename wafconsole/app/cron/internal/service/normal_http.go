@@ -2,7 +2,6 @@ package service
 
 import (
 	"context"
-
 	"github.com/go-kratos/kratos/v2/log"
 	"wafconsole/app/cron/internal/biz/normalhttp"
 )
@@ -24,7 +23,5 @@ func NewServiceNormalHttp(logger log.Logger, uc *normalhttp.UsercaseNormalHttp) 
 }
 
 func (s *NormalHttpService) GetFunc() func() {
-	return func() {
-		s.uc.SaveNormalHttp(context.Background())
-	}
+	return s.uc.SaveNormalHttp(context.Background())
 }

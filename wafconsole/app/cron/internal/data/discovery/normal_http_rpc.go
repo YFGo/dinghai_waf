@@ -13,8 +13,8 @@ import (
 	"wafconsole/utils/const/waftop"
 )
 
-// NewSiteServerRpc 站点服务
-func NewSiteServerRpc(r registry.Discovery) v1.ServerClient {
+// NewNormalHttpRpc 正常流量服务
+func NewNormalHttpRpc(r registry.Discovery) v1.NormalHttpClient {
 	conn, err := grpc.DialInsecure(
 		context.Background(),
 		grpc.WithEndpoint(waftop.WafTopRpc),
@@ -31,5 +31,5 @@ func NewSiteServerRpc(r registry.Discovery) v1.ServerClient {
 	if err != nil {
 		panic(err)
 	}
-	return v1.NewServerClient(conn)
+	return v1.NewNormalHttpClient(conn)
 }

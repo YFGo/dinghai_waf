@@ -19,18 +19,18 @@ import (
 const _ = grpc.SupportPackageIsVersion9
 
 const (
-	NormalHttp_CreateNormalHttp_FullMethodName = "/api.wafTop.v1.NormalHttp/CreateNormalHttp"
-	NormalHttp_UpdateNormalHttp_FullMethodName = "/api.wafTop.v1.NormalHttp/UpdateNormalHttp"
-	NormalHttp_DeleteNormalHttp_FullMethodName = "/api.wafTop.v1.NormalHttp/DeleteNormalHttp"
-	NormalHttp_GetNormalHttp_FullMethodName    = "/api.wafTop.v1.NormalHttp/GetNormalHttp"
-	NormalHttp_ListNormalHttp_FullMethodName   = "/api.wafTop.v1.NormalHttp/ListNormalHttp"
+	NormalHttp_CreateNormalHttpBatch_FullMethodName = "/api.wafTop.v1.NormalHttp/CreateNormalHttpBatch"
+	NormalHttp_UpdateNormalHttp_FullMethodName      = "/api.wafTop.v1.NormalHttp/UpdateNormalHttp"
+	NormalHttp_DeleteNormalHttp_FullMethodName      = "/api.wafTop.v1.NormalHttp/DeleteNormalHttp"
+	NormalHttp_GetNormalHttp_FullMethodName         = "/api.wafTop.v1.NormalHttp/GetNormalHttp"
+	NormalHttp_ListNormalHttp_FullMethodName        = "/api.wafTop.v1.NormalHttp/ListNormalHttp"
 )
 
 // NormalHttpClient is the client API for NormalHttp service.
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type NormalHttpClient interface {
-	CreateNormalHttp(ctx context.Context, in *CreateNormalHttpRequest, opts ...grpc.CallOption) (*CreateNormalHttpReply, error)
+	CreateNormalHttpBatch(ctx context.Context, in *CreateNormalHttpRequest, opts ...grpc.CallOption) (*CreateNormalHttpReply, error)
 	UpdateNormalHttp(ctx context.Context, in *UpdateNormalHttpRequest, opts ...grpc.CallOption) (*UpdateNormalHttpReply, error)
 	DeleteNormalHttp(ctx context.Context, in *DeleteNormalHttpRequest, opts ...grpc.CallOption) (*DeleteNormalHttpReply, error)
 	GetNormalHttp(ctx context.Context, in *GetNormalHttpRequest, opts ...grpc.CallOption) (*GetNormalHttpReply, error)
@@ -45,10 +45,10 @@ func NewNormalHttpClient(cc grpc.ClientConnInterface) NormalHttpClient {
 	return &normalHttpClient{cc}
 }
 
-func (c *normalHttpClient) CreateNormalHttp(ctx context.Context, in *CreateNormalHttpRequest, opts ...grpc.CallOption) (*CreateNormalHttpReply, error) {
+func (c *normalHttpClient) CreateNormalHttpBatch(ctx context.Context, in *CreateNormalHttpRequest, opts ...grpc.CallOption) (*CreateNormalHttpReply, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
 	out := new(CreateNormalHttpReply)
-	err := c.cc.Invoke(ctx, NormalHttp_CreateNormalHttp_FullMethodName, in, out, cOpts...)
+	err := c.cc.Invoke(ctx, NormalHttp_CreateNormalHttpBatch_FullMethodName, in, out, cOpts...)
 	if err != nil {
 		return nil, err
 	}
@@ -99,7 +99,7 @@ func (c *normalHttpClient) ListNormalHttp(ctx context.Context, in *ListNormalHtt
 // All implementations must embed UnimplementedNormalHttpServer
 // for forward compatibility.
 type NormalHttpServer interface {
-	CreateNormalHttp(context.Context, *CreateNormalHttpRequest) (*CreateNormalHttpReply, error)
+	CreateNormalHttpBatch(context.Context, *CreateNormalHttpRequest) (*CreateNormalHttpReply, error)
 	UpdateNormalHttp(context.Context, *UpdateNormalHttpRequest) (*UpdateNormalHttpReply, error)
 	DeleteNormalHttp(context.Context, *DeleteNormalHttpRequest) (*DeleteNormalHttpReply, error)
 	GetNormalHttp(context.Context, *GetNormalHttpRequest) (*GetNormalHttpReply, error)
@@ -114,8 +114,8 @@ type NormalHttpServer interface {
 // pointer dereference when methods are called.
 type UnimplementedNormalHttpServer struct{}
 
-func (UnimplementedNormalHttpServer) CreateNormalHttp(context.Context, *CreateNormalHttpRequest) (*CreateNormalHttpReply, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method CreateNormalHttp not implemented")
+func (UnimplementedNormalHttpServer) CreateNormalHttpBatch(context.Context, *CreateNormalHttpRequest) (*CreateNormalHttpReply, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method CreateNormalHttpBatch not implemented")
 }
 func (UnimplementedNormalHttpServer) UpdateNormalHttp(context.Context, *UpdateNormalHttpRequest) (*UpdateNormalHttpReply, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method UpdateNormalHttp not implemented")
@@ -150,20 +150,20 @@ func RegisterNormalHttpServer(s grpc.ServiceRegistrar, srv NormalHttpServer) {
 	s.RegisterService(&NormalHttp_ServiceDesc, srv)
 }
 
-func _NormalHttp_CreateNormalHttp_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+func _NormalHttp_CreateNormalHttpBatch_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(CreateNormalHttpRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(NormalHttpServer).CreateNormalHttp(ctx, in)
+		return srv.(NormalHttpServer).CreateNormalHttpBatch(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: NormalHttp_CreateNormalHttp_FullMethodName,
+		FullMethod: NormalHttp_CreateNormalHttpBatch_FullMethodName,
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(NormalHttpServer).CreateNormalHttp(ctx, req.(*CreateNormalHttpRequest))
+		return srv.(NormalHttpServer).CreateNormalHttpBatch(ctx, req.(*CreateNormalHttpRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -248,8 +248,8 @@ var NormalHttp_ServiceDesc = grpc.ServiceDesc{
 	HandlerType: (*NormalHttpServer)(nil),
 	Methods: []grpc.MethodDesc{
 		{
-			MethodName: "CreateNormalHttp",
-			Handler:    _NormalHttp_CreateNormalHttp_Handler,
+			MethodName: "CreateNormalHttpBatch",
+			Handler:    _NormalHttp_CreateNormalHttpBatch_Handler,
 		},
 		{
 			MethodName: "UpdateNormalHttp",
