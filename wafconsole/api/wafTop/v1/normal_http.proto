@@ -9,7 +9,7 @@ option java_package = "api.wafTop.v1";
 import "api/wafTop/v1/message.proto";
 
 service NormalHttp {
-	rpc CreateNormalHttp (CreateNormalHttpRequest) returns (CreateNormalHttpReply);
+	rpc CreateNormalHttpBatch (CreateNormalHttpRequest) returns (CreateNormalHttpReply);
 	rpc UpdateNormalHttp (UpdateNormalHttpRequest) returns (UpdateNormalHttpReply);
 	rpc DeleteNormalHttp (DeleteNormalHttpRequest) returns (DeleteNormalHttpReply);
 	rpc GetNormalHttp (GetNormalHttpRequest) returns (GetNormalHttpReply);

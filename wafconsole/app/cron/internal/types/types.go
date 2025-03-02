@@ -1,10 +1,8 @@
-package model
+package types
 
 import "time"
 
-const NormalHttpTableName = "normal_http_requests"
-
-type NormalHttpModel struct {
+type NormalHttpInfo struct {
 	ID            string    `json:"id"`
 	IP            string    `json:"ip"`
 	RequestURI    string    `json:"request_uri"`
