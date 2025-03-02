@@ -31,16 +31,19 @@ message Data {
     string driver = 1;
     string source = 2;
   }
-  message Redis {
-    string network = 1;
-    string addr = 2;
-    google.protobuf.Duration read_timeout = 3;
-    google.protobuf.Duration write_timeout = 4;
+  message Redis{
+    string addr = 1;
+    int64 db = 2;
+    string password = 3;
+  }
+  message ClickHouse {
+    string dsn = 1;
   }
   Database database = 1;
   Redis redis = 2;
   RabbitMQ rabbitmq = 3;
   Kafka kafka = 4;
+  ClickHouse clickhouse = 5;
 }
 
 message Trace {
@@ -57,6 +60,6 @@ message RabbitMQ {
 message Kafka {
   repeated string addrs = 1;
   string codec = 2;
-  string topic = 3;     // 新增
-  string group_id = 4;  // 新增（消费者组）
+  string topic = 3;     // 主题
+  string group_id = 4;  // 消费者组
 }

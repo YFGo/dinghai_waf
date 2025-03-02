@@ -6,7 +6,7 @@ import (
 )
 
 type RepoNormalHttp interface {
-	SaveNormalHttp2DB() error
+	SaveNormalHttp2DB(ctx context.Context) func()
 }
 
 type UsercaseNormalHttp struct {
@@ -20,7 +20,7 @@ func NewUsercaseNormalHttp(repo RepoNormalHttp, logger log.Logger) *UsercaseNorm
 
 // SaveNormalHttp 保存正常http请求
 func (n *UsercaseNormalHttp) SaveNormalHttp(ctx context.Context) {
-	if err := n.repo.SaveNormalHttp2DB(); err != nil {
+	if err := n.repo.SaveNormalHttp2DB(ctx); err != nil {
 		n.log.WithContext(ctx).Errorf("save normal http error: %v", err)
 	}
 	return

@@ -11,3 +11,7 @@ const (
 const (
 	WafTopRpc = "/microservices/wafTop/wafTop"
 )
+
+const (
+	NormalHttpTopic = "normal_http"
+)
