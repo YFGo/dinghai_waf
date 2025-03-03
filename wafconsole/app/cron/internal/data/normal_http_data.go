@@ -19,15 +19,28 @@ import (
 )
 
 type normalHttpRepo struct {
-	data *Data
-	log  *log.Helper
+	data               *Data
+	partitionConsumers map[int32]sarama.PartitionConsumer // 分区消费者
+	log                *log.Helper
 }
 
 func NewNormalHttpRepo(data *Data, logger log.Logger) normalhttp.RepoNormalHttp {
-	return &normalHttpRepo{
-		data: data,
-		log:  log.NewHelper(logger),
+	repo := &normalHttpRepo{
+		data:               data,
+		log:                log.NewHelper(logger),
+		partitionConsumers: make(map[int32]sarama.PartitionConsumer),
 	}
+	offset, _ := repo.getOffsetFromRedis()
+	partitionConsumer, err := data.kafkaConsumer.ConsumePartition(
+		waftop.NormalHttpTopic,
+		0,
+		offset,
+	)
+	if err != nil {
+		panic(err)
+	}
+	repo.partitionConsumers[0] = partitionConsumer
+	return repo
 }
 
 var consumeMutex sync.Mutex
@@ -41,12 +54,47 @@ func (n *normalHttpRepo) SaveNormalHttp2DB(ctx context.Context) error {
 	consumeMutex.Lock()
 	defer consumeMutex.Unlock()
 
-	timeoutCtx, cancel := context.WithTimeout(ctx, consumeTimeout)
+	// 1. 主动拉取消息（非阻塞模式）
+	var (
+		batchBuffer       = make([]*v1.NormalHttpInfo, 0, normalHttpBatchSize)
+		maxOffset   int64 = -1
+	)
+
+	// 设置5秒超时
+	timeoutCtx, cancel := context.WithTimeout(ctx, 5*time.Second)
 	defer cancel()
 
-	if err := n.data.kafkaConsumeGroup.Consume(timeoutCtx, []string{waftop.NormalHttpTopic}, n); err != nil {
-		n.log.WithContext(ctx).Errorf("kafka consume error: %v", err)
-		return err
+Loop:
+	for {
+		select {
+		case message := <-n.partitionConsumers[0].Messages():
+			info, err := n.processMessage(message)
+			if err != nil {
+				n.log.Error("message processing failed: ", err)
+				continue
+			}
+			batchBuffer = append(batchBuffer, info)
+			maxOffset = message.Offset
+
+			// 批量达到阈值时立即写入
+			if len(batchBuffer) >= normalHttpBatchSize {
+				if err := n.commitBatch(batchBuffer, maxOffset); err != nil {
+					return err
+				}
+				batchBuffer = batchBuffer[:0]
+			}
+
+		case <-timeoutCtx.Done():
+			break Loop // 主动退出拉取循环
+
+		case err := <-n.partitionConsumers[0].Errors():
+			n.log.Errorf("Kafka consumer error: %v", err)
+		}
+	}
+
+	// 2. 提交剩余批次
+	if len(batchBuffer) > 0 {
+		return n.commitBatch(batchBuffer, maxOffset)
 	}
 	return nil
 }
@@ -75,7 +123,6 @@ func (n *normalHttpRepo) ConsumeClaim(session sarama.ConsumerGroupSession, claim
 		batchBuffer              = make([]*v1.NormalHttpInfo, 0, normalHttpBatchSize)
 		maxCommittedOffset int64 = -1
 	)
-
 	for {
 		select {
 		case message, ok := <-claim.Messages():
@@ -94,7 +141,7 @@ func (n *normalHttpRepo) ConsumeClaim(session sarama.ConsumerGroupSession, claim
 			maxCommittedOffset = message.Offset
 
 			if len(batchBuffer) >= normalHttpBatchSize {
-				if err := n.commitBatch(session, batchBuffer, maxCommittedOffset); err != nil {
+				if err := n.commitBatch(batchBuffer, maxCommittedOffset); err != nil {
 					return err
 				}
 				batchBuffer = batchBuffer[:0]
@@ -124,12 +171,8 @@ func (n *normalHttpRepo) processMessage(message *sarama.ConsumerMessage) (*v1.No
 	}, nil
 }
 
-// commitBatch 批量插入clickhouse
-func (n *normalHttpRepo) commitBatch(session sarama.ConsumerGroupSession, batch []*v1.NormalHttpInfo, offset int64) error {
-	if len(batch) == 0 {
-		return nil
-	}
-
+// commitBatch 写入ClickHouse并提交Offset
+func (n *normalHttpRepo) commitBatch(batch []*v1.NormalHttpInfo, offset int64) error {
 	if _, err := n.data.normalHttpRpc.CreateNormalHttpBatch(context.Background(), &v1.CreateNormalHttpRequest{
 		NormalHttpInfos: batch,
 	}); err != nil {
@@ -137,19 +180,19 @@ func (n *normalHttpRepo) commitBatch(session sarama.ConsumerGroupSession, batch 
 		return err
 	}
 
-	session.Commit()
-	n.log.Infof("committed %d messages, offset: %d", len(batch), offset)
-
-	if err := n.saveOffsetToRedis(offset); err != nil {
-		n.log.Error("offset save failed: ", err)
-		return err
+	// 提交Offset到Redis（注意：需按分区存储）
+	if offset != -1 {
+		if err := n.saveOffsetToRedis(offset); err != nil {
+			n.log.Error("offset save failed: ", err)
+			return err
+		}
+		n.log.Infof("committed %d messages, offset: %d", len(batch), offset)
 	}
-
 	return nil
 }
 
 func (n *normalHttpRepo) finalCommit(session sarama.ConsumerGroupSession, batch []*v1.NormalHttpInfo, offset int64) error {
-	if err := n.commitBatch(session, batch, offset); err != nil {
+	if err := n.commitBatch(batch, offset); err != nil {
 		return err
 	}
 	n.log.Info("final commit completed")

@@ -40,3 +40,19 @@ func NewKafkaConsumerGroup(cfg *conf.Data, logger log.Logger) (sarama.ConsumerGr
 	}
 	return kafkaConsumerGroup, err
 }
+
+func NewKafkaConsumer(cfg *conf.Data, logger log.Logger) (sarama.Consumer, error) {
+	config := sarama.NewConfig()
+	config.Consumer.Offsets.Initial = sarama.OffsetNewest
+	config.ChannelBufferSize = 100
+	config.Consumer.Offsets.AutoCommit.Enable = false // 禁用自动提交
+	client, err := sarama.NewClient(cfg.Kafka.Addrs, config)
+	if err != nil {
+		return nil, err
+	}
+	kafkaConsumer, err := sarama.NewConsumerFromClient(client)
+	if err != nil {
+		return nil, err
+	}
+	return kafkaConsumer, nil
+}
