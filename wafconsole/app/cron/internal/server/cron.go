@@ -17,7 +17,7 @@ type CronServer struct {
 func NewCronServer(jobSrc *service.CronService, logger log.Logger) *CronServer {
 	l := log.NewHelper(log.With(logger, "module", "cron"))
 	ser := &CronServer{
-		sche: cron.New(),
+		sche: newWithSeconds(), // 支持秒级别的定时任务
 	}
 	if jobSrc != nil {
 		for _, job := range jobSrc.GetJobList() {
@@ -41,4 +41,10 @@ func (s *CronServer) Start(c context.Context) error {
 func (s *CronServer) Stop(c context.Context) error {
 	s.sche.Stop()
 	return nil
+}
+
+func newWithSeconds() *cron.Cron {
+	secondParser := cron.NewParser(cron.Second | cron.Minute |
+		cron.Hour | cron.Dom | cron.Month | cron.DowOptional | cron.Descriptor)
+	return cron.New(cron.WithParser(secondParser), cron.WithChain())
 }
