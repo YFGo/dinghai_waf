@@ -22,6 +22,7 @@ type Data struct {
 	log               *log.Helper
 	kafkaConsumeGroup sarama.ConsumerGroup
 	kafkaProducer     sarama.SyncProducer
+	kafkaConsumer     sarama.Consumer
 	normalHttpRpc     v1.NormalHttpClient
 	clickhouseDB      *gorm.DB
 	rdb               *redis.Client
@@ -50,6 +51,10 @@ func NewData(c *conf.Data, logger log.Logger, normalHttpRpc v1.NormalHttpClient)
 		l.Errorf("创建Redis连接失败: %v", err)
 		return nil, nil, err
 	}
+	kafkaConsumer, err := mq.NewKafkaConsumer(c, logger)
+	if err != nil {
+		l.Errorf("创建Kafka消费者失败: %v", err)
+	}
 	cleanup := func() {
 		l.Info("closing the data resources")
 		if err := kafkaConsumeGroup.Close(); err != nil {
@@ -67,12 +72,18 @@ func NewData(c *conf.Data, logger log.Logger, normalHttpRpc v1.NormalHttpClient)
 			}
 			l.Error(err)
 		}
+		if kafkaConsumer != nil {
+			if err := kafkaConsumer.Close(); err != nil {
+				l.Error(err)
+			}
+		}
 	}
 	return &Data{
 		log:               l,
 		kafkaConsumeGroup: kafkaConsumeGroup,
 		kafkaProducer:     kafkaProducer,
 		normalHttpRpc:     normalHttpRpc,
+		kafkaConsumer:     kafkaConsumer,
 		clickhouseDB:      clickhouseDB,
 		rdb:               redisDB,
 	}, cleanup, nil
