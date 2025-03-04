@@ -9,13 +9,17 @@ import (
 	v1 "wafconsole/api/wafTop/v1"
 	"wafconsole/app/wafTop/internal/conf"
 	allow "wafconsole/app/wafTop/internal/service/allow"
+	sn "wafconsole/app/wafTop/internal/service/normalhttp"
 	rule "wafconsole/app/wafTop/internal/service/rule"
 	site "wafconsole/app/wafTop/internal/service/site"
 	strategy "wafconsole/app/wafTop/internal/service/strategy"
 )
 
 // NewGRPCServer new a gRPC server.
-func NewGRPCServer(c *conf.Server, wafApp *site.WafAppService, serverWaf *site.ServerService, buildRule *rule.BuildRuleService, ruleGroup *rule.RuleGroupService, userRule *rule.UserRuleService, strategyGrpc *strategy.StrategyService, allow *allow.AllowListService, logger log.Logger) *grpc.Server {
+func NewGRPCServer(c *conf.Server, wafApp *site.WafAppService, serverWaf *site.ServerService,
+	buildRule *rule.BuildRuleService, ruleGroup *rule.RuleGroupService,
+	userRule *rule.UserRuleService, strategyGrpc *strategy.StrategyService,
+	allow *allow.AllowListService, normalHttpGrpc *sn.NormalHttpService, logger log.Logger) *grpc.Server {
 	var opts = []grpc.ServerOption{
 		grpc.Middleware(
 			recovery.Recovery(),
@@ -39,5 +43,7 @@ func NewGRPCServer(c *conf.Server, wafApp *site.WafAppService, serverWaf *site.S
 	v1.RegisterRuleGroupServer(srv, ruleGroup)
 	v1.RegisterUserRuleServer(srv, userRule)
 	v1.RegisterStrategyServer(srv, strategyGrpc)
+	v1.RegisterNormalHttpServer(srv, normalHttpGrpc)
+	v1.RegisterAllowListServer(srv, allow)
 	return srv
 }

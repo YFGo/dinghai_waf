@@ -11,6 +11,7 @@ import (
 	"github.com/go-kratos/kratos/v2/log"
 	"github.com/go-kratos/kratos/v2/registry"
 	"wafconsole/app/wafTop/internal/biz/allow"
+	"wafconsole/app/wafTop/internal/biz/normalhttp"
 	"wafconsole/app/wafTop/internal/biz/rule"
 	"wafconsole/app/wafTop/internal/biz/site"
 	"wafconsole/app/wafTop/internal/biz/strategy"
@@ -18,6 +19,7 @@ import (
 	"wafconsole/app/wafTop/internal/data"
 	"wafconsole/app/wafTop/internal/server"
 	service4 "wafconsole/app/wafTop/internal/service/allow"
+	service5 "wafconsole/app/wafTop/internal/service/normalhttp"
 	service2 "wafconsole/app/wafTop/internal/service/rule"
 	"wafconsole/app/wafTop/internal/service/site"
 	service3 "wafconsole/app/wafTop/internal/service/strategy"
@@ -58,7 +60,10 @@ func wireApp(confServer *conf.Server, bootstrap *conf.Bootstrap, logger log.Logg
 	strategyService := service3.NewStrategyService(wafStrategyUsecase)
 	listAllowUsecase := allow.NewListAllowUsecase(listAllowRepo)
 	allowListService := service4.NewAllowListService(listAllowUsecase)
-	grpcServer := server.NewGRPCServer(confServer, wafAppService, serverService, buildRuleService, ruleGroupService, userRuleService, strategyService, allowListService, logger)
+	repoNormalHttp := data.NewNormalHttpRepo(dataData, logger)
+	usecaseNormalHttp := normalhttp.NewUsecaseNormalHttp(repoNormalHttp, logger)
+	normalHttpService := service5.NewNormalHttpService(usecaseNormalHttp)
+	grpcServer := server.NewGRPCServer(confServer, wafAppService, serverService, buildRuleService, ruleGroupService, userRuleService, strategyService, allowListService, normalHttpService, logger)
 	httpServer := server.NewHTTPServer(confServer, wafAppService, serverService, buildRuleService, ruleGroupService, userRuleService, strategyService, allowListService, logger)
 	app := newApp(logger, grpcServer, httpServer, registrar)
 	return app, func() {
