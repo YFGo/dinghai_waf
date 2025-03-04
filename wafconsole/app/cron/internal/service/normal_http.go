@@ -15,7 +15,7 @@ func NewServiceNormalHttp(logger log.Logger, uc *normalhttp.UsercaseNormalHttp) 
 	return &NormalHttpService{
 		JobCommonService: JobCommonService{
 			Name: "normalhttp",
-			Spec: "*/5 * * * * ?",
+			Spec: "0 */10 * * * ?",
 			Log:  log.NewHelper(logger),
 		},
 		uc: uc,
