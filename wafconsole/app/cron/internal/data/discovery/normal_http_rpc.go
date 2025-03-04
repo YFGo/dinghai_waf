@@ -10,14 +10,13 @@ import (
 	"github.com/go-kratos/kratos/v2/transport/grpc"
 
 	v1 "wafconsole/api/wafTop/v1"
-	"wafconsole/utils/const/waftop"
 )
 
 // NewNormalHttpRpc 正常流量服务
 func NewNormalHttpRpc(r registry.Discovery) v1.NormalHttpClient {
 	conn, err := grpc.DialInsecure(
 		context.Background(),
-		grpc.WithEndpoint(waftop.WafTopRpc),
+		grpc.WithEndpoint("127.0.0.1:9001"),
 		grpc.WithDiscovery(r),
 		grpc.WithMiddleware(
 			// 异常恢复
