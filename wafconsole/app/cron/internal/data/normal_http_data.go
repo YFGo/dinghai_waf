@@ -5,8 +5,6 @@ import (
 	"encoding/json"
 	"google.golang.org/protobuf/types/known/timestamppb"
 	"strconv"
-	"sync"
-	"time"
 	v1 "wafconsole/api/wafTop/v1"
 	"wafconsole/app/cron/internal/types"
 
@@ -20,15 +18,14 @@ import (
 
 type normalHttpRepo struct {
 	data               *Data
-	partitionConsumers map[int32]sarama.PartitionConsumer // 分区消费者
+	partitionConsumers sarama.PartitionConsumer // 分区消费者
 	log                *log.Helper
 }
 
 func NewNormalHttpRepo(data *Data, logger log.Logger) normalhttp.RepoNormalHttp {
 	repo := &normalHttpRepo{
-		data:               data,
-		log:                log.NewHelper(logger),
-		partitionConsumers: make(map[int32]sarama.PartitionConsumer),
+		data: data,
+		log:  log.NewHelper(logger),
 	}
 	offset, _ := repo.getOffsetFromRedis()
 	partitionConsumer, err := data.kafkaConsumer.ConsumePartition(
@@ -39,118 +36,27 @@ func NewNormalHttpRepo(data *Data, logger log.Logger) normalhttp.RepoNormalHttp 
 	if err != nil {
 		panic(err)
 	}
-	repo.partitionConsumers[0] = partitionConsumer
+	repo.partitionConsumers = partitionConsumer
 	return repo
 }
 
-var consumeMutex sync.Mutex
-
-const (
-	normalHttpBatchSize = 100
-	consumeTimeout      = 55 * time.Second
-)
-
 func (n *normalHttpRepo) SaveNormalHttp2DB(ctx context.Context) error {
-	consumeMutex.Lock()
-	defer consumeMutex.Unlock()
-
-	// 1. 主动拉取消息（非阻塞模式）
-	var (
-		batchBuffer       = make([]*v1.NormalHttpInfo, 0, normalHttpBatchSize)
-		maxOffset   int64 = -1
-	)
-
-	// 设置5秒超时
-	timeoutCtx, cancel := context.WithTimeout(ctx, 5*time.Second)
-	defer cancel()
-
-Loop:
-	for {
-		select {
-		case message := <-n.partitionConsumers[0].Messages():
-			info, err := n.processMessage(message)
-			if err != nil {
-				n.log.Error("message processing failed: ", err)
-				continue
-			}
-			batchBuffer = append(batchBuffer, info)
-			maxOffset = message.Offset
-
-			// 批量达到阈值时立即写入
-			if len(batchBuffer) >= normalHttpBatchSize {
-				if err := n.commitBatch(batchBuffer, maxOffset); err != nil {
-					return err
-				}
-				batchBuffer = batchBuffer[:0]
-			}
-
-		case <-timeoutCtx.Done():
-			break Loop // 主动退出拉取循环
-
-		case err := <-n.partitionConsumers[0].Errors():
-			n.log.Errorf("Kafka consumer error: %v", err)
+	normalHttpInfoList := make([]*v1.NormalHttpInfo, 0)
+	var maxOffset int64 = 0
+	for msg := range n.partitionConsumers.Messages() {
+		normalHttpInfo, err := n.processMessage(msg)
+		if err != nil {
+			n.log.WithContext(ctx).Error(err)
+			return err
 		}
+		normalHttpInfoList = append(normalHttpInfoList, normalHttpInfo)
+		maxOffset = msg.Offset
 	}
-
-	// 2. 提交剩余批次
-	if len(batchBuffer) > 0 {
-		return n.commitBatch(batchBuffer, maxOffset)
+	if err := n.commitBatch(normalHttpInfoList, maxOffset); err != nil {
+		n.log.WithContext(ctx).Error(err)
+		return err
 	}
 	return nil
-}
-
-func (n *normalHttpRepo) Setup(session sarama.ConsumerGroupSession) error {
-	offset, err := n.getOffsetFromRedis()
-	if err != nil {
-		n.log.Warn("failed to get offset from redis, using default: ", err)
-		offset = 0
-	}
-
-	for partition := range session.Claims()[waftop.NormalHttpTopic] {
-		session.ResetOffset(waftop.NormalHttpTopic, int32(partition), offset, "")
-	}
-	n.log.Info("normal_http setup completed. initial offset:", offset)
-	return nil
-}
-
-func (n *normalHttpRepo) Cleanup(sarama.ConsumerGroupSession) error {
-	n.log.Info("normal_http consumer cleanup completed")
-	return nil
-}
-
-func (n *normalHttpRepo) ConsumeClaim(session sarama.ConsumerGroupSession, claim sarama.ConsumerGroupClaim) error {
-	var (
-		batchBuffer              = make([]*v1.NormalHttpInfo, 0, normalHttpBatchSize)
-		maxCommittedOffset int64 = -1
-	)
-	for {
-		select {
-		case message, ok := <-claim.Messages():
-			if !ok {
-				return n.finalCommit(session, batchBuffer, maxCommittedOffset)
-			}
-
-			info, err := n.processMessage(message)
-			if err != nil {
-				n.log.Error("message processing failed: ", err)
-				continue
-			}
-
-			batchBuffer = append(batchBuffer, info)
-			session.MarkMessage(message, "")
-			maxCommittedOffset = message.Offset
-
-			if len(batchBuffer) >= normalHttpBatchSize {
-				if err := n.commitBatch(batchBuffer, maxCommittedOffset); err != nil {
-					return err
-				}
-				batchBuffer = batchBuffer[:0]
-			}
-
-		case <-session.Context().Done():
-			return n.finalCommit(session, batchBuffer, maxCommittedOffset)
-		}
-	}
 }
 
 // processMessage 处理消息
