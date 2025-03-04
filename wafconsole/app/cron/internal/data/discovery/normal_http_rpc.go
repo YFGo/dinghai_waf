@@ -2,6 +2,7 @@ package discovery
 
 import (
 	"context"
+	"wafconsole/utils/const/waftop"
 
 	"github.com/go-kratos/kratos/v2/middleware/circuitbreaker"
 	"github.com/go-kratos/kratos/v2/middleware/recovery"
@@ -16,7 +17,7 @@ import (
 func NewNormalHttpRpc(r registry.Discovery) v1.NormalHttpClient {
 	conn, err := grpc.DialInsecure(
 		context.Background(),
-		grpc.WithEndpoint("127.0.0.1:9001"),
+		grpc.WithEndpoint(waftop.WafTopRpc),
 		grpc.WithDiscovery(r),
 		grpc.WithMiddleware(
 			// 异常恢复

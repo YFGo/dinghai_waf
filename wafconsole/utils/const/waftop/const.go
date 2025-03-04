@@ -9,7 +9,7 @@ const (
 
 // gRPC服务调用名
 const (
-	WafTopRpc = "/microservices/wafTop/wafTop"
+	WafTopRpc = "discovery:///wafconsole.wafTop"
 )
 
 const (

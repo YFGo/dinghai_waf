@@ -21,14 +21,15 @@ import (
 // go build -ldflags "-X main.Version=x.y.z"
 var (
 	// Name is the name of the compiled software.
-	Name = "wafTop"
+	Name = "wafconsole.wafTop"
 	// Version is the version of the compiled software.
-	Version string
+	Version = "v2.0.0"
 	// flagconf is the config flag.
 	flagconf string
 
 	hostname, _ = os.Hostname()
-	id          = fmt.Sprintf("%s", Name)
+	// id
+	id = fmt.Sprintf("%s/%s", hostname, Name)
 )
 
 func init() {
@@ -61,6 +62,7 @@ func main() {
 		"trace.id", tracing.TraceID(),
 		"span.id", tracing.SpanID(),
 	)
+
 	c := initConfig()
 	defer c.Close()
 
