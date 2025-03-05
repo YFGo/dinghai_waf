@@ -14,9 +14,9 @@ type NormalHttpService struct {
 func NewServiceNormalHttp(logger log.Logger, uc *normalhttp.UsercaseNormalHttp) *NormalHttpService {
 	return &NormalHttpService{
 		JobCommonService: JobCommonService{
-			Name: "normalhttp",
-			Spec: "0 */10 * * * ?",
-			Log:  log.NewHelper(logger),
+			name: "normalhttp",
+			spec: "0 */10 * * * ?",
+			log:  log.NewHelper(log.With(logger, "normal_http", "service")),
 		},
 		uc: uc,
 	}

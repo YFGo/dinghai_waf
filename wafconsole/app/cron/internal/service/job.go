@@ -11,17 +11,17 @@ type JobInterface interface {
 }
 
 type JobCommonService struct {
-	Name string
-	Spec string
-	Log  *log.Helper
+	name string
+	spec string
+	log  *log.Helper
 }
 
 func (d *JobCommonService) GetName() string {
-	return d.Name
+	return d.name
 }
 
 func (d *JobCommonService) GetSpec() string {
-	return d.Spec
+	return d.spec
 }
 
 type CronService struct {
