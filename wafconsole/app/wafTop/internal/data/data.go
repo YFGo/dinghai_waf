@@ -3,7 +3,6 @@ package data
 import (
 	"context"
 	"fmt"
-	"gorm.io/driver/clickhouse"
 	"log/slog"
 	"time"
 
@@ -11,11 +10,13 @@ import (
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/google/wire"
 	clientv3 "go.etcd.io/etcd/client/v3"
+	"gorm.io/driver/clickhouse"
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
 
 	"wafconsole/app/wafTop/internal/conf"
 	"wafconsole/app/wafTop/internal/hooks"
+	"wafconsole/utils/const/common"
 	"wafconsole/utils/migrate"
 )
 
@@ -143,7 +144,7 @@ func newMigrate(bootstrap *conf.Bootstrap) {
 		RedisAddr:     redisAddr,
 		RedisPassword: redisPassword,
 		RedisDB:       0,
-		MigrationDir:  "wafconsole/migrations",
+		MigrationDir:  common.MigratePath,
 		LockTimeout:   30 * time.Second,
 	}
 	migrator, err := migrate.NewDatabaseMigrator(cfgMigrate)
