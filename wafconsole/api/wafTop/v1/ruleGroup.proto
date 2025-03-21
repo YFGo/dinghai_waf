@@ -18,7 +18,7 @@ service RuleGroup {
 	};
 	rpc UpdateRuleGroup (UpdateRuleGroupRequest) returns (UpdateRuleGroupReply) {
 		option (google.api.http) = {
-			patch: "/app/wafTop/v1/ruleGroup"
+			put: "/app/wafTop/v1/ruleGroup"
 			body: "*"
 		};
 	};

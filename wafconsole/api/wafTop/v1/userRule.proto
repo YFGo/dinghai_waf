@@ -18,7 +18,7 @@ service UserRule {
 	};
 	rpc UpdateUserRule (UpdateUserRuleRequest) returns (UpdateUserRuleReply) {
 		option (google.api.http) = {
-			patch: "/app/wafTop/v1/userRule"
+			put: "/app/wafTop/v1/userRule"
 			body: "*"
 		};
 	};

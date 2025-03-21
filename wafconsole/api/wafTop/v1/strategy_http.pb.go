@@ -36,7 +36,7 @@ type StrategyHTTPServer interface {
 func RegisterStrategyHTTPServer(s *http.Server, srv StrategyHTTPServer) {
 	r := s.Route("/")
 	r.POST("/app/wafTop/v1/strategy", _Strategy_CreateStrategy0_HTTP_Handler(srv))
-	r.PATCH("/app/wafTop/v1/strategy", _Strategy_UpdateStrategy0_HTTP_Handler(srv))
+	r.put("/app/wafTop/v1/strategy", _Strategy_UpdateStrategy0_HTTP_Handler(srv))
 	r.DELETE("/app/wafTop/v1/strategy", _Strategy_DeleteStrategy0_HTTP_Handler(srv))
 	r.GET("/app/wafTop/v1/strategy/{id}", _Strategy_GetStrategy0_HTTP_Handler(srv))
 	r.GET("/app/wafTop/v1/strategies", _Strategy_ListStrategy0_HTTP_Handler(srv))
@@ -220,7 +220,7 @@ func (c *StrategyHTTPClientImpl) UpdateStrategy(ctx context.Context, in *UpdateS
 	path := binding.EncodeURL(pattern, in, false)
 	opts = append(opts, http.Operation(OperationStrategyUpdateStrategy))
 	opts = append(opts, http.PathTemplate(pattern))
-	err := c.cc.Invoke(ctx, "PATCH", path, in, &out, opts...)
+	err := c.cc.Invoke(ctx, "put", path, in, &out, opts...)
 	if err != nil {
 		return nil, err
 	}

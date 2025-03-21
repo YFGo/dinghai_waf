@@ -1,0 +1,226 @@
+# Generated with protoc-gen-openapi
+# https://github.com/google/gnostic/tree/master/cmd/protoc-gen-openapi
+
+openapi: 3.0.3
+info:
+    title: ""
+    version: 0.0.1
+paths:
+    /app/user/v1/waf/refreshToken:
+        post:
+            tags:
+                - Common
+            operationId: Common_CreateNewToken
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/api.user.v1.CreateNewTokenRequest'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/api.user.v1.CreateNewTokenReply'
+    /app/user/v1/wafUser:
+        put:
+            tags:
+                - WafUser
+            operationId: WafUser_UpdateWafUser
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/api.user.v1.UpdateWafUserRequest'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/api.user.v1.UpdateWafUserReply'
+        delete:
+            tags:
+                - WafUser
+            operationId: WafUser_DeleteWafUser
+            parameters:
+                - name: id
+                  in: query
+                  schema:
+                    type: string
+                - name: code
+                  in: query
+                  schema:
+                    type: string
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/api.user.v1.DeleteWafUserReply'
+    /app/user/v1/wafUser/login:
+        post:
+            tags:
+                - WafUser
+            operationId: WafUser_Login
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/api.user.v1.LoginUserInfoRequest'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/api.user.v1.LoginUserInfoReply'
+    /app/user/v1/wafUser/password:
+        put:
+            tags:
+                - WafUser
+            operationId: WafUser_UpdatePassword
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/api.user.v1.UpdatePasswordRequest'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/api.user.v1.UpdatePasswordReply'
+    /app/user/v1/wafUser/signup:
+        post:
+            tags:
+                - WafUser
+            operationId: WafUser_CreateWafUser
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/api.user.v1.CreateWafUserRequest'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/api.user.v1.CreateWafUserReply'
+    /app/user/v1/wafUser/{id}:
+        get:
+            tags:
+                - WafUser
+            operationId: WafUser_GetWafUser
+            parameters:
+                - name: id
+                  in: path
+                  required: true
+                  schema:
+                    type: string
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/api.user.v1.GetWafUserReply'
+components:
+    schemas:
+        api.user.v1.CreateNewTokenReply:
+            type: object
+            properties:
+                access_token:
+                    type: string
+                refresh_token:
+                    type: string
+                expire_at:
+                    type: string
+        api.user.v1.CreateNewTokenRequest:
+            type: object
+            properties:
+                refresh_token:
+                    type: string
+            description: '####### common ########'
+        api.user.v1.CreateWafUserReply:
+            type: object
+            properties: {}
+        api.user.v1.CreateWafUserRequest:
+            type: object
+            properties:
+                email:
+                    type: string
+                code:
+                    type: string
+                password:
+                    type: string
+        api.user.v1.DeleteWafUserReply:
+            type: object
+            properties: {}
+        api.user.v1.GetWafUserReply:
+            type: object
+            properties:
+                email:
+                    type: string
+                user_name:
+                    type: string
+                avatar_addr:
+                    type: string
+                phone:
+                    type: string
+        api.user.v1.LoginUserInfoReply:
+            type: object
+            properties:
+                access_token:
+                    type: string
+                refresh_token:
+                    type: string
+        api.user.v1.LoginUserInfoRequest:
+            type: object
+            properties:
+                login_method:
+                    type: string
+                phone:
+                    type: string
+                email:
+                    type: string
+                code:
+                    type: string
+                password:
+                    type: string
+        api.user.v1.UpdatePasswordReply:
+            type: object
+            properties: {}
+        api.user.v1.UpdatePasswordRequest:
+            type: object
+            properties:
+                id:
+                    type: string
+                code:
+                    type: string
+                password:
+                    type: string
+        api.user.v1.UpdateWafUserReply:
+            type: object
+            properties: {}
+        api.user.v1.UpdateWafUserRequest:
+            type: object
+            properties:
+                user_name:
+                    type: string
+                avatar_addr:
+                    type: string
+                phone:
+                    type: string
+tags:
+    - name: Common
+    - name: WafUser

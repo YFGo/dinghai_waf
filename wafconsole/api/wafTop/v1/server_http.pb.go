@@ -36,7 +36,7 @@ type ServerHTTPServer interface {
 func RegisterServerHTTPServer(s *http.Server, srv ServerHTTPServer) {
 	r := s.Route("/")
 	r.POST("/app/wafTop/v1/serverWaf", _Server_CreateServer0_HTTP_Handler(srv))
-	r.PATCH("/app/wafTop/v1/serverWaf", _Server_UpdateServer0_HTTP_Handler(srv))
+	r.put("/app/wafTop/v1/serverWaf", _Server_UpdateServer0_HTTP_Handler(srv))
 	r.DELETE("/app/wafTop/v1/serverWaf", _Server_DeleteServer0_HTTP_Handler(srv))
 	r.GET("/app/wafTop/v1/serverWaf/{id}", _Server_GetServer0_HTTP_Handler(srv))
 	r.GET("/app/wafTop/v1/serverWafs", _Server_ListServer0_HTTP_Handler(srv))
@@ -220,7 +220,7 @@ func (c *ServerHTTPClientImpl) UpdateServer(ctx context.Context, in *UpdateServe
 	path := binding.EncodeURL(pattern, in, false)
 	opts = append(opts, http.Operation(OperationServerUpdateServer))
 	opts = append(opts, http.PathTemplate(pattern))
-	err := c.cc.Invoke(ctx, "PATCH", path, in, &out, opts...)
+	err := c.cc.Invoke(ctx, "put", path, in, &out, opts...)
 	if err != nil {
 		return nil, err
 	}
