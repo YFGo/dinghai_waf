@@ -36,7 +36,7 @@ type AllowListHTTPServer interface {
 func RegisterAllowListHTTPServer(s *http.Server, srv AllowListHTTPServer) {
 	r := s.Route("/")
 	r.POST("/app/wafTop/v1/allow", _AllowList_CreateAllowList0_HTTP_Handler(srv))
-	r.PATCH("/app/wafTop/v1/allow", _AllowList_UpdateAllowList0_HTTP_Handler(srv))
+	r.put("/app/wafTop/v1/allow", _AllowList_UpdateAllowList0_HTTP_Handler(srv))
 	r.DELETE("/app/wafTop/v1/allow", _AllowList_DeleteAllowList0_HTTP_Handler(srv))
 	r.GET("/app/wafTop/v1/allow/{id}", _AllowList_GetAllowList0_HTTP_Handler(srv))
 	r.GET("/app/wafTop/v1/allows", _AllowList_ListAllowList0_HTTP_Handler(srv))
@@ -220,7 +220,7 @@ func (c *AllowListHTTPClientImpl) UpdateAllowList(ctx context.Context, in *Updat
 	path := binding.EncodeURL(pattern, in, false)
 	opts = append(opts, http.Operation(OperationAllowListUpdateAllowList))
 	opts = append(opts, http.PathTemplate(pattern))
-	err := c.cc.Invoke(ctx, "PATCH", path, in, &out, opts...)
+	err := c.cc.Invoke(ctx, "put", path, in, &out, opts...)
 	if err != nil {
 		return nil, err
 	}

@@ -30,7 +30,7 @@ type WafAppHTTPServer interface {
 func RegisterWafAppHTTPServer(s *http.Server, srv WafAppHTTPServer) {
 	r := s.Route("/")
 	r.POST("/app/wafTop/v1/wafApp", _WafApp_CreateWafApp0_HTTP_Handler(srv))
-	r.PATCH("/app/wafTop/v1/wafApp", _WafApp_UpdateWafApp0_HTTP_Handler(srv))
+	r.put("/app/wafTop/v1/wafApp", _WafApp_UpdateWafApp0_HTTP_Handler(srv))
 }
 
 func _WafApp_CreateWafApp0_HTTP_Handler(srv WafAppHTTPServer) func(ctx http.Context) error {
@@ -109,7 +109,7 @@ func (c *WafAppHTTPClientImpl) UpdateWafApp(ctx context.Context, in *UpdateWafAp
 	path := binding.EncodeURL(pattern, in, false)
 	opts = append(opts, http.Operation(OperationWafAppUpdateWafApp))
 	opts = append(opts, http.PathTemplate(pattern))
-	err := c.cc.Invoke(ctx, "PATCH", path, in, &out, opts...)
+	err := c.cc.Invoke(ctx, "put", path, in, &out, opts...)
 	if err != nil {
 		return nil, err
 	}

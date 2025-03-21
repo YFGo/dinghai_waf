@@ -18,7 +18,7 @@ service Strategy {
 	};
 	rpc UpdateStrategy (UpdateStrategyRequest) returns (UpdateStrategyReply) {
 		option (google.api.http) = {
-			patch: "/app/wafTop/v1/strategy"
+			put: "/app/wafTop/v1/strategy"
 			body: "*"
 		};
 	};

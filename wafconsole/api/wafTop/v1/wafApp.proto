@@ -18,7 +18,7 @@ service WafApp {
 	};
 	rpc UpdateWafApp (UpdateWafAppRequest) returns (UpdateWafAppReply) {
 		option (google.api.http) = {
-			patch: "/app/wafTop/v1/wafApp"
+			put: "/app/wafTop/v1/wafApp"
 			body: "*"
 		};
 	};

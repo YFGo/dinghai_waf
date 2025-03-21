@@ -32,7 +32,7 @@ type UserRuleHTTPServer interface {
 func RegisterUserRuleHTTPServer(s *http.Server, srv UserRuleHTTPServer) {
 	r := s.Route("/")
 	r.POST("/app/wafTop/v1/userRule", _UserRule_CreateUserRule0_HTTP_Handler(srv))
-	r.PATCH("/app/wafTop/v1/userRule", _UserRule_UpdateUserRule0_HTTP_Handler(srv))
+	r.put("/app/wafTop/v1/userRule", _UserRule_UpdateUserRule0_HTTP_Handler(srv))
 	r.DELETE("/app/wafTop/v1/userRule", _UserRule_DeleteUserRule0_HTTP_Handler(srv))
 }
 
@@ -145,7 +145,7 @@ func (c *UserRuleHTTPClientImpl) UpdateUserRule(ctx context.Context, in *UpdateU
 	path := binding.EncodeURL(pattern, in, false)
 	opts = append(opts, http.Operation(OperationUserRuleUpdateUserRule))
 	opts = append(opts, http.PathTemplate(pattern))
-	err := c.cc.Invoke(ctx, "PATCH", path, in, &out, opts...)
+	err := c.cc.Invoke(ctx, "put", path, in, &out, opts...)
 	if err != nil {
 		return nil, err
 	}

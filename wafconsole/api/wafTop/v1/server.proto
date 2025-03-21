@@ -22,7 +22,7 @@ service Server {
 	};
 	rpc UpdateServer (UpdateServerRequest) returns (UpdateServerReply) {
 		option (google.api.http) = {
-			patch: "/app/wafTop/v1/serverWaf"
+			put: "/app/wafTop/v1/serverWaf"
 			body: "*"
 		};
 	};

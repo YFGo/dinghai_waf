@@ -2,7 +2,7 @@ syntax = "proto3";
 
 package api.user.v1;
 
-import "api/user/v1/message.proto";
+import "v1/message.proto";
 import "google/api/annotations.proto";
 
 option go_package = "wafconsole/api/user/v1;v1";
@@ -18,7 +18,7 @@ service WafUser {
 	};
 	rpc UpdateWafUser (UpdateWafUserRequest) returns (UpdateWafUserReply) {
 		option (google.api.http) = {
-			patch: "/app/user/v1/wafUser"
+			put: "/app/user/v1/wafUser"
 			body: "*"
 		};
 	};
@@ -40,7 +40,7 @@ service WafUser {
 	};
 	rpc UpdatePassword(UpdatePasswordRequest) returns (UpdatePasswordReply) {
 		option (google.api.http) = {
-			patch: "/app/user/v1/wafUser/password"
+			put: "/app/user/v1/wafUser/password"
 			body: "*"
 		};
 	};
