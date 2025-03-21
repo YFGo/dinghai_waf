@@ -2,7 +2,7 @@
 // versions:
 // - protoc-gen-go-grpc v1.5.1
 // - protoc             v3.12.4
-// source: api/wafTop/v1/normal_http.proto
+// source: v1/normal_http.proto
 
 package v1
 
@@ -269,5 +269,5 @@ var NormalHttp_ServiceDesc = grpc.ServiceDesc{
 		},
 	},
 	Streams:  []grpc.StreamDesc{},
-	Metadata: "api/wafTop/v1/normal_http.proto",
+	Metadata: "v1/normal_http.proto",
 }

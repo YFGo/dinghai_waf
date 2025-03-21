@@ -1,0 +1,196 @@
+# Generated with protoc-gen-openapi
+# https://github.com/google/gnostic/tree/master/cmd/protoc-gen-openapi
+
+openapi: 3.0.3
+info:
+    title: DataView API
+    version: 0.0.1
+paths:
+    /app/dashBorad/v1/attack/dataView:
+        get:
+            tags:
+                - DataView
+            operationId: DataView_GetAttackInfoFromDay
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/api.dashBorad.v1.GetAttackInfoFromDayReply'
+    /app/dashBorad/v1/attack/detail:
+        get:
+            tags:
+                - DataView
+            operationId: DataView_GetAttackDetail
+            parameters:
+                - name: log_id
+                  in: query
+                  schema:
+                    type: string
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/api.dashBorad.v1.GetAttackDetailReply'
+    app/dashBorad/v1/attack/IPAddr:
+        get:
+            tags:
+                - DataView
+            operationId: DataView_GetAttackIpFromAddr
+            parameters:
+                - name: start_time
+                  in: query
+                  schema:
+                    type: string
+                - name: end_time
+                  in: query
+                  schema:
+                    type: string
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/api.dashBorad.v1.GetAttackIpFromAddrReply'
+    app/dashBorad/v1/attack/dataViews:
+        get:
+            tags:
+                - DataView
+            operationId: DataView_GetAttackInfoByTime
+            parameters:
+                - name: start_time
+                  in: query
+                  schema:
+                    type: string
+                - name: end_time
+                  in: query
+                  schema:
+                    type: string
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/api.dashBorad.v1.GetAttackInfoByTimeReply'
+    app/dashBorad/v1/attack/servers:
+        get:
+            tags:
+                - DataView
+            operationId: DataView_GetAttackInfoFromServer
+            parameters:
+                - name: start_time
+                  in: query
+                  schema:
+                    type: string
+                - name: end_time
+                  in: query
+                  schema:
+                    type: string
+                - name: page_now
+                  in: query
+                  schema:
+                    type: string
+                - name: page_size
+                  in: query
+                  schema:
+                    type: string
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/api.dashBorad.v1.GetAttackInfoFromServerReply'
+components:
+    schemas:
+        api.dashBorad.v1.AttackInfoByTime:
+            type: object
+            properties:
+                time:
+                    type: string
+                attack_count:
+                    type: string
+                attack_ip_count:
+                    type: string
+        api.dashBorad.v1.GetAttackDetailReply:
+            type: object
+            properties:
+                uri:
+                    type: string
+                ctime:
+                    type: string
+                protocol:
+                    type: string
+                request:
+                    type: string
+                request_method:
+                    type: string
+                client_ip:
+                    type: string
+                rule_name:
+                    type: string
+                rule_desc:
+                    type: string
+                client_port:
+                    type: string
+        api.dashBorad.v1.GetAttackInfoByTimeReply:
+            type: object
+            properties:
+                attack_info_by_times:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/api.dashBorad.v1.AttackInfoByTime'
+        api.dashBorad.v1.GetAttackInfoFormServer:
+            type: object
+            properties:
+                log_id:
+                    type: string
+                uri:
+                    type: string
+                ctime:
+                    type: string
+                rule_name:
+                    type: string
+        api.dashBorad.v1.GetAttackInfoFromDayReply:
+            type: object
+            properties:
+                attack_count:
+                    type: string
+                attack_ip_count:
+                    type: string
+                attack_add:
+                    type: number
+                    format: float
+                attack_ip_add:
+                    type: number
+                    format: float
+        api.dashBorad.v1.GetAttackInfoFromServerReply:
+            type: object
+            properties:
+                get_attack_info_form_server:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/api.dashBorad.v1.GetAttackInfoFormServer'
+                total:
+                    type: string
+        api.dashBorad.v1.GetAttackIpFromAddrReply:
+            type: object
+            properties:
+                ip_from_addr_counts:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/api.dashBorad.v1.IpFromAddrCount'
+        api.dashBorad.v1.IpFromAddrCount:
+            type: object
+            properties:
+                addr:
+                    type: string
+                count:
+                    type: string
+tags:
+    - name: DataView
