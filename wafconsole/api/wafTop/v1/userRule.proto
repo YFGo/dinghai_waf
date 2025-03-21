@@ -2,7 +2,7 @@ syntax = "proto3";
 
 package api.wafTop.v1;
 
-import "api/wafTop/v1/message.proto";
+import "v1/message.proto";
 import "google/api/annotations.proto";
 
 option go_package = "wafconsole/api/wafTop/v1;v1";

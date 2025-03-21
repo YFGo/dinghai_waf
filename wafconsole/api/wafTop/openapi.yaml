@@ -1,0 +1,1123 @@
+# Generated with protoc-gen-openapi
+# https://github.com/google/gnostic/tree/master/cmd/protoc-gen-openapi
+
+openapi: 3.0.3
+info:
+    title: ""
+    version: 0.0.1
+paths:
+    /app/wafTop/v1/allow:
+        put:
+            tags:
+                - AllowList
+            operationId: AllowList_UpdateAllowList
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/api.wafTop.v1.UpdateAllowListRequest'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/api.wafTop.v1.UpdateAllowListReply'
+        post:
+            tags:
+                - AllowList
+            operationId: AllowList_CreateAllowList
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/api.wafTop.v1.CreateAllowListRequest'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/api.wafTop.v1.CreateAllowListReply'
+        delete:
+            tags:
+                - AllowList
+            operationId: AllowList_DeleteAllowList
+            parameters:
+                - name: ids
+                  in: query
+                  schema:
+                    type: array
+                    items:
+                        type: string
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/api.wafTop.v1.DeleteAllowListReply'
+    /app/wafTop/v1/allow/{id}:
+        get:
+            tags:
+                - AllowList
+            operationId: AllowList_GetAllowList
+            parameters:
+                - name: id
+                  in: path
+                  required: true
+                  schema:
+                    type: string
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/api.wafTop.v1.GetAllowListReply'
+    /app/wafTop/v1/allows:
+        get:
+            tags:
+                - AllowList
+            operationId: AllowList_ListAllowList
+            parameters:
+                - name: name
+                  in: query
+                  schema:
+                    type: string
+                - name: page_now
+                  in: query
+                  schema:
+                    type: string
+                - name: page_size
+                  in: query
+                  schema:
+                    type: string
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/api.wafTop.v1.ListAllowListReply'
+    /app/wafTop/v1/buildinRule/{id}:
+        get:
+            tags:
+                - BuildRule
+            operationId: BuildRule_GetBuildRule
+            parameters:
+                - name: id
+                  in: path
+                  required: true
+                  schema:
+                    type: string
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/api.wafTop.v1.GetBuildRuleReply'
+    /app/wafTop/v1/buildinRules:
+        get:
+            tags:
+                - BuildRule
+            operationId: BuildRule_ListBuildRule
+            parameters:
+                - name: name
+                  in: query
+                  schema:
+                    type: string
+                - name: page_now
+                  in: query
+                  schema:
+                    type: string
+                - name: page_size
+                  in: query
+                  schema:
+                    type: string
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/api.wafTop.v1.ListBuildRuleReply'
+    /app/wafTop/v1/ruleGroup:
+        put:
+            tags:
+                - RuleGroup
+            operationId: RuleGroup_DeleteRuleGroup
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/api.wafTop.v1.DeleteRuleGroupRequest'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/api.wafTop.v1.DeleteRuleGroupReply'
+        post:
+            tags:
+                - RuleGroup
+            operationId: RuleGroup_CreateRuleGroup
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/api.wafTop.v1.CreateRuleGroupRequest'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/api.wafTop.v1.CreateRuleGroupReply'
+    /app/wafTop/v1/ruleGroup/{id}:
+        get:
+            tags:
+                - RuleGroup
+            operationId: RuleGroup_GetRuleGroup
+            parameters:
+                - name: id
+                  in: path
+                  required: true
+                  schema:
+                    type: string
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/api.wafTop.v1.GetRuleGroupReply'
+    /app/wafTop/v1/ruleGroups:
+        get:
+            tags:
+                - RuleGroup
+            operationId: RuleGroup_ListRuleGroup
+            parameters:
+                - name: name
+                  in: query
+                  schema:
+                    type: string
+                - name: is_buildin
+                  in: query
+                  schema:
+                    type: string
+                - name: page_now
+                  in: query
+                  schema:
+                    type: string
+                - name: page_size
+                  in: query
+                  schema:
+                    type: string
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/api.wafTop.v1.ListRuleGroupReply'
+    /app/wafTop/v1/serverWaf:
+        put:
+            tags:
+                - Server
+            operationId: Server_UpdateServer
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/api.wafTop.v1.UpdateServerRequest'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/api.wafTop.v1.UpdateServerReply'
+        post:
+            tags:
+                - Server
+            operationId: Server_CreateServer
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/api.wafTop.v1.CreateServerRequest'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/api.wafTop.v1.CreateServerReply'
+        delete:
+            tags:
+                - Server
+            operationId: Server_DeleteServer
+            parameters:
+                - name: ids
+                  in: query
+                  schema:
+                    type: array
+                    items:
+                        type: string
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/api.wafTop.v1.DeleteReply'
+    /app/wafTop/v1/serverWaf/{id}:
+        get:
+            tags:
+                - Server
+            operationId: Server_GetServer
+            parameters:
+                - name: id
+                  in: path
+                  required: true
+                  schema:
+                    type: string
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/api.wafTop.v1.GetServerReply'
+    /app/wafTop/v1/serverWafs:
+        get:
+            tags:
+                - Server
+            operationId: Server_ListServer
+            parameters:
+                - name: name
+                  in: query
+                  schema:
+                    type: string
+                - name: page_now
+                  in: query
+                  schema:
+                    type: string
+                - name: page_size
+                  in: query
+                  schema:
+                    type: string
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/api.wafTop.v1.ListServerReply'
+    /app/wafTop/v1/strategies:
+        get:
+            tags:
+                - Strategy
+            operationId: Strategy_ListStrategy
+            parameters:
+                - name: name
+                  in: query
+                  schema:
+                    type: string
+                - name: status
+                  in: query
+                  schema:
+                    type: string
+                - name: page_now
+                  in: query
+                  schema:
+                    type: string
+                - name: page_size
+                  in: query
+                  schema:
+                    type: string
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/api.wafTop.v1.ListStrategyReply'
+    /app/wafTop/v1/strategy:
+        put:
+            tags:
+                - Strategy
+            operationId: Strategy_UpdateStrategy
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/api.wafTop.v1.UpdateStrategyRequest'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/api.wafTop.v1.UpdateStrategyReply'
+        post:
+            tags:
+                - Strategy
+            operationId: Strategy_CreateStrategy
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/api.wafTop.v1.CreateStrategyRequest'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/api.wafTop.v1.CreateStrategyReply'
+        delete:
+            tags:
+                - Strategy
+            operationId: Strategy_DeleteStrategy
+            parameters:
+                - name: ids
+                  in: query
+                  schema:
+                    type: array
+                    items:
+                        type: string
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/api.wafTop.v1.DeleteStrategyReply'
+    /app/wafTop/v1/strategy/{id}:
+        get:
+            tags:
+                - Strategy
+            operationId: Strategy_GetStrategy
+            parameters:
+                - name: id
+                  in: path
+                  required: true
+                  schema:
+                    type: string
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/api.wafTop.v1.GetStrategyReply'
+    /app/wafTop/v1/userRule:
+        put:
+            tags:
+                - UserRule
+            operationId: UserRule_UpdateUserRule
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/api.wafTop.v1.UpdateUserRuleRequest'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/api.wafTop.v1.UpdateUserRuleReply'
+        post:
+            tags:
+                - UserRule
+            operationId: UserRule_CreateUserRule
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/api.wafTop.v1.CreateUserRuleRequest'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/api.wafTop.v1.CreateUserRuleReply'
+        delete:
+            tags:
+                - UserRule
+            operationId: UserRule_DeleteUserRule
+            parameters:
+                - name: ids
+                  in: query
+                  schema:
+                    type: array
+                    items:
+                        type: string
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/api.wafTop.v1.DeleteUserRuleReply'
+    /app/wafTop/v1/wafApp:
+        put:
+            tags:
+                - WafApp
+            operationId: WafApp_UpdateWafApp
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/api.wafTop.v1.UpdateWafAppRequest'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/api.wafTop.v1.UpdateWafAppReply'
+        post:
+            tags:
+                - WafApp
+            operationId: WafApp_CreateWafApp
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/api.wafTop.v1.CreateWafAppRequest'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/api.wafTop.v1.CreateWafAppReply'
+    /app/waf_top/v1/notice:
+        post:
+            tags:
+                - Notice
+            operationId: Notice_CreateNotice
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/api.wafTop.v1.CreateNoticeRequest'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/api.wafTop.v1.CreateNoticeReply'
+        delete:
+            tags:
+                - Notice
+            operationId: Notice_DeleteNotice
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/api.wafTop.v1.DeleteNoticeReply'
+    /app/waf_top/v1/notice/state:
+        put:
+            tags:
+                - Notice
+            operationId: Notice_UpdateNotice
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/api.wafTop.v1.UpdateNoticeRequest'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/api.wafTop.v1.UpdateNoticeReply'
+    /app/waf_top/v1/notice/{id}:
+        get:
+            tags:
+                - Notice
+            operationId: Notice_GetNotice
+            parameters:
+                - name: id
+                  in: path
+                  required: true
+                  schema:
+                    type: string
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/api.wafTop.v1.GetNoticeReply'
+    /app/waf_top/v1/notices:
+        get:
+            tags:
+                - Notice
+            operationId: Notice_ListNotice
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/api.wafTop.v1.ListNoticeReply'
+    /app/waf_top/v1/server_principal:
+        post:
+            tags:
+                - ServerPrincipal
+            operationId: ServerPrincipal_GetServerPrincipal
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/api.wafTop.v1.GetServerPrincipalRequest'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/api.wafTop.v1.GetServerPrincipalReply'
+components:
+    schemas:
+        api.wafTop.v1.AllowListInfo:
+            type: object
+            properties:
+                id:
+                    type: string
+                name:
+                    type: string
+                key:
+                    type: string
+                value:
+                    type: string
+                created_at:
+                    type: string
+                updated_at:
+                    type: string
+        api.wafTop.v1.BuildinRule:
+            type: object
+            properties:
+                id:
+                    type: string
+                risk_level:
+                    type: string
+                name:
+                    type: string
+                description:
+                    type: string
+                group_id:
+                    type: string
+                created_at:
+                    type: string
+                updated_at:
+                    type: string
+        api.wafTop.v1.CreateAllowListReply:
+            type: object
+            properties: {}
+        api.wafTop.v1.CreateAllowListRequest:
+            type: object
+            properties:
+                name:
+                    type: string
+                description:
+                    type: string
+                key:
+                    type: string
+                value:
+                    type: string
+            description: '######### 白名单 #########'
+        api.wafTop.v1.CreateNoticeReply:
+            type: object
+            properties: {}
+        api.wafTop.v1.CreateNoticeRequest:
+            type: object
+            properties: {}
+            description: '##### notice'
+        api.wafTop.v1.CreateRuleGroupReply:
+            type: object
+            properties: {}
+        api.wafTop.v1.CreateRuleGroupRequest:
+            type: object
+            properties:
+                name:
+                    type: string
+                description:
+                    type: string
+                is_buildin:
+                    type: string
+            description: '####### 规则组 #########'
+        api.wafTop.v1.CreateServerReply:
+            type: object
+            properties: {}
+        api.wafTop.v1.CreateServerRequest:
+            type: object
+            properties:
+                name:
+                    type: string
+                ip:
+                    type: string
+                uri_key:
+                    type: string
+                port:
+                    type: string
+                strategy_ids:
+                    type: array
+                    items:
+                        type: string
+                allow_ids:
+                    type: array
+                    items:
+                        type: string
+            description: waf保护的服务器
+        api.wafTop.v1.CreateStrategyReply:
+            type: object
+            properties: {}
+        api.wafTop.v1.CreateStrategyRequest:
+            type: object
+            properties:
+                name:
+                    type: string
+                description:
+                    type: string
+                status:
+                    type: string
+                action:
+                    type: string
+                next_action:
+                    type: string
+                group_id:
+                    type: array
+                    items:
+                        type: string
+        api.wafTop.v1.CreateUserRuleReply:
+            type: object
+            properties: {}
+        api.wafTop.v1.CreateUserRuleRequest:
+            type: object
+            properties:
+                name:
+                    type: string
+                description:
+                    type: string
+                risk_level:
+                    type: string
+                group_id:
+                    type: string
+                seclang_mod:
+                    $ref: '#/components/schemas/api.wafTop.v1.SeclangMod'
+            description: '########## 用户自定义规则 #########'
+        api.wafTop.v1.CreateWafAppReply:
+            type: object
+            properties: {}
+        api.wafTop.v1.CreateWafAppRequest:
+            type: object
+            properties:
+                name:
+                    type: string
+                url:
+                    type: string
+                server_id:
+                    type: string
+            description: waf保护的应用程序
+        api.wafTop.v1.DeleteAllowListReply:
+            type: object
+            properties: {}
+        api.wafTop.v1.DeleteNoticeReply:
+            type: object
+            properties: {}
+        api.wafTop.v1.DeleteReply:
+            type: object
+            properties: {}
+        api.wafTop.v1.DeleteRuleGroupInfo:
+            type: object
+            properties:
+                id:
+                    type: string
+                is_buildin:
+                    type: string
+        api.wafTop.v1.DeleteRuleGroupReply:
+            type: object
+            properties: {}
+        api.wafTop.v1.DeleteRuleGroupRequest:
+            type: object
+            properties:
+                delete_rule_group_infos:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/api.wafTop.v1.DeleteRuleGroupInfo'
+        api.wafTop.v1.DeleteStrategyReply:
+            type: object
+            properties: {}
+        api.wafTop.v1.DeleteUserRuleReply:
+            type: object
+            properties: {}
+        api.wafTop.v1.GetAllowListReply:
+            type: object
+            properties:
+                name:
+                    type: string
+                description:
+                    type: string
+                key:
+                    type: string
+                value:
+                    type: string
+                created_at:
+                    type: string
+                updated_at:
+                    type: string
+        api.wafTop.v1.GetBuildRuleReply:
+            type: object
+            properties:
+                name:
+                    type: string
+                description:
+                    type: string
+                risk_level:
+                    type: string
+                group_id:
+                    type: string
+        api.wafTop.v1.GetNoticeReply:
+            type: object
+            properties: {}
+        api.wafTop.v1.GetRuleGroupReply:
+            type: object
+            properties:
+                name:
+                    type: string
+                description:
+                    type: string
+                is_buildin:
+                    type: string
+                list_rules:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/api.wafTop.v1.ListRuleInfoByGroup'
+        api.wafTop.v1.GetServerPrincipalReply:
+            type: object
+            properties: {}
+        api.wafTop.v1.GetServerPrincipalRequest:
+            type: object
+            properties: {}
+            description: '#### 网站负责人'
+        api.wafTop.v1.GetServerReply:
+            type: object
+            properties:
+                name:
+                    type: string
+                ip:
+                    type: string
+                uri_key:
+                    type: string
+                port:
+                    type: string
+                strategies_id:
+                    type: array
+                    items:
+                        type: string
+                allow_ids:
+                    type: array
+                    items:
+                        type: string
+                waf_apps:
+                    $ref: '#/components/schemas/api.wafTop.v1.WafAppInfo'
+        api.wafTop.v1.GetStrategyReply:
+            type: object
+            properties:
+                name:
+                    type: string
+                description:
+                    type: string
+                status:
+                    type: string
+                action:
+                    type: string
+                next_action:
+                    type: string
+                rule_group_infos:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/api.wafTop.v1.RuleGroupInfo'
+        api.wafTop.v1.ListAllowListReply:
+            type: object
+            properties:
+                total:
+                    type: string
+                list_allow_list:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/api.wafTop.v1.AllowListInfo'
+        api.wafTop.v1.ListBuildRuleReply:
+            type: object
+            properties:
+                total:
+                    type: string
+                buildin_rules:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/api.wafTop.v1.BuildinRule'
+        api.wafTop.v1.ListNoticeReply:
+            type: object
+            properties: {}
+        api.wafTop.v1.ListRuleGroupReply:
+            type: object
+            properties:
+                total:
+                    type: string
+                rule_group_infos:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/api.wafTop.v1.RuleGroupInfo'
+        api.wafTop.v1.ListRuleInfoByGroup:
+            type: object
+            properties:
+                id:
+                    type: string
+                name:
+                    type: string
+                description:
+                    type: string
+                status:
+                    type: string
+                risk_level:
+                    type: string
+                seclang_mod:
+                    $ref: '#/components/schemas/api.wafTop.v1.SeclangMod'
+        api.wafTop.v1.ListServerReply:
+            type: object
+            properties:
+                total:
+                    type: string
+                list_servers:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/api.wafTop.v1.ServerInfo'
+        api.wafTop.v1.ListStrategyReply:
+            type: object
+            properties:
+                total:
+                    type: string
+                strategies:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/api.wafTop.v1.StrategyInfo'
+        api.wafTop.v1.RuleGroupInfo:
+            type: object
+            properties:
+                id:
+                    type: string
+                name:
+                    type: string
+                description:
+                    type: string
+                is_buildin:
+                    type: string
+                created_at:
+                    type: string
+                updated_at:
+                    type: string
+        api.wafTop.v1.SeclangMod:
+            type: object
+            properties:
+                match_goal:
+                    type: string
+                match_action:
+                    type: string
+                match_content:
+                    type: string
+        api.wafTop.v1.ServerInfo:
+            type: object
+            properties:
+                name:
+                    type: string
+                ip:
+                    type: string
+                uri_key:
+                    type: string
+                port:
+                    type: string
+                id:
+                    type: string
+        api.wafTop.v1.StrategyInfo:
+            type: object
+            properties:
+                id:
+                    type: string
+                status:
+                    type: string
+                action:
+                    type: string
+                next_action:
+                    type: string
+                name:
+                    type: string
+                description:
+                    type: string
+                created_at:
+                    type: string
+                updated_at:
+                    type: string
+        api.wafTop.v1.UpdateAllowListReply:
+            type: object
+            properties: {}
+        api.wafTop.v1.UpdateAllowListRequest:
+            type: object
+            properties:
+                name:
+                    type: string
+                description:
+                    type: string
+                key:
+                    type: string
+                value:
+                    type: string
+                id:
+                    type: string
+        api.wafTop.v1.UpdateNoticeReply:
+            type: object
+            properties: {}
+        api.wafTop.v1.UpdateNoticeRequest:
+            type: object
+            properties: {}
+        api.wafTop.v1.UpdateRuleGroupReply:
+            type: object
+            properties: {}
+        api.wafTop.v1.UpdateRuleGroupRequest:
+            type: object
+            properties:
+                id:
+                    type: string
+                name:
+                    type: string
+                description:
+                    type: string
+                is_buildin:
+                    type: string
+        api.wafTop.v1.UpdateServerReply:
+            type: object
+            properties: {}
+        api.wafTop.v1.UpdateServerRequest:
+            type: object
+            properties:
+                name:
+                    type: string
+                ip:
+                    type: string
+                uri_key:
+                    type: string
+                old_uri_key:
+                    type: string
+                port:
+                    type: string
+                id:
+                    type: string
+                strategy_ids:
+                    type: array
+                    items:
+                        type: string
+                allow_ids:
+                    type: array
+                    items:
+                        type: string
+        api.wafTop.v1.UpdateStrategyReply:
+            type: object
+            properties: {}
+        api.wafTop.v1.UpdateStrategyRequest:
+            type: object
+            properties:
+                name:
+                    type: string
+                description:
+                    type: string
+                status:
+                    type: string
+                action:
+                    type: string
+                next_action:
+                    type: string
+                group_id:
+                    type: array
+                    items:
+                        type: string
+                id:
+                    type: string
+        api.wafTop.v1.UpdateUserRuleReply:
+            type: object
+            properties: {}
+        api.wafTop.v1.UpdateUserRuleRequest:
+            type: object
+            properties:
+                id:
+                    type: string
+                name:
+                    type: string
+                description:
+                    type: string
+                risk_level:
+                    type: string
+                group_id:
+                    type: string
+                seclang_mod:
+                    $ref: '#/components/schemas/api.wafTop.v1.SeclangMod'
+        api.wafTop.v1.UpdateWafAppReply:
+            type: object
+            properties: {}
+        api.wafTop.v1.UpdateWafAppRequest:
+            type: object
+            properties:
+                name:
+                    type: string
+                url:
+                    type: string
+                server_id:
+                    type: string
+                id:
+                    type: string
+        api.wafTop.v1.WafAppInfo:
+            type: object
+            properties:
+                id:
+                    type: string
+                name:
+                    type: string
+                url:
+                    type: string
+tags:
+    - name: AllowList
+    - name: BuildRule
+    - name: Notice
+    - name: RuleGroup
+    - name: Server
+    - name: ServerPrincipal
+    - name: Strategy
+    - name: UserRule
+    - name: WafApp

@@ -872,7 +872,15 @@ message UpdateNoticeReply {}
 message DeleteNoticeRequest {}
 message DeleteNoticeReply {}
 
-message GetNoticeRequest {}
+message GetNoticeRequest {
+	int64 id = 1 [
+		(buf.validate.field).cel = {
+			id: "id",
+			message: "公告不存在",
+			expression: "this > 0"
+		}
+	];
+}
 message GetNoticeReply {}
 
 message ListNoticeRequest {}
