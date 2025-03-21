@@ -10,6 +10,7 @@ import (
 
 	_ "github.com/ClickHouse/clickhouse-go/v2"
 	"github.com/go-redis/redis/v8"
+	_ "github.com/go-sql-driver/mysql"
 	"github.com/golang-migrate/migrate/v4"
 	"github.com/golang-migrate/migrate/v4/database"
 	chMigrate "github.com/golang-migrate/migrate/v4/database/clickhouse"
@@ -17,9 +18,8 @@ import (
 	_ "github.com/golang-migrate/migrate/v4/source/file"
 	"github.com/google/uuid"
 	"github.com/sirupsen/logrus"
-	"wafconsole/utils/redislock"
 
-	_ "github.com/go-sql-driver/mysql"
+	"wafconsole/utils/redislock"
 )
 
 // Config 迁移配置
