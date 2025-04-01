@@ -1,0 +1,146 @@
+version: '3'
+
+networks:
+  waf-network:
+    driver: bridge
+
+services:
+  # WafCoraza服务
+  wafcoraza:
+    build:
+      context: ./wafcoraza
+      dockerfile: Dockerfile
+    container_name: wafcoraza
+    restart: always
+    environment:
+      - TZ=Asia/Shanghai
+      - PROJECT_ROOT=/
+    volumes:
+      - ./wafcoraza/conf:/wafcoraza/conf
+      - ./wafcoraza/ruleset:/wafcoraza/ruleset
+      - ./wafcoraza/waf_log:/wafcoraza/waf_log
+    ports:
+      - "8887:8887"
+    networks:
+      - waf-network
+
+  # Analyse服务
+  analyse:
+    build:
+      context: ./analyse
+      dockerfile: Dockerfile
+    container_name: analyse
+    restart: always
+    environment:
+      - TZ=Asia/Shanghai
+      - PROJECT_ROOT=/
+    volumes:
+      - ./analyse/configs:/configs
+    ports:
+      - "8000:8000"
+    networks:
+      - waf-network
+    depends_on:
+      - wafcoraza
+
+  # WafConsole Cron服务
+  waf-cron:
+    build:
+      context: ./wafconsole
+      dockerfile: app/cron/Dockerfile
+    container_name: waf-cron
+    restart: always
+    environment:
+      - TZ=Asia/Shanghai
+    volumes:
+      - ./wafconsole/app/cron/configs:/data/conf
+    ports:
+      - "8001:8000"
+      - "9001:9000"
+    networks:
+      - waf-network
+    depends_on:
+      - waf-top
+      - waf-user
+      - waf-dashboard
+
+  # WafConsole Dashboard服务
+  waf-dashboard:
+    build:
+      context: ./wafconsole
+      dockerfile: app/dashBorad/Dockerfile
+    container_name: waf-dashboard
+    restart: always
+    environment:
+      - TZ=Asia/Shanghai
+    volumes:
+      - ./wafconsole/app/dashBorad/configs:/data/conf
+    ports:
+      - "8003:8003"
+      - "9003:9006"
+    networks:
+      - waf-network
+
+  # WafConsole User服务
+  waf-user:
+    build:
+      context: ./wafconsole
+      dockerfile: app/user/Dockerfile
+    container_name: waf-user
+    restart: always
+    environment:
+      - TZ=Asia/Shanghai
+    volumes:
+      - ./wafconsole/app/user/configs:/data/conf
+    ports:
+      - "8002:8002"
+      - "9002:9002"
+    networks:
+      - waf-network
+
+  # WafConsole WafTop服务
+  waf-top:
+    build:
+      context: ./wafconsole
+      dockerfile: app/wafTop/Dockerfile
+    container_name: waf-top
+    restart: always
+    environment:
+      - TZ=Asia/Shanghai
+    volumes:
+      - ./wafconsole/app/wafTop/configs:/data/conf
+    ports:
+      - "8007:8001"
+      - "9007:9001"
+    networks:
+      - waf-network
+
+  # 数据库服务 (根据您项目的需求可能需要添加)
+  # mysql:
+  #   image: mysql:8.0
+  #   container_name: mysql
+  #   restart: always
+  #   environment:
+  #     - MYSQL_ROOT_PASSWORD=yourpassword
+  #     - MYSQL_DATABASE=waf
+  #     - TZ=Asia/Shanghai
+  #   volumes:
+  #     - ./mysql-data:/var/lib/mysql
+  #     - ./wafconsole/migrations/mysql:/docker-entrypoint-initdb.d
+  #   ports:
+  #     - "3306:3306"
+  #   networks:
+  #     - waf-network
+
+  # Redis服务 (如果项目需要)
+  # redis:
+  #   image: redis:6-alpine
+  #   container_name: redis
+  #   restart: always
+  #   command: redis-server --appendonly yes
+  #   volumes:
+  #     - ./redis-data:/data
+  #   ports:
+  #     - "6379:6379"
+  #   networks:
+  #     - waf-network 

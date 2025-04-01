@@ -1,13 +1,15 @@
 package biz
 
 import (
-	"github.com/corazawaf/coraza/v3/types"
-	uuid "github.com/satori/go.uuid"
 	"log/slog"
 	"net"
 	"net/http"
 	"strconv"
 	"time"
+
+	"github.com/corazawaf/coraza/v3/types"
+	uuid "github.com/satori/go.uuid"
+
 	"wafcoraza/data/model"
 )
 

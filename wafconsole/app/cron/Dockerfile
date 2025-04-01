@@ -1,4 +1,3 @@
-# 第一阶段：构建环境
 FROM golang:1.21 AS builder
 WORKDIR /src
 
@@ -8,8 +7,12 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     gcc \
     && rm -rf /var/lib/apt/lists/*
 
+# 复制整个项目到容器
 COPY . /src
-RUN GOPROXY=https://goproxy.cn make build
+# 进入相应的服务目录
+WORKDIR /src/wafconsole/app/cron
+# 使用 app_makefile 构建    
+RUN cd /src/wafconsole && GOPROXY=https://goproxy.cn make -f app_makefile build APP_RELATIVE_PATH=app/cron
 
 # 第二阶段：运行环境
 FROM debian:bookworm-slim
