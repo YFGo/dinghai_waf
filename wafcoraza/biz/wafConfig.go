@@ -2,15 +2,17 @@ package biz
 
 import (
 	"encoding/json"
+	"log/slog"
+	"strconv"
+	"strings"
+	"sync"
+
 	coreruleset "github.com/corazawaf/coraza-coreruleset/v4"
 	"github.com/corazawaf/coraza/v3"
 	"github.com/jcchavezs/mergefs"
 	"github.com/jcchavezs/mergefs/io"
 	clientv3 "go.etcd.io/etcd/client/v3"
-	"log/slog"
-	"strconv"
-	"strings"
-	"sync"
+
 	"wafcoraza/data/model"
 	"wafcoraza/data/types"
 )
@@ -52,7 +54,6 @@ func NewWafConfigUsercase(repo WafConfigRepo) *WafConfigUsercase {
 // 处理从etcd中取出的seclang 安全规则 , 使其符合规范
 func (w *WafConfigUsercase) disposeSeclang(seclang string) string {
 	seclangArr := strings.Split(seclang, types.SeclangCutOFF)
-	// 使用strings.Builder来构建最终的字符串
 	var formattedSeclang strings.Builder
 	for i, rule := range seclangArr {
 		if i > 0 {
