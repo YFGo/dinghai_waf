@@ -4,8 +4,6 @@ import (
 	"context"
 	"fmt"
 	"log/slog"
-	"os"
-	"path/filepath"
 	"time"
 
 	"github.com/go-kratos/kratos/v2/log"
@@ -18,6 +16,7 @@ import (
 
 	"wafconsole/app/wafTop/internal/conf"
 	"wafconsole/app/wafTop/internal/hooks"
+	"wafconsole/utils/const/common"
 	"wafconsole/utils/migrate"
 )
 
@@ -137,23 +136,7 @@ func newMigrate(bootstrap *conf.Bootstrap) {
 	// 从 conf.Data 中提取 ClickHouse 配置
 	clickHouseDSN := cfg.ClickHouse.Dsn
 
-	// 获取当前工作目录
-	currentDir, err := os.Getwd()
-	if err != nil {
-		slog.Error("get current directory failed: ", err)
-		panic(err)
-	}
-	fmt.Println("Current working directory:", currentDir)
-
-	// 构建迁移路径
-	migrationPath := filepath.Join(currentDir, "..", "..", "..", "wafconsole", "migrations")
-	fmt.Println("Migration path:", migrationPath)
-
-	// 检查目录是否存在
-	if _, err := os.Stat(migrationPath); os.IsNotExist(err) {
-		slog.Error("migration directory does not exist:", migrationPath)
-		panic(fmt.Sprintf("migration directory does not exist: %s", migrationPath))
-	}
+	migrationPath := common.MigratePath
 
 	// 构建 migrate.Config
 	cfgMigrate := &migrate.Config{

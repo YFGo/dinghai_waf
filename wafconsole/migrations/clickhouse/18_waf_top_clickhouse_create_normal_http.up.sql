@@ -1,1 +1,14 @@
-CREATE TABLE IF NOT EXISTS normal_http_requests(    id            String,    ip            String,    request_uri    String,    request_time   DateTime,    request_method String,    protocol      String,    request_body   String)    ENGINE = MergeTree()        ORDER BY (id, request_time)  -- 推荐组合主键和时间戳作为排序键        PRIMARY KEY (id)        SETTINGS index_granularity = 8192;
+CREATE TABLE IF NOT EXISTS normal_http_requests
+(
+    id            String,
+    ip            String,
+    request_uri    String,
+    request_time   DateTime,
+    request_method String,
+    protocol      String,
+    request_body   String
+)
+    ENGINE = MergeTree()
+        ORDER BY (id, request_time)  
+        PRIMARY KEY (id)
+        SETTINGS index_granularity = 8192;
