@@ -4,7 +4,7 @@ package common
 const (
 	MySqlMigrate      = "mysql"
 	ClickHouseMigrate = "clickhouse"
-	MigratePath      = "wafconsole/migrations"
+	MigratePath       = "wafconsole/migrations"
 )
 
 const (
