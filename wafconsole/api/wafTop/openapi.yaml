@@ -589,16 +589,15 @@ paths:
                             schema:
                                 $ref: '#/components/schemas/api.wafTop.v1.ListNoticeReply'
     /app/waf_top/v1/server_principal:
-        post:
+        get:
             tags:
                 - ServerPrincipal
-            operationId: ServerPrincipal_GetServerPrincipal
-            requestBody:
-                content:
-                    application/json:
-                        schema:
-                            $ref: '#/components/schemas/api.wafTop.v1.GetServerPrincipalRequest'
-                required: true
+            operationId: ServerPrincipal_GetServerPrincipalByServerId
+            parameters:
+                - name: server_id
+                  in: query
+                  schema:
+                    type: string
             responses:
                 "200":
                     description: OK
@@ -606,6 +605,65 @@ paths:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/api.wafTop.v1.GetServerPrincipalReply'
+        post:
+            tags:
+                - ServerPrincipal
+            operationId: ServerPrincipal_CreateServerPrincipal
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/api.wafTop.v1.CreateServerPrincipalRequest'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/api.wafTop.v1.CreateServerPrincipalReply'
+        delete:
+            tags:
+                - ServerPrincipal
+            operationId: ServerPrincipal_DeleteServerPrincipal
+            parameters:
+                - name: ids
+                  in: query
+                  schema:
+                    type: array
+                    items:
+                        type: string
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/api.wafTop.v1.DeleteServerPrincipalReply'
+    /app/waf_top/v1/server_principal/{id}:
+        put:
+            tags:
+                - ServerPrincipal
+            operationId: ServerPrincipal_UpdateServerPrincipal
+            parameters:
+                - name: id
+                  in: path
+                  required: true
+                  schema:
+                    type: string
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/api.wafTop.v1.UpdateServerPrincipalRequest'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/api.wafTop.v1.UpdateServerPrincipalReply'
 components:
     schemas:
         api.wafTop.v1.AllowListInfo:
@@ -675,6 +733,18 @@ components:
                 is_buildin:
                     type: string
             description: '####### 规则组 #########'
+        api.wafTop.v1.CreateServerPrincipalReply:
+            type: object
+            properties: {}
+        api.wafTop.v1.CreateServerPrincipalRequest:
+            type: object
+            properties:
+                server_id:
+                    type: string
+                principal_infos:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/api.wafTop.v1.PrincipalInfo'
         api.wafTop.v1.CreateServerReply:
             type: object
             properties: {}
@@ -774,6 +844,9 @@ components:
                     type: array
                     items:
                         $ref: '#/components/schemas/api.wafTop.v1.DeleteRuleGroupInfo'
+        api.wafTop.v1.DeleteServerPrincipalReply:
+            type: object
+            properties: {}
         api.wafTop.v1.DeleteStrategyReply:
             type: object
             properties: {}
@@ -824,11 +897,11 @@ components:
                         $ref: '#/components/schemas/api.wafTop.v1.ListRuleInfoByGroup'
         api.wafTop.v1.GetServerPrincipalReply:
             type: object
-            properties: {}
-        api.wafTop.v1.GetServerPrincipalRequest:
-            type: object
-            properties: {}
-            description: '#### 网站负责人'
+            properties:
+                server_principal_infos:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/api.wafTop.v1.ServerPrincipalInfo'
         api.wafTop.v1.GetServerReply:
             type: object
             properties:
@@ -930,6 +1003,17 @@ components:
                     type: array
                     items:
                         $ref: '#/components/schemas/api.wafTop.v1.StrategyInfo'
+        api.wafTop.v1.PrincipalInfo:
+            type: object
+            properties:
+                principal_type:
+                    type: string
+                principal_name:
+                    type: string
+                principal_position:
+                    type: string
+                notice_info:
+                    type: string
         api.wafTop.v1.RuleGroupInfo:
             type: object
             properties:
@@ -966,6 +1050,19 @@ components:
                 port:
                     type: string
                 id:
+                    type: string
+        api.wafTop.v1.ServerPrincipalInfo:
+            type: object
+            properties:
+                id:
+                    type: string
+                principal_type:
+                    type: string
+                principal_name:
+                    type: string
+                principal_position:
+                    type: string
+                notice_info:
                     type: string
         api.wafTop.v1.StrategyInfo:
             type: object
@@ -1021,6 +1118,24 @@ components:
                 description:
                     type: string
                 is_buildin:
+                    type: string
+        api.wafTop.v1.UpdateServerPrincipalReply:
+            type: object
+            properties: {}
+        api.wafTop.v1.UpdateServerPrincipalRequest:
+            type: object
+            properties:
+                id:
+                    type: string
+                server_id:
+                    type: string
+                principal_type:
+                    type: string
+                principal_name:
+                    type: string
+                principal_position:
+                    type: string
+                notice_info:
                     type: string
         api.wafTop.v1.UpdateServerReply:
             type: object

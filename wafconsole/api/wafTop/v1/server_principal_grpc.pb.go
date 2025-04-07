@@ -19,14 +19,20 @@ import (
 const _ = grpc.SupportPackageIsVersion9
 
 const (
-	ServerPrincipal_GetServerPrincipal_FullMethodName = "/api.wafTop.v1.ServerPrincipal/GetServerPrincipal"
+	ServerPrincipal_GetServerPrincipalByServerId_FullMethodName = "/api.wafTop.v1.ServerPrincipal/GetServerPrincipalByServerId"
+	ServerPrincipal_CreateServerPrincipal_FullMethodName        = "/api.wafTop.v1.ServerPrincipal/CreateServerPrincipal"
+	ServerPrincipal_UpdateServerPrincipal_FullMethodName        = "/api.wafTop.v1.ServerPrincipal/UpdateServerPrincipal"
+	ServerPrincipal_DeleteServerPrincipal_FullMethodName        = "/api.wafTop.v1.ServerPrincipal/DeleteServerPrincipal"
 )
 
 // ServerPrincipalClient is the client API for ServerPrincipal service.
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type ServerPrincipalClient interface {
-	GetServerPrincipal(ctx context.Context, in *GetServerPrincipalRequest, opts ...grpc.CallOption) (*GetServerPrincipalReply, error)
+	GetServerPrincipalByServerId(ctx context.Context, in *GetServerPrincipalRequest, opts ...grpc.CallOption) (*GetServerPrincipalReply, error)
+	CreateServerPrincipal(ctx context.Context, in *CreateServerPrincipalRequest, opts ...grpc.CallOption) (*CreateServerPrincipalReply, error)
+	UpdateServerPrincipal(ctx context.Context, in *UpdateServerPrincipalRequest, opts ...grpc.CallOption) (*UpdateServerPrincipalReply, error)
+	DeleteServerPrincipal(ctx context.Context, in *DeleteServerPrincipalRequest, opts ...grpc.CallOption) (*DeleteServerPrincipalReply, error)
 }
 
 type serverPrincipalClient struct {
@@ -37,10 +43,40 @@ func NewServerPrincipalClient(cc grpc.ClientConnInterface) ServerPrincipalClient
 	return &serverPrincipalClient{cc}
 }
 
-func (c *serverPrincipalClient) GetServerPrincipal(ctx context.Context, in *GetServerPrincipalRequest, opts ...grpc.CallOption) (*GetServerPrincipalReply, error) {
+func (c *serverPrincipalClient) GetServerPrincipalByServerId(ctx context.Context, in *GetServerPrincipalRequest, opts ...grpc.CallOption) (*GetServerPrincipalReply, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
 	out := new(GetServerPrincipalReply)
-	err := c.cc.Invoke(ctx, ServerPrincipal_GetServerPrincipal_FullMethodName, in, out, cOpts...)
+	err := c.cc.Invoke(ctx, ServerPrincipal_GetServerPrincipalByServerId_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *serverPrincipalClient) CreateServerPrincipal(ctx context.Context, in *CreateServerPrincipalRequest, opts ...grpc.CallOption) (*CreateServerPrincipalReply, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(CreateServerPrincipalReply)
+	err := c.cc.Invoke(ctx, ServerPrincipal_CreateServerPrincipal_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *serverPrincipalClient) UpdateServerPrincipal(ctx context.Context, in *UpdateServerPrincipalRequest, opts ...grpc.CallOption) (*UpdateServerPrincipalReply, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(UpdateServerPrincipalReply)
+	err := c.cc.Invoke(ctx, ServerPrincipal_UpdateServerPrincipal_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *serverPrincipalClient) DeleteServerPrincipal(ctx context.Context, in *DeleteServerPrincipalRequest, opts ...grpc.CallOption) (*DeleteServerPrincipalReply, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(DeleteServerPrincipalReply)
+	err := c.cc.Invoke(ctx, ServerPrincipal_DeleteServerPrincipal_FullMethodName, in, out, cOpts...)
 	if err != nil {
 		return nil, err
 	}
@@ -51,7 +87,10 @@ func (c *serverPrincipalClient) GetServerPrincipal(ctx context.Context, in *GetS
 // All implementations must embed UnimplementedServerPrincipalServer
 // for forward compatibility.
 type ServerPrincipalServer interface {
-	GetServerPrincipal(context.Context, *GetServerPrincipalRequest) (*GetServerPrincipalReply, error)
+	GetServerPrincipalByServerId(context.Context, *GetServerPrincipalRequest) (*GetServerPrincipalReply, error)
+	CreateServerPrincipal(context.Context, *CreateServerPrincipalRequest) (*CreateServerPrincipalReply, error)
+	UpdateServerPrincipal(context.Context, *UpdateServerPrincipalRequest) (*UpdateServerPrincipalReply, error)
+	DeleteServerPrincipal(context.Context, *DeleteServerPrincipalRequest) (*DeleteServerPrincipalReply, error)
 	mustEmbedUnimplementedServerPrincipalServer()
 }
 
@@ -62,8 +101,17 @@ type ServerPrincipalServer interface {
 // pointer dereference when methods are called.
 type UnimplementedServerPrincipalServer struct{}
 
-func (UnimplementedServerPrincipalServer) GetServerPrincipal(context.Context, *GetServerPrincipalRequest) (*GetServerPrincipalReply, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method GetServerPrincipal not implemented")
+func (UnimplementedServerPrincipalServer) GetServerPrincipalByServerId(context.Context, *GetServerPrincipalRequest) (*GetServerPrincipalReply, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetServerPrincipalByServerId not implemented")
+}
+func (UnimplementedServerPrincipalServer) CreateServerPrincipal(context.Context, *CreateServerPrincipalRequest) (*CreateServerPrincipalReply, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method CreateServerPrincipal not implemented")
+}
+func (UnimplementedServerPrincipalServer) UpdateServerPrincipal(context.Context, *UpdateServerPrincipalRequest) (*UpdateServerPrincipalReply, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method UpdateServerPrincipal not implemented")
+}
+func (UnimplementedServerPrincipalServer) DeleteServerPrincipal(context.Context, *DeleteServerPrincipalRequest) (*DeleteServerPrincipalReply, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method DeleteServerPrincipal not implemented")
 }
 func (UnimplementedServerPrincipalServer) mustEmbedUnimplementedServerPrincipalServer() {}
 func (UnimplementedServerPrincipalServer) testEmbeddedByValue()                         {}
@@ -86,20 +134,74 @@ func RegisterServerPrincipalServer(s grpc.ServiceRegistrar, srv ServerPrincipalS
 	s.RegisterService(&ServerPrincipal_ServiceDesc, srv)
 }
 
-func _ServerPrincipal_GetServerPrincipal_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+func _ServerPrincipal_GetServerPrincipalByServerId_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(GetServerPrincipalRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(ServerPrincipalServer).GetServerPrincipal(ctx, in)
+		return srv.(ServerPrincipalServer).GetServerPrincipalByServerId(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: ServerPrincipal_GetServerPrincipal_FullMethodName,
+		FullMethod: ServerPrincipal_GetServerPrincipalByServerId_FullMethodName,
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(ServerPrincipalServer).GetServerPrincipal(ctx, req.(*GetServerPrincipalRequest))
+		return srv.(ServerPrincipalServer).GetServerPrincipalByServerId(ctx, req.(*GetServerPrincipalRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _ServerPrincipal_CreateServerPrincipal_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(CreateServerPrincipalRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(ServerPrincipalServer).CreateServerPrincipal(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: ServerPrincipal_CreateServerPrincipal_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(ServerPrincipalServer).CreateServerPrincipal(ctx, req.(*CreateServerPrincipalRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _ServerPrincipal_UpdateServerPrincipal_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(UpdateServerPrincipalRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(ServerPrincipalServer).UpdateServerPrincipal(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: ServerPrincipal_UpdateServerPrincipal_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(ServerPrincipalServer).UpdateServerPrincipal(ctx, req.(*UpdateServerPrincipalRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _ServerPrincipal_DeleteServerPrincipal_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(DeleteServerPrincipalRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(ServerPrincipalServer).DeleteServerPrincipal(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: ServerPrincipal_DeleteServerPrincipal_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(ServerPrincipalServer).DeleteServerPrincipal(ctx, req.(*DeleteServerPrincipalRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -112,8 +214,20 @@ var ServerPrincipal_ServiceDesc = grpc.ServiceDesc{
 	HandlerType: (*ServerPrincipalServer)(nil),
 	Methods: []grpc.MethodDesc{
 		{
-			MethodName: "GetServerPrincipal",
-			Handler:    _ServerPrincipal_GetServerPrincipal_Handler,
+			MethodName: "GetServerPrincipalByServerId",
+			Handler:    _ServerPrincipal_GetServerPrincipalByServerId_Handler,
+		},
+		{
+			MethodName: "CreateServerPrincipal",
+			Handler:    _ServerPrincipal_CreateServerPrincipal_Handler,
+		},
+		{
+			MethodName: "UpdateServerPrincipal",
+			Handler:    _ServerPrincipal_UpdateServerPrincipal_Handler,
+		},
+		{
+			MethodName: "DeleteServerPrincipal",
+			Handler:    _ServerPrincipal_DeleteServerPrincipal_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

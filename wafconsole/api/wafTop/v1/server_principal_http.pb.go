@@ -19,29 +19,35 @@ var _ = binding.EncodeURL
 
 const _ = http.SupportPackageIsVersion1
 
-const OperationServerPrincipalGetServerPrincipal = "/api.wafTop.v1.ServerPrincipal/GetServerPrincipal"
+const OperationServerPrincipalCreateServerPrincipal = "/api.wafTop.v1.ServerPrincipal/CreateServerPrincipal"
+const OperationServerPrincipalDeleteServerPrincipal = "/api.wafTop.v1.ServerPrincipal/DeleteServerPrincipal"
+const OperationServerPrincipalGetServerPrincipalByServerId = "/api.wafTop.v1.ServerPrincipal/GetServerPrincipalByServerId"
+const OperationServerPrincipalUpdateServerPrincipal = "/api.wafTop.v1.ServerPrincipal/UpdateServerPrincipal"
 
 type ServerPrincipalHTTPServer interface {
-	GetServerPrincipal(context.Context, *GetServerPrincipalRequest) (*GetServerPrincipalReply, error)
+	CreateServerPrincipal(context.Context, *CreateServerPrincipalRequest) (*CreateServerPrincipalReply, error)
+	DeleteServerPrincipal(context.Context, *DeleteServerPrincipalRequest) (*DeleteServerPrincipalReply, error)
+	GetServerPrincipalByServerId(context.Context, *GetServerPrincipalRequest) (*GetServerPrincipalReply, error)
+	UpdateServerPrincipal(context.Context, *UpdateServerPrincipalRequest) (*UpdateServerPrincipalReply, error)
 }
 
 func RegisterServerPrincipalHTTPServer(s *http.Server, srv ServerPrincipalHTTPServer) {
 	r := s.Route("/")
-	r.POST("/app/waf_top/v1/server_principal", _ServerPrincipal_GetServerPrincipal0_HTTP_Handler(srv))
+	r.GET("/app/waf_top/v1/server_principal", _ServerPrincipal_GetServerPrincipalByServerId0_HTTP_Handler(srv))
+	r.POST("/app/waf_top/v1/server_principal", _ServerPrincipal_CreateServerPrincipal0_HTTP_Handler(srv))
+	r.PUT("/app/waf_top/v1/server_principal/{id}", _ServerPrincipal_UpdateServerPrincipal0_HTTP_Handler(srv))
+	r.DELETE("/app/waf_top/v1/server_principal", _ServerPrincipal_DeleteServerPrincipal0_HTTP_Handler(srv))
 }
 
-func _ServerPrincipal_GetServerPrincipal0_HTTP_Handler(srv ServerPrincipalHTTPServer) func(ctx http.Context) error {
+func _ServerPrincipal_GetServerPrincipalByServerId0_HTTP_Handler(srv ServerPrincipalHTTPServer) func(ctx http.Context) error {
 	return func(ctx http.Context) error {
 		var in GetServerPrincipalRequest
-		if err := ctx.Bind(&in); err != nil {
-			return err
-		}
 		if err := ctx.BindQuery(&in); err != nil {
 			return err
 		}
-		http.SetOperation(ctx, OperationServerPrincipalGetServerPrincipal)
+		http.SetOperation(ctx, OperationServerPrincipalGetServerPrincipalByServerId)
 		h := ctx.Middleware(func(ctx context.Context, req interface{}) (interface{}, error) {
-			return srv.GetServerPrincipal(ctx, req.(*GetServerPrincipalRequest))
+			return srv.GetServerPrincipalByServerId(ctx, req.(*GetServerPrincipalRequest))
 		})
 		out, err := h(ctx, &in)
 		if err != nil {
@@ -52,8 +58,77 @@ func _ServerPrincipal_GetServerPrincipal0_HTTP_Handler(srv ServerPrincipalHTTPSe
 	}
 }
 
+func _ServerPrincipal_CreateServerPrincipal0_HTTP_Handler(srv ServerPrincipalHTTPServer) func(ctx http.Context) error {
+	return func(ctx http.Context) error {
+		var in CreateServerPrincipalRequest
+		if err := ctx.Bind(&in); err != nil {
+			return err
+		}
+		if err := ctx.BindQuery(&in); err != nil {
+			return err
+		}
+		http.SetOperation(ctx, OperationServerPrincipalCreateServerPrincipal)
+		h := ctx.Middleware(func(ctx context.Context, req interface{}) (interface{}, error) {
+			return srv.CreateServerPrincipal(ctx, req.(*CreateServerPrincipalRequest))
+		})
+		out, err := h(ctx, &in)
+		if err != nil {
+			return err
+		}
+		reply := out.(*CreateServerPrincipalReply)
+		return ctx.Result(200, reply)
+	}
+}
+
+func _ServerPrincipal_UpdateServerPrincipal0_HTTP_Handler(srv ServerPrincipalHTTPServer) func(ctx http.Context) error {
+	return func(ctx http.Context) error {
+		var in UpdateServerPrincipalRequest
+		if err := ctx.Bind(&in); err != nil {
+			return err
+		}
+		if err := ctx.BindQuery(&in); err != nil {
+			return err
+		}
+		if err := ctx.BindVars(&in); err != nil {
+			return err
+		}
+		http.SetOperation(ctx, OperationServerPrincipalUpdateServerPrincipal)
+		h := ctx.Middleware(func(ctx context.Context, req interface{}) (interface{}, error) {
+			return srv.UpdateServerPrincipal(ctx, req.(*UpdateServerPrincipalRequest))
+		})
+		out, err := h(ctx, &in)
+		if err != nil {
+			return err
+		}
+		reply := out.(*UpdateServerPrincipalReply)
+		return ctx.Result(200, reply)
+	}
+}
+
+func _ServerPrincipal_DeleteServerPrincipal0_HTTP_Handler(srv ServerPrincipalHTTPServer) func(ctx http.Context) error {
+	return func(ctx http.Context) error {
+		var in DeleteServerPrincipalRequest
+		if err := ctx.BindQuery(&in); err != nil {
+			return err
+		}
+		http.SetOperation(ctx, OperationServerPrincipalDeleteServerPrincipal)
+		h := ctx.Middleware(func(ctx context.Context, req interface{}) (interface{}, error) {
+			return srv.DeleteServerPrincipal(ctx, req.(*DeleteServerPrincipalRequest))
+		})
+		out, err := h(ctx, &in)
+		if err != nil {
+			return err
+		}
+		reply := out.(*DeleteServerPrincipalReply)
+		return ctx.Result(200, reply)
+	}
+}
+
 type ServerPrincipalHTTPClient interface {
-	GetServerPrincipal(ctx context.Context, req *GetServerPrincipalRequest, opts ...http.CallOption) (rsp *GetServerPrincipalReply, err error)
+	CreateServerPrincipal(ctx context.Context, req *CreateServerPrincipalRequest, opts ...http.CallOption) (rsp *CreateServerPrincipalReply, err error)
+	DeleteServerPrincipal(ctx context.Context, req *DeleteServerPrincipalRequest, opts ...http.CallOption) (rsp *DeleteServerPrincipalReply, err error)
+	GetServerPrincipalByServerId(ctx context.Context, req *GetServerPrincipalRequest, opts ...http.CallOption) (rsp *GetServerPrincipalReply, err error)
+	UpdateServerPrincipal(ctx context.Context, req *UpdateServerPrincipalRequest, opts ...http.CallOption) (rsp *UpdateServerPrincipalReply, err error)
 }
 
 type ServerPrincipalHTTPClientImpl struct {
@@ -64,13 +139,52 @@ func NewServerPrincipalHTTPClient(client *http.Client) ServerPrincipalHTTPClient
 	return &ServerPrincipalHTTPClientImpl{client}
 }
 
-func (c *ServerPrincipalHTTPClientImpl) GetServerPrincipal(ctx context.Context, in *GetServerPrincipalRequest, opts ...http.CallOption) (*GetServerPrincipalReply, error) {
-	var out GetServerPrincipalReply
+func (c *ServerPrincipalHTTPClientImpl) CreateServerPrincipal(ctx context.Context, in *CreateServerPrincipalRequest, opts ...http.CallOption) (*CreateServerPrincipalReply, error) {
+	var out CreateServerPrincipalReply
 	pattern := "/app/waf_top/v1/server_principal"
 	path := binding.EncodeURL(pattern, in, false)
-	opts = append(opts, http.Operation(OperationServerPrincipalGetServerPrincipal))
+	opts = append(opts, http.Operation(OperationServerPrincipalCreateServerPrincipal))
 	opts = append(opts, http.PathTemplate(pattern))
 	err := c.cc.Invoke(ctx, "POST", path, in, &out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return &out, nil
+}
+
+func (c *ServerPrincipalHTTPClientImpl) DeleteServerPrincipal(ctx context.Context, in *DeleteServerPrincipalRequest, opts ...http.CallOption) (*DeleteServerPrincipalReply, error) {
+	var out DeleteServerPrincipalReply
+	pattern := "/app/waf_top/v1/server_principal"
+	path := binding.EncodeURL(pattern, in, true)
+	opts = append(opts, http.Operation(OperationServerPrincipalDeleteServerPrincipal))
+	opts = append(opts, http.PathTemplate(pattern))
+	err := c.cc.Invoke(ctx, "DELETE", path, nil, &out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return &out, nil
+}
+
+func (c *ServerPrincipalHTTPClientImpl) GetServerPrincipalByServerId(ctx context.Context, in *GetServerPrincipalRequest, opts ...http.CallOption) (*GetServerPrincipalReply, error) {
+	var out GetServerPrincipalReply
+	pattern := "/app/waf_top/v1/server_principal"
+	path := binding.EncodeURL(pattern, in, true)
+	opts = append(opts, http.Operation(OperationServerPrincipalGetServerPrincipalByServerId))
+	opts = append(opts, http.PathTemplate(pattern))
+	err := c.cc.Invoke(ctx, "GET", path, nil, &out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return &out, nil
+}
+
+func (c *ServerPrincipalHTTPClientImpl) UpdateServerPrincipal(ctx context.Context, in *UpdateServerPrincipalRequest, opts ...http.CallOption) (*UpdateServerPrincipalReply, error) {
+	var out UpdateServerPrincipalReply
+	pattern := "/app/waf_top/v1/server_principal/{id}"
+	path := binding.EncodeURL(pattern, in, false)
+	opts = append(opts, http.Operation(OperationServerPrincipalUpdateServerPrincipal))
+	opts = append(opts, http.PathTemplate(pattern))
+	err := c.cc.Invoke(ctx, "PUT", path, in, &out, opts...)
 	if err != nil {
 		return nil, err
 	}

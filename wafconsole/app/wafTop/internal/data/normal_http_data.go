@@ -2,11 +2,12 @@ package data
 
 import (
 	"context"
-	"github.com/go-kratos/kratos/v2/log"
-	"wafconsole/app/wafTop/internal/biz/iface"
-	"wafconsole/app/wafTop/internal/data/model"
 
+	"github.com/go-kratos/kratos/v2/log"
+
+	"wafconsole/app/wafTop/internal/biz/iface"
 	"wafconsole/app/wafTop/internal/biz/normalhttp"
+	"wafconsole/app/wafTop/internal/data/model"
 )
 
 type normalHttpRepo struct {

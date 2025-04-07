@@ -20,7 +20,9 @@ import (
 )
 
 // NewHTTPServer new an HTTP server.
-func NewHTTPServer(c *conf.Server, appWafTop *site.WafAppService, serverWaf *site.ServerService, buildRule *rule.BuildRuleService, ruleGroup *rule.RuleGroupService, userRule *rule.UserRuleService, strategyHttp *strategy.StrategyService, allow *allow.AllowListService, logger log.Logger) *http.Server {
+func NewHTTPServer(c *conf.Server, appWafTop *site.WafAppService, serverWaf *site.ServerService, buildRule *rule.BuildRuleService,
+	ruleGroup *rule.RuleGroupService, userRule *rule.UserRuleService, strategyHttp *strategy.StrategyService,
+	allow *allow.AllowListService, principal *site.ServerPrincipalService, logger log.Logger) *http.Server {
 	protoValidate, err := up.NewValidate()
 	if err != nil {
 		slog.Error("protoValidate", err)
@@ -57,5 +59,6 @@ func NewHTTPServer(c *conf.Server, appWafTop *site.WafAppService, serverWaf *sit
 	v1.RegisterUserRuleHTTPServer(srv, userRule)
 	v1.RegisterStrategyHTTPServer(srv, strategyHttp)
 	v1.RegisterAllowListHTTPServer(srv, allow)
+	v1.RegisterServerPrincipalHTTPServer(srv, principal)
 	return srv
 }

@@ -13,4 +13,4 @@ import (
 // ProviderSet is service providers.
 var ProviderSet = wire.NewSet(site.NewWafAppService, site.NewServerService,
 	rule.NewBuildRuleService, rule.NewRuleGroupService, rule.NewUserRuleService,
-	strategy.NewStrategyService, allow.NewAllowListService, sn.NewNormalHttpService)
+	strategy.NewStrategyService, allow.NewAllowListService, sn.NewNormalHttpService, site.NewServerPrincipalService)

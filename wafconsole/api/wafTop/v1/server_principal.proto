@@ -11,10 +11,26 @@ import "google/api/annotations.proto";
 
 
 service ServerPrincipal {
-	rpc GetServerPrincipal (GetServerPrincipalRequest) returns (GetServerPrincipalReply) {
+	rpc GetServerPrincipalByServerId (GetServerPrincipalRequest) returns (GetServerPrincipalReply) {
+		option (google.api.http) = {
+			get: "/app/waf_top/v1/server_principal"
+		};
+	};
+	rpc CreateServerPrincipal (CreateServerPrincipalRequest) returns (CreateServerPrincipalReply) {
 		option (google.api.http) = {
 			post: "/app/waf_top/v1/server_principal"
 			body: "*"
 		};
 	};
+	rpc UpdateServerPrincipal (UpdateServerPrincipalRequest) returns (UpdateServerPrincipalReply) {
+		option (google.api.http) = {
+			put: "/app/waf_top/v1/server_principal/{id}"
+			body: "*"
+		};
+	};
+	rpc DeleteServerPrincipal (DeleteServerPrincipalRequest) returns (DeleteServerPrincipalReply) {
+		option (google.api.http) = {
+			delete: "/app/waf_top/v1/server_principal"
+		};
+	}
 }
