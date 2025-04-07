@@ -888,8 +888,130 @@ message ListNoticeReply {}
 
 
 // #### 网站负责人
-message GetServerPrincipalRequest {}
-message GetServerPrincipalReply {}
+message GetServerPrincipalRequest {
+	int64 server_id =1 [
+		(buf.validate.field).cel = {
+			id: "server_id",
+			message: "服务器不存在",
+			expression: "this > 0"
+		}
+	];
+}
+message ServerPrincipalInfo {
+	int64 id = 1;
+	string principal_type = 2;
+	string principal_name = 3;
+	string principal_position = 4;
+	string notice_info = 5;
+}
+message GetServerPrincipalReply {
+	repeated ServerPrincipalInfo server_principal_infos = 1;
+}
+
+message CreateServerPrincipalRequest {
+	int64 server_id = 1 [
+		(buf.validate.field).cel = {
+			id: "server_id",
+			message: "服务器不存在",
+			expression: "this > 0"
+		}
+	];
+	repeated PrincipalInfo principal_infos = 2;
+}
+message CreateServerPrincipalReply {}
+
+
+
+message PrincipalInfo {
+	string principal_type = 1 [
+		(buf.validate.field).cel = {
+			id: "principal_type",
+			message: "通知负责人类型不能为空",
+			expression: "size(this) > 0"
+		}
+	];
+	string principal_name = 3 [
+		(buf.validate.field).cel = {
+			id: "principal_name",
+			message: "负责人名称不能为空",
+			expression: "size(this) > 0"
+		}
+	];
+	string principal_position = 4 [
+		(buf.validate.field).cel = {
+			id: "principal_position",
+			message: "负责人职位不能为空",
+			expression: "size(this) > 0"
+		}
+	];
+	string notice_info = 5 [
+		(buf.validate.field).cel = {
+			id: "notice_info",
+			message: "通知方式不能为空",
+			expression: "size(this) > 0"
+		}
+	];
+
+}
+
+message UpdateServerPrincipalRequest {
+	int64 id = 1 [
+		(buf.validate.field).cel = {
+			id: "id",
+			message: "负责人不存在",
+			expression: "this > 0"
+		}
+	];
+	int64 server_id =2 [
+		(buf.validate.field).cel = {
+			id: "server_id",
+			message: "服务器不存在",
+			expression: "this > 0"
+		}
+	];
+	string principal_type = 3 [
+		(buf.validate.field).cel = {
+			id: "principal_type",
+			message: "通知负责人类型不能为空",
+			expression: "size(this) > 0"
+		}
+	];
+	string principal_name = 4 [
+		(buf.validate.field).cel = {
+			id: "principal_name",
+			message: "负责人名称不能为空",
+			expression: "size(this) > 0"
+		}
+	];
+	string principal_position = 5 [
+		(buf.validate.field).cel = {
+			id: "principal_position",
+			message: "负责人职位不能为空",
+			expression: "size(this) > 0"
+		}
+	];
+	string notice_info = 6 [
+		(buf.validate.field).cel = {
+			id: "notice_info",
+			message: "通知方式不能为空",
+			expression: "size(this) > 0"
+		}
+	];
+}
+message UpdateServerPrincipalReply {}	
+
+message DeleteServerPrincipalRequest {
+	repeated int64 ids = 1 [
+		(buf.validate.field).cel = {
+			id: "ids",
+			message: "请选择需要删除的负责人",
+			expression: "size(this) > 0"
+		}
+	];
+}
+message DeleteServerPrincipalReply {}
+
+
 
 
 

@@ -64,7 +64,10 @@ func wireApp(confServer *conf.Server, bootstrap *conf.Bootstrap, logger log.Logg
 	usecaseNormalHttp := normalhttp.NewUsecaseNormalHttp(repoNormalHttp, logger)
 	normalHttpService := service5.NewNormalHttpService(usecaseNormalHttp)
 	grpcServer := server.NewGRPCServer(confServer, wafAppService, serverService, buildRuleService, ruleGroupService, userRuleService, strategyService, allowListService, normalHttpService, logger)
-	httpServer := server.NewHTTPServer(confServer, wafAppService, serverService, buildRuleService, ruleGroupService, userRuleService, strategyService, allowListService, logger)
+	serverPrincipalRepo := data.NewServerPrincipalRepo(dataData)
+	serverPrincipalUsecase := siteBiz.NewServerPrincipalUsecase(serverPrincipalRepo, serverRepo, logger)
+	serverPrincipalService := service.NewServerPrincipalService(serverPrincipalUsecase)
+	httpServer := server.NewHTTPServer(confServer, wafAppService, serverService, buildRuleService, ruleGroupService, userRuleService, strategyService, allowListService, serverPrincipalService, logger)
 	app := newApp(logger, grpcServer, httpServer, registrar)
 	return app, func() {
 		cleanup()

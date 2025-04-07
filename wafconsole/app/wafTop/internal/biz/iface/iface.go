@@ -2,7 +2,9 @@ package iface
 
 import (
 	"context"
+
 	"gorm.io/gorm"
+
 	"wafconsole/app/wafTop/internal/data/model"
 )
 
@@ -19,7 +21,8 @@ type Domain interface {
 		model.StrategyConfig |
 		model.UserRule |
 		model.AllowList |
-		model.NormalHttpModel
+		model.NormalHttpModel |
+		model.PrincipalInfo
 }
 
 type BaseRepo[T Domain] interface {

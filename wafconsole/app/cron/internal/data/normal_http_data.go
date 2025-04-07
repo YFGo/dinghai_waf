@@ -5,13 +5,13 @@ import (
 	"encoding/json"
 	"strconv"
 
-	"google.golang.org/protobuf/types/known/timestamppb"
 	"github.com/IBM/sarama"
 	"github.com/go-kratos/kratos/v2/log"
+	"google.golang.org/protobuf/types/known/timestamppb"
 
 	v1 "wafconsole/api/wafTop/v1"
-	"wafconsole/app/cron/internal/types"
 	"wafconsole/app/cron/internal/biz/normalhttp"
+	"wafconsole/app/cron/internal/types"
 	"wafconsole/utils/const/cron"
 	"wafconsole/utils/const/waftop"
 )
@@ -85,7 +85,6 @@ func (n *normalHttpRepo) commitBatch(batch []*v1.NormalHttpInfo, offset int64) e
 		n.log.Error("batch create failed: ", err)
 		return err
 	}
-
 	// 提交Offset到Redis（注意：需按分区存储）
 	if offset != -1 {
 		if err := n.saveOffsetToRedis(offset); err != nil {

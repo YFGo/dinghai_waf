@@ -13,4 +13,4 @@ import (
 // ProviderSet is biz providers.
 var ProviderSet = wire.NewSet(siteBiz.NewGreeterUsecase, siteBiz.NewServerUsecase,
 	ruleBiz.NewBuildRuleUsecase, ruleBiz.NewRuleGroupUsecase, ruleBiz.NewUserRuleUsecase,
-	strategyBiz.NewWafStrategyUsecase, allow.NewListAllowUsecase, normalhttp.NewUsecaseNormalHttp)
+	strategyBiz.NewWafStrategyUsecase, allow.NewListAllowUsecase, normalhttp.NewUsecaseNormalHttp , siteBiz.NewServerPrincipalUsecase)

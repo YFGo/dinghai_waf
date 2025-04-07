@@ -2,28 +2,34 @@ package data
 
 import (
 	"encoding/json"
-	"github.com/IBM/sarama"
-	"github.com/gocarina/gocsv"
 	"log/slog"
 	"os"
 	"strconv"
 	"sync"
+
+	"github.com/IBM/sarama"
+	"github.com/gocarina/gocsv"
+
 	"wafcoraza/biz"
 	"wafcoraza/data/model"
 )
 
 type saveAttackEventRepo struct {
-	data *Data
-	mu   sync.Mutex
+	data            *Data
+	mu              sync.Mutex
+	attackEventFile string
 }
 
 func NewSaveAttackEventRepo(data *Data) biz.AttackEventRepo {
-	return &saveAttackEventRepo{data: data}
+	return &saveAttackEventRepo{
+		data:            data,
+		attackEventFile: "waf_log/attack_events.csv",
+	}
 }
 
 // ReadAttackEvent 读取csv文件中的数据
 func (s *saveAttackEventRepo) ReadAttackEvent() []model.AttackEvent {
-	file, err := os.OpenFile("wafcoraza/waf_log/attack_events.csv", os.O_RDONLY, os.ModePerm)
+	file, err := os.OpenFile(s.attackEventFile, os.O_RDONLY, os.ModePerm)
 	if err != nil {
 		slog.Error("ReadAttackEvent Error opening file: ", err)
 		return nil
@@ -39,7 +45,7 @@ func (s *saveAttackEventRepo) ReadAttackEvent() []model.AttackEvent {
 
 // AppendToFile 将新数据写入csv文件
 func (s *saveAttackEventRepo) AppendToFile(attackEvent []model.AttackEvent) {
-	path := "wafcoraza/waf_log/attack_events.csv"
+	path := s.attackEventFile
 	var file *os.File
 	//判断此文件是否存在
 	if _, err := os.Stat(path); os.IsNotExist(err) {
@@ -106,7 +112,7 @@ func (s *saveAttackEventRepo) CollectionAttackEvent() {
 		return
 	}
 	//写入成功之后 , 删除json文件
-	if err := os.Remove("wafcoraza/waf_log/attack_events.csv"); err != nil {
+	if err := os.Remove(s.attackEventFile); err != nil {
 		slog.Error("remove attack_events.csv error: ", err)
 		return
 	}
