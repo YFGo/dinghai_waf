@@ -139,7 +139,15 @@ func (s serverRepo) Delete(ctx context.Context, serverIds []int64) (int64, error
 		if err != nil {
 			return err
 		}
+		err = tx.Where("server_id in (?)", serverIds).Unscoped().Delete(&model.ServerPrincipal{}).Error
+		if err != nil {
+			return err
+		}
 		err = tx.Where("id in (?)", serverIds).Unscoped().Delete(&model.ServerWaf{}).Error //删除主表数据")
+		if err != nil {
+			return err
+		}
+		err = tx.Where("server_id in (?)", serverIds).Delete(&model.PrincipalInfo{}).Error
 		if err != nil {
 			return err
 		}
