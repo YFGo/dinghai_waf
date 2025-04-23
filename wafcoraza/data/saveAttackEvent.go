@@ -56,13 +56,12 @@ func (s *saveAttackEventRepo) AppendToFile(attackEvent []model.AttackEvent) {
 			}
 		}(file)
 		if err != nil {
-			slog.Error("Error opening file: ", err)
 			return
 		}
 		// 写入标头和数据
 		err = gocsv.MarshalFile(attackEvent, file)
 		if err != nil {
-			slog.Error("Error marshaling file: ", err)
+
 			return
 		}
 	} else {
@@ -79,7 +78,6 @@ func (s *saveAttackEventRepo) AppendToFile(attackEvent []model.AttackEvent) {
 		//文件存在 , 不写入标头
 		err = gocsv.MarshalWithoutHeaders(&attackEvent, file)
 		if err != nil {
-			slog.Error("Error marshaling file: ", err)
 			return
 		}
 	}

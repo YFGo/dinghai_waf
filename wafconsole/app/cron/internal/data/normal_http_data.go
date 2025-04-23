@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"strconv"
+	"wafconsole/utils/const/waftop"
 
 	"github.com/IBM/sarama"
 	"github.com/go-kratos/kratos/v2/log"
@@ -13,7 +14,6 @@ import (
 	"wafconsole/app/cron/internal/biz/normalhttp"
 	"wafconsole/app/cron/internal/types"
 	"wafconsole/utils/const/cron"
-	"wafconsole/utils/const/waftop"
 )
 
 type normalHttpRepo struct {
@@ -27,31 +27,43 @@ func NewNormalHttpRepo(data *Data, logger log.Logger) normalhttp.RepoNormalHttp 
 		data: data,
 		log:  log.NewHelper(logger),
 	}
-	offset, _ := repo.getOffsetFromRedis()
-	partitionConsumer, err := data.kafkaConsumer.ConsumePartition(
+	return repo
+}
+
+func (n *normalHttpRepo) SaveNormalHttp2DB(ctx context.Context) error {
+	offset, _ := n.getOffsetFromRedis()
+	partitionConsumer, err := n.data.kafkaConsumer.ConsumePartition(
 		waftop.NormalHttpTopic,
 		0,
 		offset,
 	)
 	if err != nil {
-		panic(err)
+		n.log.WithContext(ctx).Errorf("consume partition err: %v", err)
+		return err
 	}
-	repo.partitionConsumers = partitionConsumer
-	return repo
-}
-
-func (n *normalHttpRepo) SaveNormalHttp2DB(ctx context.Context) error {
+	defer partitionConsumer.Close()
+	hwOffset := partitionConsumer.HighWaterMarkOffset() // 末尾偏移量
 	normalHttpInfoList := make([]*v1.NormalHttpInfo, 0)
 	var maxOffset int64 = 0
-	for msg := range n.partitionConsumers.Messages() {
-		normalHttpInfo, err := n.processMessage(msg)
-		if err != nil {
-			n.log.WithContext(ctx).Error(err)
-			return err
+	for {
+		select {
+		case msg, ok := <-partitionConsumer.Messages():
+			if !ok {
+				break
+			}
+			normalHttpInfo, err := n.processMessage(msg)
+			if err != nil {
+				n.log.WithContext(ctx).Error(err)
+				return err
+			}
+			normalHttpInfoList = append(normalHttpInfoList, normalHttpInfo)
+			maxOffset = msg.Offset
+			if maxOffset+1 == hwOffset {
+				goto COMMIT
+			}
 		}
-		normalHttpInfoList = append(normalHttpInfoList, normalHttpInfo)
-		maxOffset = msg.Offset
 	}
+COMMIT:
 	if err := n.commitBatch(normalHttpInfoList, maxOffset); err != nil {
 		n.log.WithContext(ctx).Error(err)
 		return err
