@@ -4,7 +4,6 @@ import (
 	"context"
 	"encoding/json"
 	"strconv"
-	"wafconsole/utils/const/waftop"
 
 	"github.com/IBM/sarama"
 	"github.com/go-kratos/kratos/v2/log"
@@ -14,6 +13,7 @@ import (
 	"wafconsole/app/cron/internal/biz/normalhttp"
 	"wafconsole/app/cron/internal/types"
 	"wafconsole/utils/const/cron"
+	"wafconsole/utils/const/waftop"
 )
 
 type normalHttpRepo struct {

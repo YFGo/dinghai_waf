@@ -31,13 +31,11 @@ func NewSaveAttackEventRepo(data *Data) biz.AttackEventRepo {
 func (s *saveAttackEventRepo) ReadAttackEvent() []model.AttackEvent {
 	file, err := os.OpenFile(s.attackEventFile, os.O_RDONLY, os.ModePerm)
 	if err != nil {
-		slog.Error("ReadAttackEvent Error opening file: ", err)
 		return nil
 	}
 	defer file.Close()
 	var attackEvents []model.AttackEvent
 	if err := gocsv.UnmarshalFile(file, &attackEvents); err != nil {
-		slog.Error("ReadAttackEvent Error unmarshaling file: ", err)
 		return nil
 	}
 	return attackEvents
@@ -50,14 +48,10 @@ func (s *saveAttackEventRepo) AppendToFile(attackEvent []model.AttackEvent) {
 	//判断此文件是否存在
 	if _, err := os.Stat(path); os.IsNotExist(err) {
 		file, err = os.OpenFile(path, os.O_CREATE|os.O_WRONLY, 0644) //文件不存在 , 需要创建文件
-		defer func(file *os.File) {
-			if err := file.Close(); err != nil {
-				slog.Error("Error closing file: ", err)
-			}
-		}(file)
 		if err != nil {
 			return
 		}
+		defer file.Close()
 		// 写入标头和数据
 		err = gocsv.MarshalFile(attackEvent, file)
 		if err != nil {
@@ -66,13 +60,8 @@ func (s *saveAttackEventRepo) AppendToFile(attackEvent []model.AttackEvent) {
 		}
 	} else {
 		file, err = os.OpenFile(path, os.O_APPEND|os.O_WRONLY, 0644)
-		defer func(file *os.File) {
-			if err := file.Close(); err != nil {
-				slog.Error("Error closing file: ", err)
-			}
-		}(file)
+		defer file.Close()
 		if err != nil {
-			slog.Error("Error opening file: ", err)
 			return
 		}
 		//文件存在 , 不写入标头
