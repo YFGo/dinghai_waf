@@ -2,6 +2,7 @@ package server
 
 import (
 	"context"
+	"github.com/go-kratos/kratos/v2/middleware/tracing"
 	"log/slog"
 
 	v1 "wafconsole/api/user/v1"
@@ -42,6 +43,7 @@ func NewHTTPServer(c *conf.Server, userService *service.WafUserService, commonSe
 		http.Middleware(
 			recovery.Recovery(),
 			up.MiddlewareCors(),
+			tracing.Server(),
 			protoValidate.ValidateUnaryServerInterceptor(), //参数校验
 			selector.Server(
 				up.JWTMiddleware(), //token验证

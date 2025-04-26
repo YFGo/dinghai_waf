@@ -10,3 +10,7 @@ const (
 const (
 	CutOff = "_"
 )
+
+const (
+	AppName = "定海"
+)

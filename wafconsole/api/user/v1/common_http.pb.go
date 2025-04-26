@@ -20,14 +20,23 @@ var _ = binding.EncodeURL
 const _ = http.SupportPackageIsVersion1
 
 const OperationCommonCreateNewToken = "/api.user.v1.Common/CreateNewToken"
+const OperationCommonGetCaptcha = "/api.user.v1.Common/GetCaptcha"
+const OperationCommonSendCode = "/api.user.v1.Common/SendCode"
+const OperationCommonVerifyCaptcha = "/api.user.v1.Common/VerifyCaptcha"
 
 type CommonHTTPServer interface {
 	CreateNewToken(context.Context, *CreateNewTokenRequest) (*CreateNewTokenReply, error)
+	GetCaptcha(context.Context, *GetCaptchaRequest) (*GetCaptchaReply, error)
+	SendCode(context.Context, *SendEmailRequest) (*SendEmailReply, error)
+	VerifyCaptcha(context.Context, *VerifyCaptchaRequest) (*VerifyCaptchaReply, error)
 }
 
 func RegisterCommonHTTPServer(s *http.Server, srv CommonHTTPServer) {
 	r := s.Route("/")
 	r.POST("/app/user/v1/waf/refreshToken", _Common_CreateNewToken0_HTTP_Handler(srv))
+	r.GET("/app/user/v1/waf/captchaRight", _Common_GetCaptcha0_HTTP_Handler(srv))
+	r.POST("/app/user/v1/waf/captchaVerify", _Common_VerifyCaptcha0_HTTP_Handler(srv))
+	r.GET("/app/user/v1/waf/code", _Common_SendCode0_HTTP_Handler(srv))
 }
 
 func _Common_CreateNewToken0_HTTP_Handler(srv CommonHTTPServer) func(ctx http.Context) error {
@@ -52,8 +61,71 @@ func _Common_CreateNewToken0_HTTP_Handler(srv CommonHTTPServer) func(ctx http.Co
 	}
 }
 
+func _Common_GetCaptcha0_HTTP_Handler(srv CommonHTTPServer) func(ctx http.Context) error {
+	return func(ctx http.Context) error {
+		var in GetCaptchaRequest
+		if err := ctx.BindQuery(&in); err != nil {
+			return err
+		}
+		http.SetOperation(ctx, OperationCommonGetCaptcha)
+		h := ctx.Middleware(func(ctx context.Context, req interface{}) (interface{}, error) {
+			return srv.GetCaptcha(ctx, req.(*GetCaptchaRequest))
+		})
+		out, err := h(ctx, &in)
+		if err != nil {
+			return err
+		}
+		reply := out.(*GetCaptchaReply)
+		return ctx.Result(200, reply)
+	}
+}
+
+func _Common_VerifyCaptcha0_HTTP_Handler(srv CommonHTTPServer) func(ctx http.Context) error {
+	return func(ctx http.Context) error {
+		var in VerifyCaptchaRequest
+		if err := ctx.Bind(&in); err != nil {
+			return err
+		}
+		if err := ctx.BindQuery(&in); err != nil {
+			return err
+		}
+		http.SetOperation(ctx, OperationCommonVerifyCaptcha)
+		h := ctx.Middleware(func(ctx context.Context, req interface{}) (interface{}, error) {
+			return srv.VerifyCaptcha(ctx, req.(*VerifyCaptchaRequest))
+		})
+		out, err := h(ctx, &in)
+		if err != nil {
+			return err
+		}
+		reply := out.(*VerifyCaptchaReply)
+		return ctx.Result(200, reply)
+	}
+}
+
+func _Common_SendCode0_HTTP_Handler(srv CommonHTTPServer) func(ctx http.Context) error {
+	return func(ctx http.Context) error {
+		var in SendEmailRequest
+		if err := ctx.BindQuery(&in); err != nil {
+			return err
+		}
+		http.SetOperation(ctx, OperationCommonSendCode)
+		h := ctx.Middleware(func(ctx context.Context, req interface{}) (interface{}, error) {
+			return srv.SendCode(ctx, req.(*SendEmailRequest))
+		})
+		out, err := h(ctx, &in)
+		if err != nil {
+			return err
+		}
+		reply := out.(*SendEmailReply)
+		return ctx.Result(200, reply)
+	}
+}
+
 type CommonHTTPClient interface {
 	CreateNewToken(ctx context.Context, req *CreateNewTokenRequest, opts ...http.CallOption) (rsp *CreateNewTokenReply, err error)
+	GetCaptcha(ctx context.Context, req *GetCaptchaRequest, opts ...http.CallOption) (rsp *GetCaptchaReply, err error)
+	SendCode(ctx context.Context, req *SendEmailRequest, opts ...http.CallOption) (rsp *SendEmailReply, err error)
+	VerifyCaptcha(ctx context.Context, req *VerifyCaptchaRequest, opts ...http.CallOption) (rsp *VerifyCaptchaReply, err error)
 }
 
 type CommonHTTPClientImpl struct {
@@ -69,6 +141,45 @@ func (c *CommonHTTPClientImpl) CreateNewToken(ctx context.Context, in *CreateNew
 	pattern := "/app/user/v1/waf/refreshToken"
 	path := binding.EncodeURL(pattern, in, false)
 	opts = append(opts, http.Operation(OperationCommonCreateNewToken))
+	opts = append(opts, http.PathTemplate(pattern))
+	err := c.cc.Invoke(ctx, "POST", path, in, &out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return &out, nil
+}
+
+func (c *CommonHTTPClientImpl) GetCaptcha(ctx context.Context, in *GetCaptchaRequest, opts ...http.CallOption) (*GetCaptchaReply, error) {
+	var out GetCaptchaReply
+	pattern := "/app/user/v1/waf/captchaRight"
+	path := binding.EncodeURL(pattern, in, true)
+	opts = append(opts, http.Operation(OperationCommonGetCaptcha))
+	opts = append(opts, http.PathTemplate(pattern))
+	err := c.cc.Invoke(ctx, "GET", path, nil, &out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return &out, nil
+}
+
+func (c *CommonHTTPClientImpl) SendCode(ctx context.Context, in *SendEmailRequest, opts ...http.CallOption) (*SendEmailReply, error) {
+	var out SendEmailReply
+	pattern := "/app/user/v1/waf/code"
+	path := binding.EncodeURL(pattern, in, true)
+	opts = append(opts, http.Operation(OperationCommonSendCode))
+	opts = append(opts, http.PathTemplate(pattern))
+	err := c.cc.Invoke(ctx, "GET", path, nil, &out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return &out, nil
+}
+
+func (c *CommonHTTPClientImpl) VerifyCaptcha(ctx context.Context, in *VerifyCaptchaRequest, opts ...http.CallOption) (*VerifyCaptchaReply, error) {
+	var out VerifyCaptchaReply
+	pattern := "/app/user/v1/waf/captchaVerify"
+	path := binding.EncodeURL(pattern, in, false)
+	opts = append(opts, http.Operation(OperationCommonVerifyCaptcha))
 	opts = append(opts, http.PathTemplate(pattern))
 	err := c.cc.Invoke(ctx, "POST", path, in, &out, opts...)
 	if err != nil {

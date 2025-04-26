@@ -1,6 +1,7 @@
 package server
 
 import (
+	"github.com/go-kratos/kratos/v2/middleware/tracing"
 	v1 "wafconsole/api/user/v1"
 	"wafconsole/app/user/internal/conf"
 	"wafconsole/app/user/internal/service"
@@ -14,6 +15,7 @@ import (
 func NewGRPCServer(c *conf.Server, wafUser *service.WafUserService, commonService *service.CommonService, logger log.Logger) *grpc.Server {
 	var opts = []grpc.ServerOption{
 		grpc.Middleware(
+			tracing.Server(),
 			recovery.Recovery(),
 		),
 	}

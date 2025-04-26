@@ -6,6 +6,53 @@ info:
     title: ""
     version: 0.0.1
 paths:
+    /app/user/v1/waf/captchaRight:
+        get:
+            tags:
+                - Common
+            operationId: Common_GetCaptcha
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/api.user.v1.GetCaptchaReply'
+    /app/user/v1/waf/captchaVerify:
+        post:
+            tags:
+                - Common
+            operationId: Common_VerifyCaptcha
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/api.user.v1.VerifyCaptchaRequest'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/api.user.v1.VerifyCaptchaReply'
+    /app/user/v1/waf/code:
+        get:
+            tags:
+                - Common
+            operationId: Common_SendCode
+            parameters:
+                - name: user_email
+                  in: query
+                  schema:
+                    type: string
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/api.user.v1.SendEmailReply'
     /app/user/v1/waf/refreshToken:
         post:
             tags:
@@ -166,6 +213,15 @@ components:
         api.user.v1.DeleteWafUserReply:
             type: object
             properties: {}
+        api.user.v1.GetCaptchaReply:
+            type: object
+            properties:
+                captcha_id:
+                    type: string
+                master_image:
+                    type: string
+                thumb_image:
+                    type: string
         api.user.v1.GetWafUserReply:
             type: object
             properties:
@@ -197,6 +253,9 @@ components:
                     type: string
                 password:
                     type: string
+        api.user.v1.SendEmailReply:
+            type: object
+            properties: {}
         api.user.v1.UpdatePasswordReply:
             type: object
             properties: {}
@@ -221,6 +280,17 @@ components:
                     type: string
                 phone:
                     type: string
+        api.user.v1.VerifyCaptchaReply:
+            type: object
+            properties: {}
+        api.user.v1.VerifyCaptchaRequest:
+            type: object
+            properties:
+                captcha_id:
+                    type: string
+                user_angle:
+                    type: number
+                    format: float
 tags:
     - name: Common
     - name: WafUser

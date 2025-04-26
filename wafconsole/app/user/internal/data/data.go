@@ -1,10 +1,17 @@
 package data
 
 import (
+	"context"
 	"fmt"
+	"log/slog"
+	"net/smtp"
+	"wafconsole/app/user/internal/data/types"
+
+	"github.com/go-redis/redis/v8"
 	"github.com/google/wire"
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
+
 	"wafconsole/app/user/internal/conf"
 	"wafconsole/app/user/internal/hooks"
 )
@@ -14,25 +21,36 @@ var ProviderSet = wire.NewSet(NewData, NewWafUserRepo, NewWafUserCommonRepo)
 
 // Data .
 type Data struct {
-	db *gorm.DB
+	db       *gorm.DB
+	rdb      *redis.Client
+	emailCfg *types.EmailCfg
 }
 
 // NewData .
 func NewData(s *conf.Server, bootstrap *conf.Bootstrap) (*Data, func(), error) {
 	c := bootstrap.Data
-	mysql, err := newMysql(c.Mysql)
+	mysqlClient, err := newMysql(c.Mysql)
 	if err != nil {
 		return nil, nil, err
 	}
+	redisClient := newRedis(c.Redis)
+
+	emailCfg := newEmailAuth(c.Email)
+
 	cleanup := func() {
-		if mysql != nil {
-			if db, err := mysql.DB(); err == nil && db != nil {
+		if mysqlClient != nil {
+			if db, err := mysqlClient.DB(); err == nil && db != nil {
 				db.Close()
 			}
 		}
+		if redisClient != nil {
+			redisClient.Close()
+		}
 	}
 	return &Data{
-		db: mysql,
+		db:       mysqlClient,
+		rdb:      redisClient,
+		emailCfg: emailCfg,
 	}, cleanup, nil
 }
 
@@ -57,4 +75,29 @@ func newMysql(cfg *conf.Data_Mysql) (*gorm.DB, error) {
 	hooks.CreateTable(db)
 
 	return db, nil
+}
+
+func newRedis(cfg *conf.Data_Redis) *redis.Client {
+	rdb := redis.NewClient(&redis.Options{
+		Addr:     cfg.Addr,
+		DB:       int(cfg.Db),
+		Password: cfg.Password,
+	})
+	_, err := rdb.Ping(context.Background()).Result()
+	if err != nil {
+		slog.Error("failed to connect redis", err)
+		panic(err)
+	}
+	return rdb
+}
+
+func newEmailAuth(cfg *conf.Data_Email) *types.EmailCfg {
+	auth := smtp.PlainAuth("", cfg.SmtpUserName, cfg.SmtpPassword, cfg.SmtpServer)
+	return &types.EmailCfg{
+		SmtpUserName: cfg.SmtpUserName,
+		SmtpPassword: cfg.SmtpPassword,
+		SmtpServer:   cfg.SmtpServer,
+		SmtpProt:     cfg.SmtpPort,
+		Auth:         auth,
+	}
 }

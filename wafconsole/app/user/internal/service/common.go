@@ -2,6 +2,7 @@ package service
 
 import (
 	"context"
+	"google.golang.org/grpc/codes"
 	pb "wafconsole/api/user/v1"
 	"wafconsole/app/user/internal/biz"
 	up "wafconsole/utils/plugin"
@@ -28,4 +29,36 @@ func (s *CommonService) CreateNewToken(ctx context.Context, req *pb.CreateNewTok
 		RefreshToken: refreshTokenNew,
 		ExpireAt:     exprieAt,
 	}, nil
+}
+
+func (s *CommonService) GetCaptcha(ctx context.Context, req *pb.GetCaptchaRequest) (*pb.GetCaptchaReply, error) {
+	captchaId, masterImg, thumbImg, err := s.uc.GetCaptcha(ctx)
+	if err != nil {
+		return nil, up.ServerErr()
+	}
+
+	return &pb.GetCaptchaReply{
+		CaptchaId:   captchaId,
+		MasterImage: masterImg,
+		ThumbImage:  thumbImg,
+	}, nil
+}
+
+func (s *CommonService) VerifyCaptcha(ctx context.Context, req *pb.VerifyCaptchaRequest) (*pb.VerifyCaptchaReply, error) {
+	err := s.uc.VerifyCaptchaInfo(ctx, req.CaptchaId, float64(req.UserAngle))
+	if err != nil {
+		if up.StatusErr(err, codes.PermissionDenied) || up.StatusErr(err, codes.Canceled) {
+			return nil, up.CaptchaErr()
+		}
+		return nil, up.ServerErr()
+	}
+	return &pb.VerifyCaptchaReply{}, nil
+}
+
+func (s *CommonService) SendCode(ctx context.Context, req *pb.SendEmailRequest) (*pb.SendEmailReply, error) {
+	err := s.uc.SendCode(ctx, req.UserEmail)
+	if err != nil {
+		return nil, up.ServerErr()
+	}
+	return &pb.SendEmailReply{}, nil
 }

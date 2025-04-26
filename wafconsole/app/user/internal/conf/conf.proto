@@ -37,13 +37,21 @@ message Data {
     int32 max_open = 7;
   }
   message Redis {
-    string network = 1;
-    string addr = 2;
-    google.protobuf.Duration read_timeout = 3;
-    google.protobuf.Duration write_timeout = 4;
+    string addr = 1;
+    int64 db = 2;
+    string password = 3;
+    google.protobuf.Duration read_timeout = 4;
+    google.protobuf.Duration write_timeout = 5;
+  }
+  message Email {
+    string smtp_server = 1;
+    string smtp_port = 2;
+    string smtp_user_name = 3;
+    string smtp_password = 4;
   }
   Mysql mysql = 1;
   Redis redis = 2;
+  Email email = 3;
 }
 
 message Trace {
