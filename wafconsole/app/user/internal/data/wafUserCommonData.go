@@ -29,7 +29,7 @@ func (w *wafUserCommonRepo) SaveKVToRs(ctx context.Context, userEmail, systemCod
 func (w *wafUserCommonRepo) SendSingEmailCode(ctx context.Context, content, userEmail string) error {
 	emailCfg := w.data.emailCfg
 	if err := sendinfo.SendEmail(emailCfg.SmtpServer, emailCfg.SmtpProt, emailCfg.SmtpUserName, userEmail, content, emailCfg.Auth); err != nil {
-		w.log.WithContext(ctx).Error("send sing code is failed")
+		w.log.WithContext(ctx).Error("send sing code is failed:", err)
 		return err
 	}
 	return nil

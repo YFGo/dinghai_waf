@@ -3,6 +3,7 @@ package sendinfo
 import (
 	"log/slog"
 	"net/smtp"
+
 	"wafconsole/utils/const/common"
 )
 
