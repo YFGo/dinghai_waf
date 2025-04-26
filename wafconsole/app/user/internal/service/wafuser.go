@@ -3,6 +3,7 @@ package service
 import (
 	"context"
 	"log/slog"
+	"wafconsole/app/user/internal/service/validation"
 
 	pb "wafconsole/api/user/v1"
 	"wafconsole/app/user/internal/biz"
@@ -61,21 +62,22 @@ func (s *WafUserService) GetWafUser(ctx context.Context, req *pb.GetWafUserReque
 	}, nil
 }
 func (s *WafUserService) Login(ctx context.Context, req *pb.LoginUserInfoRequest) (*pb.LoginUserInfoReply, error) {
-	userInfo := types.UserInfo{
-		Email:    req.Email,
-		Password: req.Password,
+	loginInfo, isExist := validation.LoginMethod(uint8(req.LoginMethod), req.Email, req.Phone, req.Code, req.Password)
+	if !isExist {
+		return nil, up.LoginMethodErr()
 	}
-	accessToken, refreshToken, err := s.uc.LoginByEmailPassword(ctx, userInfo)
+	accessToken, refreshToken, avatarAddr, userId, err := s.uc.LoginByEmailPassword(ctx, loginInfo.Account, loginInfo.AccountCheck, uint8(req.LoginMethod))
 	if err != nil {
 		if up.StatusErr(err, codes.NotFound) {
 			return nil, up.UserNotFoundErr()
 		}
-		slog.ErrorContext(ctx, "LoginByEmailPassword err : %v", err)
 		return nil, up.ServerErr()
 	}
 	return &pb.LoginUserInfoReply{
 		AccessToken:  accessToken,
 		RefreshToken: refreshToken,
+		AvatarAddr:   avatarAddr,
+		UserId:       uint64(userId),
 	}, nil
 }
 func (s *WafUserService) UpdatePassword(ctx context.Context, req *pb.UpdatePasswordRequest) (*pb.UpdatePasswordReply, error) {
