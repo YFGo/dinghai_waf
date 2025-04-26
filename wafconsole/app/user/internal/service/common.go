@@ -56,8 +56,11 @@ func (s *CommonService) VerifyCaptcha(ctx context.Context, req *pb.VerifyCaptcha
 }
 
 func (s *CommonService) SendCode(ctx context.Context, req *pb.SendEmailRequest) (*pb.SendEmailReply, error) {
-	err := s.uc.SendCode(ctx, req.UserEmail)
+	err := s.uc.SendCode(ctx, req.UserEmail, req.SendAction)
 	if err != nil {
+		if up.StatusErr(err, codes.NotFound) {
+			return nil, up.UserNotFoundErr()
+		}
 		return nil, up.ServerErr()
 	}
 	return &pb.SendEmailReply{}, nil

@@ -2,9 +2,12 @@ package biz
 
 import (
 	"context"
+	"errors"
+	"gorm.io/gorm"
 	"math"
 	"sync"
 	"time"
+	"wafconsole/utils/const/user"
 
 	"github.com/go-kratos/kratos/v2/log"
 	"google.golang.org/grpc/codes"
@@ -17,17 +20,20 @@ import (
 type WafUserCommonRepo interface {
 	SaveKVToRs(ctx context.Context, userEmail, systemCode string, expiration time.Duration) error
 	SendSingEmailCode(ctx context.Context, content, userEmail string) error
+	DeleteKvFromRs(ctx context.Context, userEmail string) error
 }
 
 type WafUserCommonUsecase struct {
 	captchaStore sync.Map
 	repo         WafUserCommonRepo
+	wafUserRepo  WafUserRepo
 	log          *log.Helper
 }
 
-func NewWafUserCommonUsecase(repo WafUserCommonRepo, logger log.Logger) *WafUserCommonUsecase {
+func NewWafUserCommonUsecase(repo WafUserCommonRepo, wafUserRepo WafUserRepo, logger log.Logger) *WafUserCommonUsecase {
 	return &WafUserCommonUsecase{
 		repo:         repo,
+		wafUserRepo:  wafUserRepo,
 		captchaStore: sync.Map{},
 		log:          log.NewHelper(logger),
 	}
@@ -85,7 +91,19 @@ func (w *WafUserCommonUsecase) VerifyCaptchaInfo(ctx context.Context, captchaId 
 }
 
 // SendCode 发送验证码
-func (w *WafUserCommonUsecase) SendCode(ctx context.Context, userEmail string) error {
+func (w *WafUserCommonUsecase) SendCode(ctx context.Context, userEmail, sendAction string) error {
+	// 判断如果是登录行为发送的验证码 , 验证邮箱是否存在
+	if sendAction == user.LoginActionSend {
+		_, err := w.wafUserRepo.GetUserInfoByEmail(ctx, userEmail)
+		if err != nil {
+			if errors.Is(err, gorm.ErrRecordNotFound) { // 用户不存在
+				return status.Error(codes.NotFound, "user not found")
+			}
+			w.log.WithContext(ctx).Error(err)
+			return err
+		}
+
+	}
 	// 1. 生成验证码
 	emailCode := code.NewEmailCode()
 	codeInfo := emailCode.Generate()
@@ -95,7 +113,11 @@ func (w *WafUserCommonUsecase) SendCode(ctx context.Context, userEmail string) e
 		return err
 	}
 	// 3. 发送邮件
-	emailBody := code.GenerateEmailBody(codeInfo) // 邮件模板
+	emailBody, err := code.GenerateEmailBody(codeInfo) // 邮件模板
+	if err != nil {
+		w.log.WithContext(ctx).Error(err)
+		return err
+	}
 	if err := w.repo.SendSingEmailCode(ctx, emailBody, userEmail); err != nil {
 		w.log.WithContext(ctx).Error(err)
 		return err

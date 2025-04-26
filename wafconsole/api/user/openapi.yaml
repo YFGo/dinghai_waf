@@ -46,6 +46,10 @@ paths:
                   in: query
                   schema:
                     type: string
+                - name: send_action
+                  in: query
+                  schema:
+                    type: string
             responses:
                 "200":
                     description: OK
@@ -239,6 +243,10 @@ components:
                 access_token:
                     type: string
                 refresh_token:
+                    type: string
+                user_id:
+                    type: string
+                avatar_addr:
                     type: string
         api.user.v1.LoginUserInfoRequest:
             type: object

@@ -69,3 +69,9 @@ func (w wafUserRepo) GetRedisValueByKey(ctx context.Context, key string) (string
 	}
 	return code, nil
 }
+
+func (w wafUserRepo) GetUserInfoByEmail(ctx context.Context, email string) (types.UserInfo, error) {
+	var res types.UserInfo
+	err := w.data.db.Where("email = ?", email).First(&res).Error
+	return res, err
+}

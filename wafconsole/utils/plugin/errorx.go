@@ -10,7 +10,8 @@ const (
 	ErrCaptchaError
 
 	// 1000 ~ 2000 用户相关
-	ErrUserCode = 1001
+	ErrUserCode              = 1001
+	ErrLoginMethodIsNotExist = 1002
 
 	// 6500 ~ 7000 规则错误
 	ErrRuleGroupIsExist = 6500
@@ -47,6 +48,10 @@ func UserNotFoundErr() error {
 
 func UserCodeErr() error {
 	return errors.New(ErrUserCode, "", "验证码输入错误")
+}
+
+func LoginMethodErr() error {
+	return errors.New(ErrLoginMethodIsNotExist, "", "暂不支持此种登录方式")
 }
 
 func AllowExistErr() error {

@@ -32,10 +32,10 @@ func wireApp(confServer *conf.Server, bootstrap *conf.Bootstrap, logger log.Logg
 		return nil, nil, err
 	}
 	wafUserRepo := data.NewWafUserRepo(dataData, logger)
-	wafUserUsecase := biz.NewWafUserUsecase(wafUserRepo, logger)
-	wafUserService := service.NewWafUserService(wafUserUsecase)
 	wafUserCommonRepo := data.NewWafUserCommonRepo(dataData, logger)
-	wafUserCommonUsecase := biz.NewWafUserCommonUsecase(wafUserCommonRepo, logger)
+	wafUserUsecase := biz.NewWafUserUsecase(wafUserRepo, wafUserCommonRepo, logger)
+	wafUserService := service.NewWafUserService(wafUserUsecase)
+	wafUserCommonUsecase := biz.NewWafUserCommonUsecase(wafUserCommonRepo, wafUserRepo, logger)
 	commonService := service.NewCommonService(wafUserCommonUsecase)
 	grpcServer := server.NewGRPCServer(confServer, wafUserService, commonService, logger)
 	httpServer := server.NewHTTPServer(confServer, wafUserService, commonService, logger)

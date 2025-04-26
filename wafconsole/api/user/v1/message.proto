@@ -90,8 +90,10 @@ message LoginUserInfoRequest {
 }
 
 message LoginUserInfoReply{
-    string access_token = 1;
-    string refresh_token = 2;
+  string access_token = 1;
+  string refresh_token = 2;
+  uint64 user_id = 3;
+  string avatar_addr= 4;
 }
 
 message UpdatePasswordRequest {
@@ -164,6 +166,13 @@ message SendEmailRequest {
       expression: "this.isEmail()"
     }
   ] ;
+  string send_action = 2 [
+    (buf.validate.field).cel = {
+      id: "send_action",
+      message: "请重试",
+      expression: "this in ['login' , 'sign']"
+    }
+  ];
 }
 
 message SendEmailReply {

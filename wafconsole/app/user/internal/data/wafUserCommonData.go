@@ -34,3 +34,11 @@ func (w *wafUserCommonRepo) SendSingEmailCode(ctx context.Context, content, user
 	}
 	return nil
 }
+
+func (w *wafUserCommonRepo) DeleteKvFromRs(ctx context.Context, userEmail string) error {
+	if err := w.data.rdb.Del(ctx, userEmail).Err(); err != nil {
+		w.log.WithContext(ctx).Error("delete email is failed:", err)
+		return err
+	}
+	return nil
+}
