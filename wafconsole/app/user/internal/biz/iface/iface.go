@@ -3,14 +3,14 @@ package iface
 import (
 	"context"
 	"gorm.io/gorm"
-	"wafconsole/app/user/internal/data/model"
+	"wafconsole/app/user/internal/data/types"
 )
 
 type WhereOption func(*gorm.DB)
 type WhereOptionWithReturn func(*gorm.DB) *gorm.DB
 
 type Domain interface {
-	model.UserInfo
+	types.UserInfo
 }
 
 type BaseRepo[T Domain] interface {

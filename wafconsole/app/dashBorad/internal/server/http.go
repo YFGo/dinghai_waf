@@ -3,6 +3,7 @@ package server
 import (
 	"github.com/go-kratos/kratos/v2/log"
 	"github.com/go-kratos/kratos/v2/middleware/recovery"
+	"github.com/go-kratos/kratos/v2/middleware/tracing"
 	"github.com/go-kratos/kratos/v2/transport/http"
 
 	v1 "wafconsole/api/dashBorad/v1"
@@ -24,6 +25,7 @@ func NewHTTPServer(c *conf.Server, dataView *view.DataViewService, logger log.Lo
 			protoValidate.ValidateUnaryServerInterceptor(),
 			up.MiddlewareCors(),
 			up.JWTMiddleware(),
+			tracing.Server(),
 		),
 		http.ResponseEncoder(utils.ResponseEncoder),
 		http.ErrorEncoder(utils.ErrorEncoder),

@@ -1,20 +1,36 @@
 package biz
 
 import (
+	"context"
+	"math"
+	"sync"
+	"time"
+
+	"github.com/go-kratos/kratos/v2/log"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
+
+	"wafconsole/utils/code"
 	up "wafconsole/utils/plugin"
 )
 
 type WafUserCommonRepo interface {
+	SaveKVToRs(ctx context.Context, userEmail, systemCode string, expiration time.Duration) error
+	SendSingEmailCode(ctx context.Context, content, userEmail string) error
 }
 
 type WafUserCommonUsecase struct {
-	repo WafUserCommonRepo
+	captchaStore sync.Map
+	repo         WafUserCommonRepo
+	log          *log.Helper
 }
 
-func NewWafUserCommonUsecase(repo WafUserCommonRepo) *WafUserCommonUsecase {
-	return &WafUserCommonUsecase{repo: repo}
+func NewWafUserCommonUsecase(repo WafUserCommonRepo, logger log.Logger) *WafUserCommonUsecase {
+	return &WafUserCommonUsecase{
+		repo:         repo,
+		captchaStore: sync.Map{},
+		log:          log.NewHelper(logger),
+	}
 }
 
 func (w *WafUserCommonUsecase) RefreshAccessToken(refreshToken string) (string, string, int64, error) {
@@ -29,4 +45,60 @@ func (w *WafUserCommonUsecase) RefreshAccessToken(refreshToken string) (string, 
 		return accessToken, refreshTokenNew, expiresAt, nil
 	}
 	return "", "", 0, status.Error(codes.Canceled, "refreshToken is expired")
+}
+
+// GetCaptcha 获取图片验证码
+func (w *WafUserCommonUsecase) GetCaptcha(ctx context.Context) (string, string, string, error) {
+	rotateCaptcha := code.NewRotateCaptchaStrategy()
+	captchaID, masterImg, thumbImg, captchaCache, err := rotateCaptcha.Generate()
+	if err != nil {
+		w.log.WithContext(ctx).Error(err)
+		return "", "", "", err
+	}
+	// 存储正确角度
+	w.captchaStore.Store(captchaID, captchaCache)
+	return captchaID, masterImg, thumbImg, nil
+}
+
+// VerifyCaptchaInfo 校验验证码逻辑
+func (w *WafUserCommonUsecase) VerifyCaptchaInfo(ctx context.Context, captchaId string, userAngle float64) error {
+	// 从缓存中获取
+	captchaCache, exists := w.captchaStore.Load(captchaId)
+	if !exists {
+		w.log.WithContext(ctx).Error(codes.NotFound)
+		return status.Error(codes.NotFound, "<UNK>")
+	}
+	captchaCacheValue, ok := captchaCache.(*code.CaptchaCacheValue)
+	if !ok {
+		w.log.WithContext(ctx).Error(codes.Unknown)
+		return status.Error(codes.Unknown, "<UNK>")
+	}
+	w.captchaStore.Delete(captchaId)
+	if time.Now().After(captchaCacheValue.ExpireTime) { // 验证码过期
+		return status.Error(codes.Canceled, "expired")
+	}
+	success := math.Abs(userAngle-captchaCacheValue.CorrectAngle) <= 5
+	if !success { // 验证未通过
+		return status.Error(codes.PermissionDenied, "captcha code is error")
+	}
+	return nil
+}
+
+// SendCode 发送验证码
+func (w *WafUserCommonUsecase) SendCode(ctx context.Context, userEmail string) error {
+	// 1. 生成验证码
+	emailCode := code.NewEmailCode()
+	codeInfo := emailCode.Generate()
+	// 2. 先把验证码存入redis
+	if err := w.repo.SaveKVToRs(ctx, userEmail, codeInfo, 5*time.Minute); err != nil {
+		w.log.WithContext(ctx).Error(err)
+		return err
+	}
+	// 3. 发送邮件
+	emailBody := code.GenerateEmailBody(codeInfo) // 邮件模板
+	if err := w.repo.SendSingEmailCode(ctx, userEmail, emailBody); err != nil {
+		w.log.WithContext(ctx).Error(err)
+		return err
+	}
+	return nil
 }

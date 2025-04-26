@@ -19,8 +19,8 @@ message CreateWafUserRequest {
     string code = 2 [
             (buf.validate.field).cel = {
                 id: "code",
-                message: "邮件验证码不能为空",
-                expression: "size(this) > 0"
+                message: "验证码错误",
+                expression: "size(this) == 6"
             }
     ];
     string password = 3 [
@@ -135,4 +135,37 @@ message CreateNewTokenReply {
     string access_token = 1;
     string refresh_token = 2;
     int64 expire_at = 3;
+}
+
+message GetCaptchaRequest {
+
+}
+
+message GetCaptchaReply {
+  string captcha_id = 1;
+  string master_image = 2;
+  string thumb_image = 3;
+}
+
+message VerifyCaptchaRequest {
+  string captcha_id = 1;
+  float user_angle = 2;
+}
+
+message VerifyCaptchaReply {
+
+}
+
+message SendEmailRequest {
+  string user_email = 1 [
+    (buf.validate.field).cel = {
+      id: "user_email",
+      message: "邮箱地址不合法",
+      expression: "this.isEmail()"
+    }
+  ] ;
+}
+
+message SendEmailReply {
+
 }

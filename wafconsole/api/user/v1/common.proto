@@ -18,4 +18,20 @@ service Common {
 			body: "*"
 		};
 	};
+	rpc GetCaptcha (GetCaptchaRequest) returns (GetCaptchaReply) {
+		option (google.api.http) = {
+			get: "/app/user/v1/waf/captchaRight"
+		};
+	};
+	rpc VerifyCaptcha (VerifyCaptchaRequest) returns (VerifyCaptchaReply) {
+		option (google.api.http) = {
+			post: "/app/user/v1/waf/captchaVerify"
+			body: "*",
+		};
+	};
+	rpc SendCode(SendEmailRequest) returns (SendEmailReply) {
+		option (google.api.http) = {
+			get: "/app/user/v1/waf/code"
+		};
+	}
 }

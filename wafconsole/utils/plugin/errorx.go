@@ -7,6 +7,10 @@ import (
 const (
 	ErrTokenIsFailed = 900 + iota
 	ErrServer
+	ErrCaptchaError
+
+	// 1000 ~ 2000 用户相关
+	ErrUserCode = 1001
 
 	// 6500 ~ 7000 规则错误
 	ErrRuleGroupIsExist = 6500
@@ -32,9 +36,17 @@ func ServerErr() error {
 	return errors.New(ErrServer, "", "服务繁忙")
 }
 
+func CaptchaErr() error {
+	return errors.New(ErrCaptchaError, "", "请重新验证")
+}
+
 // 1000 ~ 2000 用户相关
 func UserNotFoundErr() error {
 	return errors.New(1000, "", "登录信息错误")
+}
+
+func UserCodeErr() error {
+	return errors.New(ErrUserCode, "", "验证码输入错误")
 }
 
 func AllowExistErr() error {

@@ -6,7 +6,7 @@ import (
 
 	pb "wafconsole/api/user/v1"
 	"wafconsole/app/user/internal/biz"
-	"wafconsole/app/user/internal/data/model"
+	"wafconsole/app/user/internal/data/types"
 	up "wafconsole/utils/plugin"
 
 	"google.golang.org/grpc/codes"
@@ -24,12 +24,15 @@ func NewWafUserService(uc *biz.WafUserUsecase) *WafUserService {
 }
 
 func (s *WafUserService) CreateWafUser(ctx context.Context, req *pb.CreateWafUserRequest) (*pb.CreateWafUserReply, error) {
-	userInfo := model.UserInfo{
+	userInfo := types.UserInfo{
 		Email:    req.Email,
 		Password: req.Password,
 	}
-	err := s.uc.SignUp(ctx, userInfo)
+	err := s.uc.SignUp(ctx, userInfo, req.Code)
 	if err != nil {
+		if up.StatusErr(err, codes.PermissionDenied) {
+			return nil, up.UserCodeErr()
+		}
 		return nil, err
 	}
 	return &pb.CreateWafUserReply{}, nil
@@ -58,7 +61,7 @@ func (s *WafUserService) GetWafUser(ctx context.Context, req *pb.GetWafUserReque
 	}, nil
 }
 func (s *WafUserService) Login(ctx context.Context, req *pb.LoginUserInfoRequest) (*pb.LoginUserInfoReply, error) {
-	userInfo := model.UserInfo{
+	userInfo := types.UserInfo{
 		Email:    req.Email,
 		Password: req.Password,
 	}

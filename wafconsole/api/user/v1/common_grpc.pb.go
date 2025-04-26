@@ -22,6 +22,9 @@ const _ = grpc.SupportPackageIsVersion9
 
 const (
 	Common_CreateNewToken_FullMethodName = "/api.user.v1.Common/CreateNewToken"
+	Common_GetCaptcha_FullMethodName     = "/api.user.v1.Common/GetCaptcha"
+	Common_VerifyCaptcha_FullMethodName  = "/api.user.v1.Common/VerifyCaptcha"
+	Common_SendCode_FullMethodName       = "/api.user.v1.Common/SendCode"
 )
 
 // CommonClient is the client API for Common service.
@@ -29,6 +32,9 @@ const (
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type CommonClient interface {
 	CreateNewToken(ctx context.Context, in *CreateNewTokenRequest, opts ...grpc.CallOption) (*CreateNewTokenReply, error)
+	GetCaptcha(ctx context.Context, in *GetCaptchaRequest, opts ...grpc.CallOption) (*GetCaptchaReply, error)
+	VerifyCaptcha(ctx context.Context, in *VerifyCaptchaRequest, opts ...grpc.CallOption) (*VerifyCaptchaReply, error)
+	SendCode(ctx context.Context, in *SendEmailRequest, opts ...grpc.CallOption) (*SendEmailReply, error)
 }
 
 type commonClient struct {
@@ -49,11 +55,44 @@ func (c *commonClient) CreateNewToken(ctx context.Context, in *CreateNewTokenReq
 	return out, nil
 }
 
+func (c *commonClient) GetCaptcha(ctx context.Context, in *GetCaptchaRequest, opts ...grpc.CallOption) (*GetCaptchaReply, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(GetCaptchaReply)
+	err := c.cc.Invoke(ctx, Common_GetCaptcha_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *commonClient) VerifyCaptcha(ctx context.Context, in *VerifyCaptchaRequest, opts ...grpc.CallOption) (*VerifyCaptchaReply, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(VerifyCaptchaReply)
+	err := c.cc.Invoke(ctx, Common_VerifyCaptcha_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *commonClient) SendCode(ctx context.Context, in *SendEmailRequest, opts ...grpc.CallOption) (*SendEmailReply, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(SendEmailReply)
+	err := c.cc.Invoke(ctx, Common_SendCode_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // CommonServer is the server API for Common service.
 // All implementations must embed UnimplementedCommonServer
 // for forward compatibility.
 type CommonServer interface {
 	CreateNewToken(context.Context, *CreateNewTokenRequest) (*CreateNewTokenReply, error)
+	GetCaptcha(context.Context, *GetCaptchaRequest) (*GetCaptchaReply, error)
+	VerifyCaptcha(context.Context, *VerifyCaptchaRequest) (*VerifyCaptchaReply, error)
+	SendCode(context.Context, *SendEmailRequest) (*SendEmailReply, error)
 	mustEmbedUnimplementedCommonServer()
 }
 
@@ -66,6 +105,15 @@ type UnimplementedCommonServer struct{}
 
 func (UnimplementedCommonServer) CreateNewToken(context.Context, *CreateNewTokenRequest) (*CreateNewTokenReply, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method CreateNewToken not implemented")
+}
+func (UnimplementedCommonServer) GetCaptcha(context.Context, *GetCaptchaRequest) (*GetCaptchaReply, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetCaptcha not implemented")
+}
+func (UnimplementedCommonServer) VerifyCaptcha(context.Context, *VerifyCaptchaRequest) (*VerifyCaptchaReply, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method VerifyCaptcha not implemented")
+}
+func (UnimplementedCommonServer) SendCode(context.Context, *SendEmailRequest) (*SendEmailReply, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method SendCode not implemented")
 }
 func (UnimplementedCommonServer) mustEmbedUnimplementedCommonServer() {}
 func (UnimplementedCommonServer) testEmbeddedByValue()                {}
@@ -106,6 +154,60 @@ func _Common_CreateNewToken_Handler(srv interface{}, ctx context.Context, dec fu
 	return interceptor(ctx, in, info, handler)
 }
 
+func _Common_GetCaptcha_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetCaptchaRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(CommonServer).GetCaptcha(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: Common_GetCaptcha_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(CommonServer).GetCaptcha(ctx, req.(*GetCaptchaRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Common_VerifyCaptcha_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(VerifyCaptchaRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(CommonServer).VerifyCaptcha(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: Common_VerifyCaptcha_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(CommonServer).VerifyCaptcha(ctx, req.(*VerifyCaptchaRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Common_SendCode_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(SendEmailRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(CommonServer).SendCode(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: Common_SendCode_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(CommonServer).SendCode(ctx, req.(*SendEmailRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // Common_ServiceDesc is the grpc.ServiceDesc for Common service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -116,6 +218,18 @@ var Common_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "CreateNewToken",
 			Handler:    _Common_CreateNewToken_Handler,
+		},
+		{
+			MethodName: "GetCaptcha",
+			Handler:    _Common_GetCaptcha_Handler,
+		},
+		{
+			MethodName: "VerifyCaptcha",
+			Handler:    _Common_VerifyCaptcha_Handler,
+		},
+		{
+			MethodName: "SendCode",
+			Handler:    _Common_SendCode_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

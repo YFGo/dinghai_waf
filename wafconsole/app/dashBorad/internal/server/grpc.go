@@ -1,6 +1,7 @@
 package server
 
 import (
+	"github.com/go-kratos/kratos/v2/middleware/tracing"
 	v1 "wafconsole/api/dashBorad/v1"
 	"wafconsole/app/dashBorad/internal/conf"
 	"wafconsole/app/dashBorad/internal/service/view"
@@ -15,6 +16,7 @@ func NewGRPCServer(c *conf.Server, dataView *view.DataViewService, logger log.Lo
 	var opts = []grpc.ServerOption{
 		grpc.Middleware(
 			recovery.Recovery(),
+			tracing.Server(),
 		),
 	}
 	if c.Grpc.Network != "" {
