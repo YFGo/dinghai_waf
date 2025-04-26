@@ -92,9 +92,9 @@ func newRedis(cfg *conf.Data_Redis) *redis.Client {
 }
 
 func newEmailAuth(cfg *conf.Data_Email) *types.EmailCfg {
-	auth := smtp.PlainAuth("", cfg.SmtpUserName, cfg.SmtpPassword, cfg.SmtpServer)
+	auth := smtp.PlainAuth("", cfg.SmtpUsername, cfg.SmtpPassword, cfg.SmtpServer)
 	return &types.EmailCfg{
-		SmtpUserName: cfg.SmtpUserName,
+		SmtpUserName: cfg.SmtpUsername,
 		SmtpPassword: cfg.SmtpPassword,
 		SmtpServer:   cfg.SmtpServer,
 		SmtpProt:     cfg.SmtpPort,

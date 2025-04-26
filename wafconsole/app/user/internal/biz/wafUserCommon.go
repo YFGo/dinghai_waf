@@ -96,7 +96,7 @@ func (w *WafUserCommonUsecase) SendCode(ctx context.Context, userEmail string) e
 	}
 	// 3. 发送邮件
 	emailBody := code.GenerateEmailBody(codeInfo) // 邮件模板
-	if err := w.repo.SendSingEmailCode(ctx, userEmail, emailBody); err != nil {
+	if err := w.repo.SendSingEmailCode(ctx, emailBody, userEmail); err != nil {
 		w.log.WithContext(ctx).Error(err)
 		return err
 	}

@@ -46,7 +46,7 @@ message Data {
   message Email {
     string smtp_server = 1;
     string smtp_port = 2;
-    string smtp_user_name = 3;
+    string smtp_username=3;
     string smtp_password = 4;
   }
   Mysql mysql = 1;
