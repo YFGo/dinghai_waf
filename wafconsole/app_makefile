@@ -86,7 +86,7 @@ generate:
 .PHONY: build
 # build
 build:
-	mkdir -p bin/ && go build -ldflags "-X main.Version=$(VERSION)" -o ./bin/ ./...
+	mkdir bin && go build -ldflags "-X main.Version=v1.0.1-115-g1e97b0c" -o ./bin/ ./...
 
 .PHONY: test
 # test

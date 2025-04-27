@@ -2,7 +2,7 @@ package main
 
 import (
 	"context"
-	"wafconsole/app/user/internal/conf"
+	"time"
 
 	"go.opentelemetry.io/otel"
 	"go.opentelemetry.io/otel/attribute"
@@ -10,11 +10,27 @@ import (
 	"go.opentelemetry.io/otel/sdk/resource"
 	tracesdk "go.opentelemetry.io/otel/sdk/trace"
 	semconv "go.opentelemetry.io/otel/semconv/v1.4.0"
+	"google.golang.org/grpc"
+
+	"wafconsole/app/user/internal/conf"
 )
 
 // set trace provider
+// set trace provider
 func setTracerProvider(ctx context.Context, c *conf.Trace) error {
-	exp, err := otlptracegrpc.New(ctx, otlptracegrpc.WithEndpoint(c.Endpoint), otlptracegrpc.WithInsecure())
+	// 设置连接超时时间
+	ctx, cancel := context.WithTimeout(ctx, 10*time.Second)
+	defer cancel()
+
+	// 创建带有超时和调整帧大小的选项
+	clientOpts := []otlptracegrpc.Option{
+		otlptracegrpc.WithEndpoint(c.Endpoint),
+		otlptracegrpc.WithInsecure(),
+		otlptracegrpc.WithDialOption(grpc.WithDefaultCallOptions(grpc.MaxCallRecvMsgSize(1024 * 1024 * 10))), // 调整最大接收消息大小为 10MB
+		otlptracegrpc.WithDialOption(grpc.WithDefaultCallOptions(grpc.MaxCallSendMsgSize(1024 * 1024 * 10))), // 调整最大发送消息大小为 10MB
+	}
+
+	exp, err := otlptracegrpc.New(ctx, clientOpts...)
 	if err != nil {
 		return err
 	}

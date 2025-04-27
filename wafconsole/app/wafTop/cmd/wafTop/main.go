@@ -79,7 +79,7 @@ func main() {
 	ctx := context.Background()
 	err := setTracerProvider(ctx, bc.Trace)
 	if err != nil {
-		log.Error(err)
+		panic(err)
 	}
 
 	//init registry
