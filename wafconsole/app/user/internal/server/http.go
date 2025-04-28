@@ -23,6 +23,9 @@ func NewWhiteListMatcher() selector.MatchFunc {
 	whiteList["/api.user.v1.WafUser/CreateWafUser"] = struct{}{}
 	whiteList["/api.user.v1.WafUser/Login"] = struct{}{}
 	whiteList["/api.user.v1.Common/CreateNewToken"] = struct{}{}
+	whiteList["/api.user.v1.Common/GetCaptcha"] = struct{}{}
+	whiteList["/api.user.v1.Common/VerifyCaptcha"] = struct{}{}
+	whiteList["/api.user.v1.Common/SendCode"] = struct{}{}
 
 	return func(ctx context.Context, operation string) bool {
 		if _, ok := whiteList[operation]; ok {
