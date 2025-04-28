@@ -65,3 +65,7 @@ func (s *CommonService) SendCode(ctx context.Context, req *pb.SendEmailRequest) 
 	}
 	return &pb.SendEmailReply{}, nil
 }
+
+func (s *CommonService) SseConnect(ctx context.Context, req *pb.SseConnectRequest) (*pb.SseConnectReply, error) {
+	return &pb.SseConnectReply{}, nil
+}

@@ -14,10 +14,7 @@ import (
 )
 
 type AttackEventRepo interface {
-	ReadAttackEvent() []model.AttackEvent
-	AppendToFile(attackEvent []model.AttackEvent)
-	WriteEventTask()
-	CollectionAttackEvent()
+	AppendToKafka(attackEvent []model.AttackEvent)
 }
 
 type AttackEventUsercase struct {
@@ -30,7 +27,7 @@ func NewAttackEventUsercase(repo AttackEventRepo) *AttackEventUsercase {
 	}
 }
 
-// LogAttackEvent 记录每次的攻击事件到JSON文件
+// LogAttackEvent 记录每次的攻击事件到kafka
 func (uc *AttackEventUsercase) LogAttackEvent(matchRules []types.MatchedRule, req *http.Request, requestBody []byte, action, nextAction uint8) {
 	// 获取真实的客户端 IP 地址和端口
 	_, clientPort, err := net.SplitHostPort(req.RemoteAddr)
@@ -62,10 +59,5 @@ func (uc *AttackEventUsercase) LogAttackEvent(matchRules []types.MatchedRule, re
 		Request:       string(requestBody),
 	}
 	eventCsv := []model.AttackEvent{event} // csv格式数据正确处理
-	uc.repo.AppendToFile(eventCsv)         // 写入文件
-}
-
-// StartTimeTask 开启定时任务
-func (uc *AttackEventUsercase) StartTimeTask() func() {
-	return uc.repo.WriteEventTask
+	uc.repo.AppendToKafka(eventCsv)        // 写入kafka
 }

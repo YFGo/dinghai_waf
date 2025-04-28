@@ -75,6 +75,18 @@ paths:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/api.user.v1.CreateNewTokenReply'
+    /app/user/v1/waf/sse:
+        get:
+            tags:
+                - Common
+            operationId: Common_SseConnect
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/api.user.v1.SseConnectReply'
     /app/user/v1/wafUser:
         put:
             tags:
@@ -262,6 +274,9 @@ components:
                 password:
                     type: string
         api.user.v1.SendEmailReply:
+            type: object
+            properties: {}
+        api.user.v1.SseConnectReply:
             type: object
             properties: {}
         api.user.v1.UpdatePasswordReply:
