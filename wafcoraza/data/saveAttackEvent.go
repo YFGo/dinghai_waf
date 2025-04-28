@@ -3,13 +3,10 @@ package data
 import (
 	"encoding/json"
 	"log/slog"
-	"os"
 	"strconv"
 	"sync"
 
 	"github.com/IBM/sarama"
-	"github.com/gocarina/gocsv"
-
 	"wafcoraza/biz"
 	"wafcoraza/data/model"
 )
@@ -27,60 +24,9 @@ func NewSaveAttackEventRepo(data *Data) biz.AttackEventRepo {
 	}
 }
 
-// ReadAttackEvent 读取csv文件中的数据
-func (s *saveAttackEventRepo) ReadAttackEvent() []model.AttackEvent {
-	file, err := os.OpenFile(s.attackEventFile, os.O_RDONLY, os.ModePerm)
-	if err != nil {
-		return nil
-	}
-	defer file.Close()
-	var attackEvents []model.AttackEvent
-	if err := gocsv.UnmarshalFile(file, &attackEvents); err != nil {
-		return nil
-	}
-	return attackEvents
-}
-
-// AppendToFile 将新数据写入csv文件
-func (s *saveAttackEventRepo) AppendToFile(attackEvent []model.AttackEvent) {
-	path := s.attackEventFile
-	var file *os.File
-	//判断此文件是否存在
-	if _, err := os.Stat(path); os.IsNotExist(err) {
-		file, err = os.OpenFile(path, os.O_CREATE|os.O_WRONLY, 0644) //文件不存在 , 需要创建文件
-		if err != nil {
-			return
-		}
-		defer file.Close()
-		// 写入标头和数据
-		err = gocsv.MarshalFile(attackEvent, file)
-		if err != nil {
-
-			return
-		}
-	} else {
-		file, err = os.OpenFile(path, os.O_APPEND|os.O_WRONLY, 0644)
-		defer file.Close()
-		if err != nil {
-			return
-		}
-		//文件存在 , 不写入标头
-		err = gocsv.MarshalWithoutHeaders(&attackEvent, file)
-		if err != nil {
-			return
-		}
-	}
-}
-
-// CollectionAttackEvent 将数据写入kafka
-func (s *saveAttackEventRepo) CollectionAttackEvent() {
-	events := s.ReadAttackEvent()
-	if len(events) == 0 {
-		slog.Info("no attack event")
-		return
-	}
+func (s *saveAttackEventRepo) AppendToKafka(attackEvent []model.AttackEvent) {
 	var producerMessages []*sarama.ProducerMessage
-	for _, event := range events {
+	for _, event := range attackEvent {
 		eventJson, err := json.Marshal(&event)
 		if err != nil {
 			slog.Error("json marshal error: ", err)
@@ -98,21 +44,4 @@ func (s *saveAttackEventRepo) CollectionAttackEvent() {
 		slog.Info("send messages to kafka: ", err)
 		return
 	}
-	//写入成功之后 , 删除json文件
-	if err := os.Remove(s.attackEventFile); err != nil {
-		slog.Error("remove attack_events.csv error: ", err)
-		return
-	}
-	slog.Info("write kafka success")
-}
-
-func (s *saveAttackEventRepo) WriteEventTask() {
-	spec := "0 0/5 * * * ?" // 每隔5分钟执行一次
-	// 添加一个任务
-	eventTaskID, err := s.data.timeTask.AddFunc(spec, s.CollectionAttackEvent)
-	if err != nil {
-		slog.Error("add task error: ", err, "task id: ", eventTaskID)
-		return
-	}
-	s.data.timeTask.Start()
 }

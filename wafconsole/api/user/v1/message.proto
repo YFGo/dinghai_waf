@@ -178,3 +178,20 @@ message SendEmailRequest {
 message SendEmailReply {
 
 }
+
+message SseConnectRequest{
+}
+
+message EarthData {
+  string form_ip_addr = 1;
+  string to_ip_addr = 2;
+  string form_longitude = 3;
+  string form_latitude = 4;
+  string to_longitude = 5;
+  string to_latitude = 6;
+}
+
+
+message SseConnectReply{
+
+}

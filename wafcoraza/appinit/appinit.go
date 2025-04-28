@@ -24,11 +24,7 @@ func InitApp() (func(), *wafHttp.WafHandleService, *ini.File) {
 	// normal http
 	normalHttpRepo := data.NewNormalHttpRepo(dataDB)
 	normalHttpUsercase := biz.NewNormalHttpUsercase(normalHttpRepo)
-	// 初始化定时任务
-	// 开启定时任务
-	//开启定时任务
-	timeTask := attackUsercase.StartTimeTask()
-	timeTask()
+
 	attackHttp := wafHttp.NewWafHandleService(attackUsercase, wafConfigUsercase, wafAllowUsercase, normalHttpUsercase)
 
 	// 在服务启动之处 , 创建存储攻击日志的csv文件

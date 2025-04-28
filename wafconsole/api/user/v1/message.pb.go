@@ -1031,6 +1031,78 @@ func (*SendEmailReply) Descriptor() ([]byte, []int) {
 	return file_v1_message_proto_rawDescGZIP(), []int{19}
 }
 
+type SseConnectRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *SseConnectRequest) Reset() {
+	*x = SseConnectRequest{}
+	mi := &file_v1_message_proto_msgTypes[20]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *SseConnectRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*SseConnectRequest) ProtoMessage() {}
+
+func (x *SseConnectRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_v1_message_proto_msgTypes[20]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use SseConnectRequest.ProtoReflect.Descriptor instead.
+func (*SseConnectRequest) Descriptor() ([]byte, []int) {
+	return file_v1_message_proto_rawDescGZIP(), []int{20}
+}
+
+type SseConnectReply struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *SseConnectReply) Reset() {
+	*x = SseConnectReply{}
+	mi := &file_v1_message_proto_msgTypes[21]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *SseConnectReply) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*SseConnectReply) ProtoMessage() {}
+
+func (x *SseConnectReply) ProtoReflect() protoreflect.Message {
+	mi := &file_v1_message_proto_msgTypes[21]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use SseConnectReply.ProtoReflect.Descriptor instead.
+func (*SseConnectReply) Descriptor() ([]byte, []int) {
+	return file_v1_message_proto_rawDescGZIP(), []int{21}
+}
+
 var File_v1_message_proto protoreflect.FileDescriptor
 
 var file_v1_message_proto_rawDesc = string([]byte{
@@ -1189,10 +1261,12 @@ var file_v1_message_proto_rawDesc = string([]byte{
 	0x20, 0x5b, 0x27, 0x6c, 0x6f, 0x67, 0x69, 0x6e, 0x27, 0x20, 0x2c, 0x20, 0x27, 0x73, 0x69, 0x67,
 	0x6e, 0x27, 0x5d, 0x52, 0x0a, 0x73, 0x65, 0x6e, 0x64, 0x41, 0x63, 0x74, 0x69, 0x6f, 0x6e, 0x22,
 	0x10, 0x0a, 0x0e, 0x53, 0x65, 0x6e, 0x64, 0x45, 0x6d, 0x61, 0x69, 0x6c, 0x52, 0x65, 0x70, 0x6c,
-	0x79, 0x42, 0x2a, 0x0a, 0x0b, 0x61, 0x70, 0x69, 0x2e, 0x75, 0x73, 0x65, 0x72, 0x2e, 0x76, 0x31,
-	0x50, 0x01, 0x5a, 0x19, 0x77, 0x61, 0x66, 0x63, 0x6f, 0x6e, 0x73, 0x6f, 0x6c, 0x65, 0x2f, 0x61,
-	0x70, 0x69, 0x2f, 0x75, 0x73, 0x65, 0x72, 0x2f, 0x76, 0x31, 0x3b, 0x76, 0x31, 0x62, 0x06, 0x70,
-	0x72, 0x6f, 0x74, 0x6f, 0x33,
+	0x79, 0x22, 0x13, 0x0a, 0x11, 0x53, 0x73, 0x65, 0x43, 0x6f, 0x6e, 0x6e, 0x65, 0x63, 0x74, 0x52,
+	0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x22, 0x11, 0x0a, 0x0f, 0x53, 0x73, 0x65, 0x43, 0x6f, 0x6e,
+	0x6e, 0x65, 0x63, 0x74, 0x52, 0x65, 0x70, 0x6c, 0x79, 0x42, 0x2a, 0x0a, 0x0b, 0x61, 0x70, 0x69,
+	0x2e, 0x75, 0x73, 0x65, 0x72, 0x2e, 0x76, 0x31, 0x50, 0x01, 0x5a, 0x19, 0x77, 0x61, 0x66, 0x63,
+	0x6f, 0x6e, 0x73, 0x6f, 0x6c, 0x65, 0x2f, 0x61, 0x70, 0x69, 0x2f, 0x75, 0x73, 0x65, 0x72, 0x2f,
+	0x76, 0x31, 0x3b, 0x76, 0x31, 0x62, 0x06, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x33,
 })
 
 var (
@@ -1207,7 +1281,7 @@ func file_v1_message_proto_rawDescGZIP() []byte {
 	return file_v1_message_proto_rawDescData
 }
 
-var file_v1_message_proto_msgTypes = make([]protoimpl.MessageInfo, 20)
+var file_v1_message_proto_msgTypes = make([]protoimpl.MessageInfo, 22)
 var file_v1_message_proto_goTypes = []any{
 	(*CreateWafUserRequest)(nil),  // 0: api.user.v1.CreateWafUserRequest
 	(*CreateWafUserReply)(nil),    // 1: api.user.v1.CreateWafUserReply
@@ -1229,6 +1303,8 @@ var file_v1_message_proto_goTypes = []any{
 	(*VerifyCaptchaReply)(nil),    // 17: api.user.v1.VerifyCaptchaReply
 	(*SendEmailRequest)(nil),      // 18: api.user.v1.SendEmailRequest
 	(*SendEmailReply)(nil),        // 19: api.user.v1.SendEmailReply
+	(*SseConnectRequest)(nil),     // 20: api.user.v1.SseConnectRequest
+	(*SseConnectReply)(nil),       // 21: api.user.v1.SseConnectReply
 }
 var file_v1_message_proto_depIdxs = []int32{
 	0, // [0:0] is the sub-list for method output_type
@@ -1249,7 +1325,7 @@ func file_v1_message_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_v1_message_proto_rawDesc), len(file_v1_message_proto_rawDesc)),
 			NumEnums:      0,
-			NumMessages:   20,
+			NumMessages:   22,
 			NumExtensions: 0,
 			NumServices:   0,
 		},

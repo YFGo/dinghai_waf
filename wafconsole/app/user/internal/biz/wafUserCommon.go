@@ -124,3 +124,12 @@ func (w *WafUserCommonUsecase) SendCode(ctx context.Context, userEmail, sendActi
 	}
 	return nil
 }
+
+func (w *WafUserCommonUsecase) SseConnect(ctx context.Context, userId int64) error {
+
+	return nil
+}
+
+func sendSseMsg(ctx context.Context) {
+
+}

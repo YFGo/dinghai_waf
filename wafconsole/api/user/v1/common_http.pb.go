@@ -22,12 +22,14 @@ const _ = http.SupportPackageIsVersion1
 const OperationCommonCreateNewToken = "/api.user.v1.Common/CreateNewToken"
 const OperationCommonGetCaptcha = "/api.user.v1.Common/GetCaptcha"
 const OperationCommonSendCode = "/api.user.v1.Common/SendCode"
+const OperationCommonSseConnect = "/api.user.v1.Common/SseConnect"
 const OperationCommonVerifyCaptcha = "/api.user.v1.Common/VerifyCaptcha"
 
 type CommonHTTPServer interface {
 	CreateNewToken(context.Context, *CreateNewTokenRequest) (*CreateNewTokenReply, error)
 	GetCaptcha(context.Context, *GetCaptchaRequest) (*GetCaptchaReply, error)
 	SendCode(context.Context, *SendEmailRequest) (*SendEmailReply, error)
+	SseConnect(context.Context, *SseConnectRequest) (*SseConnectReply, error)
 	VerifyCaptcha(context.Context, *VerifyCaptchaRequest) (*VerifyCaptchaReply, error)
 }
 
@@ -37,6 +39,7 @@ func RegisterCommonHTTPServer(s *http.Server, srv CommonHTTPServer) {
 	r.GET("/app/user/v1/waf/captchaRight", _Common_GetCaptcha0_HTTP_Handler(srv))
 	r.POST("/app/user/v1/waf/captchaVerify", _Common_VerifyCaptcha0_HTTP_Handler(srv))
 	r.GET("/app/user/v1/waf/code", _Common_SendCode0_HTTP_Handler(srv))
+	r.GET("/app/user/v1/waf/sse", _Common_SseConnect0_HTTP_Handler(srv))
 }
 
 func _Common_CreateNewToken0_HTTP_Handler(srv CommonHTTPServer) func(ctx http.Context) error {
@@ -121,10 +124,30 @@ func _Common_SendCode0_HTTP_Handler(srv CommonHTTPServer) func(ctx http.Context)
 	}
 }
 
+func _Common_SseConnect0_HTTP_Handler(srv CommonHTTPServer) func(ctx http.Context) error {
+	return func(ctx http.Context) error {
+		var in SseConnectRequest
+		if err := ctx.BindQuery(&in); err != nil {
+			return err
+		}
+		http.SetOperation(ctx, OperationCommonSseConnect)
+		h := ctx.Middleware(func(ctx context.Context, req interface{}) (interface{}, error) {
+			return srv.SseConnect(ctx, req.(*SseConnectRequest))
+		})
+		out, err := h(ctx, &in)
+		if err != nil {
+			return err
+		}
+		reply := out.(*SseConnectReply)
+		return ctx.Result(200, reply)
+	}
+}
+
 type CommonHTTPClient interface {
 	CreateNewToken(ctx context.Context, req *CreateNewTokenRequest, opts ...http.CallOption) (rsp *CreateNewTokenReply, err error)
 	GetCaptcha(ctx context.Context, req *GetCaptchaRequest, opts ...http.CallOption) (rsp *GetCaptchaReply, err error)
 	SendCode(ctx context.Context, req *SendEmailRequest, opts ...http.CallOption) (rsp *SendEmailReply, err error)
+	SseConnect(ctx context.Context, req *SseConnectRequest, opts ...http.CallOption) (rsp *SseConnectReply, err error)
 	VerifyCaptcha(ctx context.Context, req *VerifyCaptchaRequest, opts ...http.CallOption) (rsp *VerifyCaptchaReply, err error)
 }
 
@@ -167,6 +190,19 @@ func (c *CommonHTTPClientImpl) SendCode(ctx context.Context, in *SendEmailReques
 	pattern := "/app/user/v1/waf/code"
 	path := binding.EncodeURL(pattern, in, true)
 	opts = append(opts, http.Operation(OperationCommonSendCode))
+	opts = append(opts, http.PathTemplate(pattern))
+	err := c.cc.Invoke(ctx, "GET", path, nil, &out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return &out, nil
+}
+
+func (c *CommonHTTPClientImpl) SseConnect(ctx context.Context, in *SseConnectRequest, opts ...http.CallOption) (*SseConnectReply, error) {
+	var out SseConnectReply
+	pattern := "/app/user/v1/waf/sse"
+	path := binding.EncodeURL(pattern, in, true)
+	opts = append(opts, http.Operation(OperationCommonSseConnect))
 	opts = append(opts, http.PathTemplate(pattern))
 	err := c.cc.Invoke(ctx, "GET", path, nil, &out, opts...)
 	if err != nil {
