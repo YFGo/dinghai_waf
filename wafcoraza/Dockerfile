@@ -72,6 +72,9 @@ COPY --from=build /src/wafcoraza/conf/ /wafcoraza/conf/
 COPY --from=build /src/wafcoraza/ruleset/ /wafcoraza/ruleset/
 COPY --from=build /src/wafcoraza/waf_log /wafcoraza/waf_log/
 
+# 设置工作目录，让应用程序从这里开始查找配置文件
+WORKDIR /wafcoraza
+
 # Expose the port that the application listens on.
 EXPOSE 8887
 
