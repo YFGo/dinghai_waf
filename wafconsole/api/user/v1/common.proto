@@ -34,9 +34,4 @@ service Common {
 			get: "/app/user/v1/waf/code"
 		};
 	}
-	rpc SseConnect(SseConnectRequest) returns (SseConnectReply) {
-		option (google.api.http) = {
-			get: "/app/user/v1/waf/sse"
-		};
-	}
 }

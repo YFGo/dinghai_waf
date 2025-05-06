@@ -25,7 +25,6 @@ const (
 	Common_GetCaptcha_FullMethodName     = "/api.user.v1.Common/GetCaptcha"
 	Common_VerifyCaptcha_FullMethodName  = "/api.user.v1.Common/VerifyCaptcha"
 	Common_SendCode_FullMethodName       = "/api.user.v1.Common/SendCode"
-	Common_SseConnect_FullMethodName     = "/api.user.v1.Common/SseConnect"
 )
 
 // CommonClient is the client API for Common service.
@@ -36,7 +35,6 @@ type CommonClient interface {
 	GetCaptcha(ctx context.Context, in *GetCaptchaRequest, opts ...grpc.CallOption) (*GetCaptchaReply, error)
 	VerifyCaptcha(ctx context.Context, in *VerifyCaptchaRequest, opts ...grpc.CallOption) (*VerifyCaptchaReply, error)
 	SendCode(ctx context.Context, in *SendEmailRequest, opts ...grpc.CallOption) (*SendEmailReply, error)
-	SseConnect(ctx context.Context, in *SseConnectRequest, opts ...grpc.CallOption) (*SseConnectReply, error)
 }
 
 type commonClient struct {
@@ -87,16 +85,6 @@ func (c *commonClient) SendCode(ctx context.Context, in *SendEmailRequest, opts 
 	return out, nil
 }
 
-func (c *commonClient) SseConnect(ctx context.Context, in *SseConnectRequest, opts ...grpc.CallOption) (*SseConnectReply, error) {
-	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	out := new(SseConnectReply)
-	err := c.cc.Invoke(ctx, Common_SseConnect_FullMethodName, in, out, cOpts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
 // CommonServer is the server API for Common service.
 // All implementations must embed UnimplementedCommonServer
 // for forward compatibility.
@@ -105,7 +93,6 @@ type CommonServer interface {
 	GetCaptcha(context.Context, *GetCaptchaRequest) (*GetCaptchaReply, error)
 	VerifyCaptcha(context.Context, *VerifyCaptchaRequest) (*VerifyCaptchaReply, error)
 	SendCode(context.Context, *SendEmailRequest) (*SendEmailReply, error)
-	SseConnect(context.Context, *SseConnectRequest) (*SseConnectReply, error)
 	mustEmbedUnimplementedCommonServer()
 }
 
@@ -127,9 +114,6 @@ func (UnimplementedCommonServer) VerifyCaptcha(context.Context, *VerifyCaptchaRe
 }
 func (UnimplementedCommonServer) SendCode(context.Context, *SendEmailRequest) (*SendEmailReply, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method SendCode not implemented")
-}
-func (UnimplementedCommonServer) SseConnect(context.Context, *SseConnectRequest) (*SseConnectReply, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method SseConnect not implemented")
 }
 func (UnimplementedCommonServer) mustEmbedUnimplementedCommonServer() {}
 func (UnimplementedCommonServer) testEmbeddedByValue()                {}
@@ -224,24 +208,6 @@ func _Common_SendCode_Handler(srv interface{}, ctx context.Context, dec func(int
 	return interceptor(ctx, in, info, handler)
 }
 
-func _Common_SseConnect_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(SseConnectRequest)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(CommonServer).SseConnect(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: Common_SseConnect_FullMethodName,
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(CommonServer).SseConnect(ctx, req.(*SseConnectRequest))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
 // Common_ServiceDesc is the grpc.ServiceDesc for Common service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -264,10 +230,6 @@ var Common_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "SendCode",
 			Handler:    _Common_SendCode_Handler,
-		},
-		{
-			MethodName: "SseConnect",
-			Handler:    _Common_SseConnect_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

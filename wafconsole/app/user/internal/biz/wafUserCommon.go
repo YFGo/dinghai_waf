@@ -3,17 +3,17 @@ package biz
 import (
 	"context"
 	"errors"
-	"gorm.io/gorm"
 	"math"
 	"sync"
 	"time"
-	"wafconsole/utils/const/user"
 
 	"github.com/go-kratos/kratos/v2/log"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
+	"gorm.io/gorm"
 
 	"wafconsole/utils/code"
+	"wafconsole/utils/const/user"
 	up "wafconsole/utils/plugin"
 )
 
@@ -85,6 +85,7 @@ func (w *WafUserCommonUsecase) VerifyCaptchaInfo(ctx context.Context, captchaId 
 	}
 	success := math.Abs(userAngle-captchaCacheValue.CorrectAngle) <= 5
 	if !success { // 验证未通过
+		w.log.WithContext(ctx).Error(codes.PermissionDenied)
 		return status.Error(codes.PermissionDenied, "captcha code is error")
 	}
 	return nil
@@ -125,11 +126,8 @@ func (w *WafUserCommonUsecase) SendCode(ctx context.Context, userEmail, sendActi
 	return nil
 }
 
+// SseConnect 实现SSE连接
 func (w *WafUserCommonUsecase) SseConnect(ctx context.Context, userId int64) error {
-
+	// 这个方法只返回成功，实际的SSE处理由HTTP层完成
 	return nil
-}
-
-func sendSseMsg(ctx context.Context) {
-
 }

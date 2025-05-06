@@ -5,3 +5,7 @@ const (
 	LoginActionSend = "login"
 	SignActionSend  = "sign"
 )
+
+const (
+	GinRouterSse = "/app/user/v1/waf/sse"
+)
