@@ -58,7 +58,7 @@ func (r *RotateCaptchaStrategy) Generate() (string, string, string, *CaptchaCach
 	if err != nil {
 		return "", "", "", nil, err
 	}
-	thumbImg, err := captData.GetThumbImage().ToBase64() // 缩略图生成
+	thumbImg, err := captData.GetThumbImage().ToBase64() // 缩略图生成i
 	if err != nil {
 		return "", "", "", nil, err
 	}
